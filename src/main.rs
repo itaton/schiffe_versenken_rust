@@ -12,6 +12,7 @@ use stm32f7_discovery::{
     gpio::{GpioPort, OutputPin},
     init,
     system_clock::{self, Hz},
+    lcd::Color,
 };
 
 #[entry]
@@ -26,6 +27,14 @@ fn main() -> ! {
 
     init::init_system_clock_216mhz(&mut rcc, &mut pwr, &mut flash);
     init::enable_gpio_ports(&mut rcc);
+    let mut fmc = peripherals.FMC;
+    let mut ltdc = peripherals.LTDC;
+    let mut sai_2 = peripherals.SAI2;
+    let mut rng = peripherals.RNG;
+    let mut sdmmc = peripherals.SDMMC1;
+    let mut syscfg = peripherals.SYSCFG;
+    let mut ethernet_mac = peripherals.ETHERNET_MAC;
+    let mut ethernet_dma = peripherals.ETHERNET_DMA;
 
     let gpio_a = GpioPort::new(peripherals.GPIOA);
     let gpio_b = GpioPort::new(peripherals.GPIOB);
@@ -42,9 +51,22 @@ fn main() -> ! {
         gpio_a, gpio_b, gpio_c, gpio_d, gpio_e, gpio_f, gpio_g, gpio_h, gpio_i, gpio_j, gpio_k,
     );
 
+
     // configure the systick timer 20Hz (20 ticks per second)
     init::init_systick(Hz(20), &mut systick, &rcc);
     systick.enable_interrupt();
+
+    init::init_sdram(&mut rcc, &mut fmc);
+    let mut lcd = init::init_lcd(&mut ltdc, &mut rcc);
+    pins.display_enable.set(true);
+    pins.backlight.set(true);
+    let mut layer_1 = lcd.layer_1().unwrap();
+    let mut layer_2 = lcd.layer_2().unwrap();
+    let bg_color = Color{red: 255,green: 0 ,blue: 0,alpha: 255};
+    layer_1.clear();
+    layer_2.clear();
+    lcd.set_background_color(bg_color);
+    
 
     // turn led on
     pins.led.set(true);
@@ -57,6 +79,7 @@ fn main() -> ! {
             pins.led.toggle();
             last_led_toggle = ticks;
         }
+        
     }
 }
 
