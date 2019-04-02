@@ -63,9 +63,14 @@ fn main() -> ! {
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut layer_2 = lcd.layer_2().unwrap();
     let bg_color = Color{red: 255,green: 0 ,blue: 0,alpha: 255};
+    let blue = Color{red: 0,green: 0 ,blue: 255,alpha: 255};
+    let green = Color{red: 0,green: 255 ,blue: 0,alpha: 255};
+    let black = Color{red: 0,green: 0 ,blue: 0,alpha: 255};
     layer_1.clear();
     layer_2.clear();
-    lcd.set_background_color(bg_color);
+    lcd.set_background_color(blue);
+
+    let arr = [10,20,30,40,50];
     
 
     // turn led on
@@ -79,6 +84,23 @@ fn main() -> ! {
             pins.led.toggle();
             last_led_toggle = ticks;
         }
+        let color = [0xff00, 0x0f00]; //yellow;green
+        for c in arr.iter() {
+            let i1 = 124 + 5 * c;
+            let i2 = 356 - 5 * c;
+            let j1 = 10 + 5 * c;
+            let j2 = 262 - 5 * c;
+            //for i in i1..i2 {
+            for i in 0..272 {
+                layer_1.print_point_color_at(*c, i, black);
+                //for j in j1..j2 {
+                //    layer_1.print_point_color_at(i, j, blue);
+                //}
+            }
+        }
+        //layer_1.clear();
+        //layer_2.clear();
+
         
     }
 }
