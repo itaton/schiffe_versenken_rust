@@ -1,5 +1,5 @@
 [package]
-name = "rustPraktikum"
+name = "schiffe_versenken_rust"
 version = "0.1.0"
 authors = ["itaton <stefan.gapp@t-online.de>", "sgufler <s.gufler@online.de>", "deshiJo <joachim.muessig@gmx.de"]
 edition = "2018"
