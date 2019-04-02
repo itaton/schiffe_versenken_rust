@@ -1,0 +1,7 @@
+[package]
+name = "rustPraktikum"
+version = "0.1.0"
+authors = ["itaton <stefan.gapp@t-online.de>"]
+edition = "2018"
+
+[dependencies]
