@@ -2,13 +2,6 @@
 #![no_main]
 #![feature(alloc_error_handler)]
 
-extern crate alloc_cortex_m;
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate cortex_m_semihosting;
-extern crate stm32f7;
-extern crate stm32f7_discovery;
-
 use alloc_cortex_m::CortexMHeap;
 use core::alloc::Layout as AllocLayout;
 use core::panic::PanicInfo;
