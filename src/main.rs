@@ -70,7 +70,10 @@ fn main() -> ! {
     layer_2.clear();
     lcd.set_background_color(blue);
 
-    let arr = [10,20,30,40,50];
+    let arr = [24,48,72,96,120,144,168,192,216,240,264];
+    //let arr = [200,210,220];
+    //let arr = [10,20,30];
+    let arr2 = [24,48,72,96,120,144,168,192,216,240,264];
     
 
     // turn led on
@@ -84,18 +87,23 @@ fn main() -> ! {
             pins.led.toggle();
             last_led_toggle = ticks;
         }
-        let color = [0xff00, 0x0f00]; //yellow;green
+        //let color = [0xff00, 0x0f00]; //yellow;green
         for c in arr.iter() {
-            let i1 = 124 + 5 * c;
-            let i2 = 356 - 5 * c;
-            let j1 = 10 + 5 * c;
-            let j2 = 262 - 5 * c;
+            //let i1 = 124 + 5 * c;
+            //let i2 = 356 - 5 * c;
+            //let j1 = 10 + 5 * c;
+            //let j2 = 262 - 5 * c;
             //for i in i1..i2 {
             for i in 0..272 {
                 layer_1.print_point_color_at(*c, i, black);
                 //for j in j1..j2 {
                 //    layer_1.print_point_color_at(i, j, blue);
                 //}
+            }
+        }
+        for c in arr2.iter() {
+            for i in 0..480 {
+                layer_1.print_point_color_at(i, *c, black);
             }
         }
         //layer_1.clear();
