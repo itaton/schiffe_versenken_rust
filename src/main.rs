@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 #![feature(alloc_error_handler)]
+#![warn(clippy::all)]
 
 use alloc_cortex_m::CortexMHeap;
 use core::alloc::Layout as AllocLayout;
