@@ -10,6 +10,7 @@ static blue:Color = Color{red: 0,green: 0 ,blue: 255,alpha: 255};
 static green:Color = Color{red: 0,green: 255 ,blue: 0,alpha: 255};
 static black:Color = Color{red: 0,green: 0 ,blue: 0,alpha: 255};
 static grey:Color = Color{red: 127,green: 127 ,blue: 127,alpha: 127};
+static white:Color = Color{red: 0, green: 0, blue: 0, alpha: 255};
  
 pub fn init_display(mut lcd: Lcd) {
     let mut layer_1 = lcd.layer_1().unwrap();
@@ -56,7 +57,7 @@ fn print_background(mut layer_1: Layer<FramebufferArgb8888>) {
 /**
  * draw ship on x, y coordination. The direction is vertical for true and horizontal for false.
  */
-pub fn printShip(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_start_location: usize, y_ship_start_location: usize, vertical: bool) {
+pub fn print_ship(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_start_location: usize, y_ship_start_location: usize, vertical: bool) {
     let block_size = 25;
     let x_start_pixel = x_ship_start_location*block_size;
     let y_start_pixel = y_ship_start_location*block_size;
@@ -66,7 +67,7 @@ pub fn printShip(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_s
         //vertical
         for c in x_start_pixel..x_end_pixel {
             for i in y_start_pixel..y_end_pixel {
-                layer_2.print_point_color_at(c, i, grey);
+                layer_2.print_point_color_at(c, i, white);
             }
         }
     } else {
@@ -75,7 +76,7 @@ pub fn printShip(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_s
         //horizontal
         for c in x_start_pixel..x_end_pixel {
             for i in y_start_pixel..y_end_pixel {
-                layer_2.print_point_color_at(c, i, grey);
+                layer_2.print_point_color_at(c, i, white);
             }
         }
     }
