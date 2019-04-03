@@ -105,6 +105,9 @@ fn main() -> ! {
     text_writer.write_str(" i");
     text_writer.write_str("\n\n\n");
     text_writer.write_str(" j");
+    text_writer.x_pos=70;
+    text_writer.y_pos=70;
+    text_writer.write_str("hello");
     //lib_writer.write_at(framebuffer, "hi", 50, 50);
     //text_writer.x_pos = 20;
     
@@ -156,6 +159,10 @@ fn main() -> ! {
 
         
     }
+}
+
+fn printIdices() {
+    
 }
 
 #[global_allocator]
