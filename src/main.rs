@@ -1,7 +1,10 @@
 #![no_std]
 #![no_main]
-#![feature(alloc_error_handler)]
+#![feature(alloc_error_handler,alloc)]
 #![warn(clippy::all)]
+
+#[macro_use]
+extern crate alloc;
 
 use alloc_cortex_m::CortexMHeap;
 use core::fmt::Write;
@@ -218,6 +221,10 @@ fn main() -> ! {
 
         
     }
+}
+
+fn write_in_field() {
+
 }
 
 #[global_allocator]
