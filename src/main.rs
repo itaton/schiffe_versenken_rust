@@ -4,6 +4,7 @@
 #![warn(clippy::all)]
 
 use alloc_cortex_m::CortexMHeap;
+use core::fmt::Write;
 use core::alloc::Layout as AllocLayout;
 use core::panic::PanicInfo;
 use cortex_m_rt::{entry, exception};
@@ -12,8 +13,11 @@ use stm32f7_discovery::{
     gpio::{GpioPort, OutputPin},
     init,
     system_clock::{self, Hz},
-    lcd::Color,
+    lcd::{self,Color},
 };
+//use lcd::Framebuffer;
+//use lcd::FramebufferL8;
+//use lcd::TextWriter;
 
 #[entry]
 fn main() -> ! {
@@ -62,14 +66,51 @@ fn main() -> ! {
     pins.backlight.set(true);
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut layer_2 = lcd.layer_2().unwrap();
+    //lcd::init_stdout(layer_1);
     let bg_color = Color{red: 255,green: 0 ,blue: 0,alpha: 255};
     let blue = Color{red: 0,green: 0 ,blue: 255,alpha: 255};
     let green = Color{red: 0,green: 255 ,blue: 0,alpha: 255};
     let black = Color{red: 0,green: 0 ,blue: 0,alpha: 255};
-    let grey = Color{red: 127,green: 127 ,blue: 127,alpha: 127};
+    let grey = Color{red: 127,green: 127 ,blue: 127,alpha: 255};
     layer_1.clear();
-    layer_2.clear();
+    //layer_2.clear();
     lcd.set_background_color(blue);
+
+    //let mut framebuffer = FramebufferL8::new();
+    //framebuffer.init();
+    //lcd.framebuffer_addr = framebuffer.get_framebuffer_addr() as u32;
+    //lcd.backbuffer_addr = framebuffer.get_backbuffer_addr() as u32;
+
+    let mut text_writer = layer_1.text_writer();
+    //let lib_writer = TextWriter::new(TTF, 40.0);
+    text_writer.write_str("\n");
+    text_writer.write_str("     1  2  3  4  5  6  7  8  9  10");
+    text_writer.write_str("\n\n\n");
+    text_writer.write_str(" a");
+    text_writer.write_str("\n\n\n");
+    text_writer.write_str(" b");
+    text_writer.write_str("\n\n\n");
+    text_writer.write_str(" c");
+    text_writer.write_str("\n\n\n");
+    text_writer.write_str(" d");
+    text_writer.write_str("\n\n\n\n");
+    text_writer.write_str(" e");
+    text_writer.write_str("\n\n\n");
+    text_writer.write_str(" f");
+    text_writer.write_str("\n\n\n");
+    text_writer.write_str(" g");
+    text_writer.write_str("\n\n\n");
+    text_writer.write_str(" h");
+    text_writer.write_str("\n\n\n");
+    text_writer.write_str(" i");
+    text_writer.write_str("\n\n\n");
+    text_writer.write_str(" j");
+    text_writer.x_pos=70;
+    text_writer.y_pos=70;
+    text_writer.write_str("hello");
+    //lib_writer.write_at(framebuffer, "hi", 50, 50);
+    //text_writer.x_pos = 20;
+    
 
     let arr = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250,274,275];
     //let arr = [200,210,220];
@@ -118,6 +159,10 @@ fn main() -> ! {
 
         
     }
+}
+
+fn printIdices() {
+    
 }
 
 #[global_allocator]
