@@ -1,7 +1,10 @@
 #![no_std]
 #![no_main]
-#![feature(alloc_error_handler)]
+#![feature(alloc_error_handler,alloc)]
 #![warn(clippy::all)]
+
+#[macro_use]
+extern crate alloc;
 
 use alloc_cortex_m::CortexMHeap;
 use core::fmt::Write;
@@ -73,7 +76,7 @@ fn main() -> ! {
     let black = Color{red: 0,green: 0 ,blue: 0,alpha: 255};
     let grey = Color{red: 127,green: 127 ,blue: 127,alpha: 255};
     layer_1.clear();
-    //layer_2.clear();
+    layer_2.clear();
     lcd.set_background_color(blue);
 
     //let mut framebuffer = FramebufferL8::new();
@@ -83,28 +86,90 @@ fn main() -> ! {
 
     let mut text_writer = layer_1.text_writer();
     //let lib_writer = TextWriter::new(TTF, 40.0);
-    text_writer.write_str("\n");
-    text_writer.write_str("     1  2  3  4  5  6  7  8  9  10");
-    text_writer.write_str("\n\n\n");
-    text_writer.write_str(" a");
-    text_writer.write_str("\n\n\n");
-    text_writer.write_str(" b");
-    text_writer.write_str("\n\n\n");
-    text_writer.write_str(" c");
-    text_writer.write_str("\n\n\n");
-    text_writer.write_str(" d");
-    text_writer.write_str("\n\n\n\n");
-    text_writer.write_str(" e");
-    text_writer.write_str("\n\n\n");
-    text_writer.write_str(" f");
-    text_writer.write_str("\n\n\n");
-    text_writer.write_str(" g");
-    text_writer.write_str("\n\n\n");
-    text_writer.write_str(" h");
-    text_writer.write_str("\n\n\n");
-    text_writer.write_str(" i");
-    text_writer.write_str("\n\n\n");
-    text_writer.write_str(" j");
+    //text_writer.write_str("\n");
+    //text_writer.write_str("     1  2  3  4  5  6  7  8  9  10");
+    //text_writer.write_str("\n\n\n");
+    //text_writer.write_str(" a");
+    //text_writer.write_str("\n\n\n");
+    //text_writer.write_str(" b");
+    //text_writer.write_str("\n\n\n");
+    //text_writer.write_str(" c");
+    //text_writer.write_str("\n\n\n");
+    //text_writer.write_str(" d");
+    //text_writer.write_str("\n\n\n\n");
+    //text_writer.write_str(" e");
+    //text_writer.write_str("\n\n\n");
+    //text_writer.write_str(" f");
+    //text_writer.write_str("\n\n\n");
+    //text_writer.write_str(" g");
+    //text_writer.write_str("\n\n\n");
+    //text_writer.write_str(" h");
+    //text_writer.write_str("\n\n\n");
+    //text_writer.write_str(" i");
+    //text_writer.write_str("\n\n\n");
+    //text_writer.write_str(" j");
+    text_writer.x_pos=35;
+    text_writer.y_pos=9;
+    text_writer.write_str("1");
+    text_writer.x_pos=60;
+    text_writer.y_pos=9;
+    text_writer.write_str("2");
+    text_writer.x_pos=85;
+    text_writer.y_pos=9;
+    text_writer.write_str("3");
+    text_writer.x_pos=110;
+    text_writer.y_pos=9;
+    text_writer.write_str("4");
+    text_writer.x_pos=135;
+    text_writer.y_pos=9;
+    text_writer.write_str("5");
+    text_writer.x_pos=160;
+    text_writer.y_pos=9;
+    text_writer.write_str("6");
+    text_writer.x_pos=185;
+    text_writer.y_pos=9;
+    text_writer.write_str("7");
+    text_writer.x_pos=210;
+    text_writer.y_pos=9;
+    text_writer.write_str("8");
+    text_writer.x_pos=235;
+    text_writer.y_pos=9;
+    text_writer.write_str("9");
+    text_writer.x_pos=255;
+    text_writer.y_pos=9;
+    text_writer.write_str("10");
+
+
+    text_writer.x_pos=9;
+    text_writer.y_pos=35;
+    text_writer.write_str("a");
+    text_writer.x_pos=9;
+    text_writer.y_pos=60;
+    text_writer.write_str("b");
+    text_writer.x_pos=9;
+    text_writer.y_pos=85;
+    text_writer.write_str("c");
+    text_writer.x_pos=9;
+    text_writer.y_pos=110;
+    text_writer.write_str("d");
+    text_writer.x_pos=9;
+    text_writer.y_pos=135;
+    text_writer.write_str("e");
+    text_writer.x_pos=9;
+    text_writer.y_pos=160;
+    text_writer.write_str("f");
+    text_writer.x_pos=9;
+    text_writer.y_pos=185;
+    text_writer.write_str("g");
+    text_writer.x_pos=9;
+    text_writer.y_pos=210;
+    text_writer.write_str("h");
+    text_writer.x_pos=9;
+    text_writer.y_pos=235;
+    text_writer.write_str("i");
+    text_writer.x_pos=9;
+    text_writer.y_pos=260;
+    text_writer.write_str("j");
     //lib_writer.write_at(framebuffer, "hi", 50, 50);
     //text_writer.x_pos = 20;
     
@@ -156,6 +221,10 @@ fn main() -> ! {
 
         
     }
+}
+
+fn write_in_field() {
+
 }
 
 #[global_allocator]
