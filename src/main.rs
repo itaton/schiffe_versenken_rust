@@ -170,6 +170,9 @@ fn main() -> ! {
     text_writer.x_pos=9;
     text_writer.y_pos=260;
     text_writer.write_str("j");
+
+    write_in_field(3,3,text_writer,"X");
+    //write_in_field(3,3, text_writer,"O");
     //lib_writer.write_at(framebuffer, "hi", 50, 50);
     //text_writer.x_pos = 20;
     
@@ -223,8 +226,14 @@ fn main() -> ! {
     }
 }
 
-fn write_in_field() {
-
+fn write_in_field(x: usize, y: usize, mut text_writer: stm32f7_discovery::lcd::TextWriter<stm32f7_discovery::lcd::FramebufferArgb8888>, letter: &str) {
+    let x_pos = 9 + 25 * x;
+    let y_pos = 9 + 25 * y;
+    if x == 0 {let x_pos = 9;};
+    if y == 0 {let y_pos = 9;};
+    text_writer.x_pos = x_pos;
+    text_writer.y_pos = y_pos;
+    text_writer.write_str(letter);
 }
 
 #[global_allocator]
