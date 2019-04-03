@@ -1,3 +1,4 @@
+mod Ships;
 use stm32f7_discovery::{
     lcd::FramebufferAl88,
     lcd::FramebufferArgb8888,
@@ -57,7 +58,7 @@ fn print_background(mut layer_1: Layer<FramebufferArgb8888>) {
 /**
  * draw ship on x, y coordination. The direction is vertical for true and horizontal for false.
  */
-pub fn print_ship(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_start_location: usize, y_ship_start_location: usize, vertical: bool) {
+pub fn print_ship(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_start_location: usize, y_ship_start_location: usize, vertical: bool)
     let block_size = 25;
     let x_start_pixel = x_ship_start_location*block_size;
     let y_start_pixel = y_ship_start_location*block_size;
