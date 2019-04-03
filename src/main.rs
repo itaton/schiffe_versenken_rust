@@ -89,6 +89,9 @@ fn main() -> ! {
     touch::check_family_id(&mut i2c_3).unwrap();
 
     let mut text_writer = layer_1.text_writer();
+    //TODO: never pass the text_writer as reference, always only the layer. Then initialize a new text writer when needed. 
+    //ALSO: remove pub from x_pos, y_pos and add a second layer.text_writer() with arguments position.
+    //display::setup_ship_5(&mut layer_1, &mut text_writer);
 
     
     write_in_field(3,3,&mut text_writer,"X");
@@ -109,7 +112,7 @@ fn main() -> ! {
 // poll for new touch data  u
         for touch in &touch::touches(&mut i2c_3).unwrap() {
             let (x,y) = calculate_touch_block(touch.x, touch.y);
-            display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut text_writer,"x");
+            display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut text_writer," ");
             // layer_2.print_point_color_at(
             //     touch.x as usize,
             //     touch.y as usize,

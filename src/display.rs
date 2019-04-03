@@ -52,6 +52,36 @@ fn print_background(mut layer_1: &mut Layer<FramebufferArgb8888>) {
             }
         }
 
+}
+
+pub fn setup_ship_5(mut layer_1: &mut Layer<FramebufferArgb8888>, mut text_writer : &mut TextWriter<FramebufferArgb8888>) {
+    let arr = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250,274,275];
+    //let arr2 = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250];
+    let arr = [299,300,380,381];
+    let arr2 = [199,200,249,250];
+    for i in 299..300 {
+        for j in 199..250 {
+            layer_1.print_point_color_at(i, j, black);
+        }
+    }
+    for i in 380..381 {
+        for j in 199..250 {
+            layer_1.print_point_color_at(i, j, black);
+        }
+    }
+    for i in 299..381 {
+        for j in 199..200 {
+            layer_1.print_point_color_at(i, j, black);
+        }
+    }
+    for i in 299..381 {
+        for j in 249..250 {
+            layer_1.print_point_color_at(i, j, black);
+        }
+    }
+    text_writer.x_pos = 300;
+    text_writer.y_pos = 100;
+    text_writer.write_str("Please set up your 5 ship");
 } 
 
 fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
