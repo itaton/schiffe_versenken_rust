@@ -17,6 +17,7 @@ use stm32f7_discovery::{
     init,
     system_clock::{self, Hz},
     lcd::{self,Color},
+    touch,
 };
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
@@ -78,6 +79,12 @@ fn main() -> ! {
     layer_1.clear();
     layer_2.clear();
     lcd.set_background_color(blue);
+
+    let mut i2c_3 = init::init_i2c_3(peripherals.I2C3, &mut rcc);
+    i2c_3.test_2();
+    i2c_3.test_2();
+    touch::check_family_id(&mut i2c_3).unwrap();
+        
 
     //let mut framebuffer = FramebufferL8::new();
     //framebuffer.init();
@@ -170,6 +177,10 @@ fn main() -> ! {
     text_writer.x_pos=9;
     text_writer.y_pos=260;
     text_writer.write_str("j");
+
+    write_in_field(3,3,&mut text_writer,"X");
+    write_in_field(4,4,&mut text_writer,"O");
+    //write_in_field(3,3, text_writer,"O");
     //lib_writer.write_at(framebuffer, "hi", 50, 50);
     //text_writer.x_pos = 20;
     
@@ -186,6 +197,16 @@ fn main() -> ! {
 
     let mut last_led_toggle = system_clock::ticks();
     loop {
+
+// poll for new touch data  u
+        for touch in &touch::touches(&mut i2c_3).unwrap() {
+            layer_2.print_point_color_at(
+                touch.x as usize,
+                touch.y as usize,
+                Color::from_hex(0xffffff),
+            );
+        }
+
         let ticks = system_clock::ticks();
         // every 0.5 seconds (we have 20 ticks per second)
         if ticks - last_led_toggle >= 10 {
@@ -223,8 +244,14 @@ fn main() -> ! {
     }
 }
 
-fn write_in_field() {
-
+fn write_in_field(x: usize, y: usize, mut text_writer: &mut stm32f7_discovery::lcd::TextWriter<stm32f7_discovery::lcd::FramebufferArgb8888>, letter: &str) {
+    let x_pos = 9 + 25 * x;
+    let y_pos = 9 + 25 * y;
+    if x == 0 {let x_pos = 9;};
+    if y == 0 {let y_pos = 9;};
+    text_writer.x_pos = x_pos;
+    text_writer.y_pos = y_pos;
+    text_writer.write_str(letter);
 }
 
 #[global_allocator]
