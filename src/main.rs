@@ -19,6 +19,7 @@ use stm32f7_discovery::{
     lcd::{self,Color,TextWriter,FramebufferArgb8888,Layer},
     touch,
 };
+mod display;
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
@@ -68,119 +69,27 @@ fn main() -> ! {
     let mut lcd = init::init_lcd(&mut ltdc, &mut rcc);
     pins.display_enable.set(true);
     pins.backlight.set(true);
+
+    display::init_display(&mut lcd);
+
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut layer_2 = lcd.layer_2().unwrap();
-    //lcd::init_stdout(layer_1);
     let bg_color = Color{red: 255,green: 0 ,blue: 0,alpha: 255};
     let blue = Color{red: 0,green: 0 ,blue: 255,alpha: 255};
     let green = Color{red: 0,green: 255 ,blue: 0,alpha: 255};
     let black = Color{red: 0,green: 0 ,blue: 0,alpha: 255};
     let grey = Color{red: 127,green: 127 ,blue: 127,alpha: 255};
-    layer_1.clear();
-    layer_2.clear();
-    lcd.set_background_color(blue);
+    //layer_1.clear();
+    //layer_2.clear();
+    //lcd.set_background_color(blue);
 
     let mut i2c_3 = init::init_i2c_3(peripherals.I2C3, &mut rcc);
     i2c_3.test_2();
     i2c_3.test_2();
     touch::check_family_id(&mut i2c_3).unwrap();
-        
-
-    //let mut framebuffer = FramebufferL8::new();
-    //framebuffer.init();
-    //lcd.framebuffer_addr = framebuffer.get_framebuffer_addr() as u32;
-    //lcd.backbuffer_addr = framebuffer.get_backbuffer_addr() as u32;
 
     let mut text_writer = layer_1.text_writer();
-    //let lib_writer = TextWriter::new(TTF, 40.0);
-    //text_writer.write_str("\n");
-    //text_writer.write_str("     1  2  3  4  5  6  7  8  9  10");
-    //text_writer.write_str("\n\n\n");
-    //text_writer.write_str(" a");
-    //text_writer.write_str("\n\n\n");
-    //text_writer.write_str(" b");
-    //text_writer.write_str("\n\n\n");
-    //text_writer.write_str(" c");
-    //text_writer.write_str("\n\n\n");
-    //text_writer.write_str(" d");
-    //text_writer.write_str("\n\n\n\n");
-    //text_writer.write_str(" e");
-    //text_writer.write_str("\n\n\n");
-    //text_writer.write_str(" f");
-    //text_writer.write_str("\n\n\n");
-    //text_writer.write_str(" g");
-    //text_writer.write_str("\n\n\n");
-    //text_writer.write_str(" h");
-    //text_writer.write_str("\n\n\n");
-    //text_writer.write_str(" i");
-    //text_writer.write_str("\n\n\n");
-    //text_writer.write_str(" j");
-    text_writer.x_pos=35;
-    text_writer.y_pos=9;
-    text_writer.write_str("1");
-    text_writer.x_pos=60;
-    text_writer.y_pos=9;
-    text_writer.write_str("2");
-    text_writer.x_pos=85;
-    text_writer.y_pos=9;
-    text_writer.write_str("3");
-    text_writer.x_pos=110;
-    text_writer.y_pos=9;
-    text_writer.write_str("4");
-    text_writer.x_pos=135;
-    text_writer.y_pos=9;
-    text_writer.write_str("5");
-    text_writer.x_pos=160;
-    text_writer.y_pos=9;
-    text_writer.write_str("6");
-    text_writer.x_pos=185;
-    text_writer.y_pos=9;
-    text_writer.write_str("7");
-    text_writer.x_pos=210;
-    text_writer.y_pos=9;
-    text_writer.write_str("8");
-    text_writer.x_pos=235;
-    text_writer.y_pos=9;
-    text_writer.write_str("9");
-    text_writer.x_pos=255;
-    text_writer.y_pos=9;
-    text_writer.write_str("10");
 
-
-    text_writer.x_pos=9;
-    text_writer.y_pos=35;
-    text_writer.write_str("a");
-    text_writer.x_pos=9;
-    text_writer.y_pos=60;
-    text_writer.write_str("b");
-    text_writer.x_pos=9;
-    text_writer.y_pos=85;
-    text_writer.write_str("c");
-    text_writer.x_pos=9;
-    text_writer.y_pos=110;
-    text_writer.write_str("d");
-    text_writer.x_pos=9;
-    text_writer.y_pos=135;
-    text_writer.write_str("e");
-    text_writer.x_pos=9;
-    text_writer.y_pos=160;
-    text_writer.write_str("f");
-    text_writer.x_pos=9;
-    text_writer.y_pos=185;
-    text_writer.write_str("g");
-    text_writer.x_pos=9;
-    text_writer.y_pos=210;
-    text_writer.write_str("h");
-    text_writer.x_pos=9;
-    text_writer.y_pos=235;
-    text_writer.write_str("i");
-    text_writer.x_pos=9;
-    text_writer.y_pos=260;
-    text_writer.write_str("j");
-
-
-    write_in_field(1,0,&mut text_writer,"1");
-    write_in_field(1,0,&mut text_writer,"1");
     
     write_in_field(3,3,&mut text_writer,"X");
     write_in_field(4,4,&mut text_writer,"O");
@@ -189,11 +98,6 @@ fn main() -> ! {
     //text_writer.x_pos = 20;
     
 
-    let arr = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250,274,275];
-    //let arr = [200,210,220];
-    //let arr = [10,20,30];
-    let arr2 = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250];
-    //let arr2 = [24,48,72,96,120,144,168,192,216,240,264];
     //let ship1 = []
 
     // turn led on
@@ -217,25 +121,6 @@ fn main() -> ! {
             pins.led.toggle();
             last_led_toggle = ticks;
         }
-        //let color = [0xff00, 0x0f00]; //yellow;green
-        for c in arr.iter() {
-            //let i1 = 124 + 5 * c;
-            //let i2 = 356 - 5 * c;
-            //let j1 = 10 + 5 * c;
-            //let j2 = 262 - 5 * c;
-            //for i in i1..i2 {
-            for i in 0..272 {
-                layer_1.print_point_color_at(*c, i, black);
-                //for j in j1..j2 {
-                //    layer_1.print_point_color_at(i, j, blue);
-                //}
-            }
-        }
-        for c in arr2.iter() {
-            for i in 0..275 {
-                layer_1.print_point_color_at(i, *c, black);
-            }
-        }
         for c in 53..72 {
             for i in 78..172 {
                 layer_2.print_point_color_at(c, i, grey);
@@ -246,10 +131,6 @@ fn main() -> ! {
 
         
     }
-}
-
-fn init_gamefield(mut text_writer: &mut TextWriter<FramebufferArgb8888>, mut layer: &mut Layer<FramebufferArgb8888>) {
-
 }
 
 fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
