@@ -6,10 +6,11 @@ use stm32f7_discovery::{
     lcd::Layer,
 };
 
-    static blue:Color = Color{red: 0,green: 0 ,blue: 255,alpha: 255};
-    static green:Color = Color{red: 0,green: 255 ,blue: 0,alpha: 255};
-    static black:Color = Color{red: 0,green: 0 ,blue: 0,alpha: 255};
-    static grey:Color = Color{red: 127,green: 127 ,blue: 127,alpha: 127};
+static blue:Color = Color{red: 0,green: 0 ,blue: 255,alpha: 255};
+static green:Color = Color{red: 0,green: 255 ,blue: 0,alpha: 255};
+static black:Color = Color{red: 0,green: 0 ,blue: 0,alpha: 255};
+static grey:Color = Color{red: 127,green: 127 ,blue: 127,alpha: 127};
+static white:Color = Color{red: 0, green: 0, blue: 0, alpha: 255};
  
 pub fn init_display(mut lcd: Lcd) {
     let mut layer_1 = lcd.layer_1().unwrap();
@@ -20,6 +21,9 @@ pub fn init_display(mut lcd: Lcd) {
     let bg_color = Color{red: 0,green: 0 ,blue: 255,alpha: 190};
     set_background_color(bg_color, lcd);
     print_background(layer_1);
+    printShip(layer_2, 4, 2, 2, false);
+    // printShip(layer_2, 2, 4, 5, true);
+    // printShip(layer_2, 6, 6, 1, false);
 }  
 
 fn set_background_color(color: Color,mut lcd: Lcd) {
@@ -48,12 +52,32 @@ fn print_background(mut layer_1: Layer<FramebufferArgb8888>) {
             }
         }
 
-}        
+} 
 
-pub fn printShip(mut layer_2: Layer<FramebufferAl88>) {
-    for c in 53..72 {
-        for i in 78..172 {
-            layer_2.print_point_color_at(c, i, grey);
+/**
+ * draw ship on x, y coordination. The direction is vertical for true and horizontal for false.
+ */
+pub fn print_ship(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_start_location: usize, y_ship_start_location: usize, vertical: bool) {
+    let block_size = 25;
+    let x_start_pixel = x_ship_start_location*block_size;
+    let y_start_pixel = y_ship_start_location*block_size;
+    if vertical {
+        let x_end_pixel = x_start_pixel + block_size;
+        let y_end_pixel = y_start_pixel + (block_size*ship_size);
+        //vertical
+        for c in x_start_pixel..x_end_pixel {
+            for i in y_start_pixel..y_end_pixel {
+                layer_2.print_point_color_at(c, i, white);
+            }
+        }
+    } else {
+        let x_end_pixel = x_start_pixel + (block_size*ship_size);
+        let y_end_pixel = y_start_pixel + block_size;
+        //horizontal
+        for c in x_start_pixel..x_end_pixel {
+            for i in y_start_pixel..y_end_pixel {
+                layer_2.print_point_color_at(c, i, white);
+            }
         }
     }
 }
