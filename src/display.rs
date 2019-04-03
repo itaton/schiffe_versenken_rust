@@ -29,8 +29,8 @@ pub fn init_display(mut lcd: &mut Lcd) {
     //set_background_color(blue, *lcd);
     lcd.set_background_color(blue);
     print_indicies(&mut text_writer);
-    //printShip(layer_2, 4, 2, 2, false);
-    // printShip(layer_2, 2, 4, 5, true);
+    print_ship(layer_2, 4, 2, 2, false);
+    // print_ship(layer_2, 2, 4, 5, true);
     // printShip(layer_2, 6, 6, 1, false);
 }  
 
@@ -82,7 +82,7 @@ fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
 
 }
 
-fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
+pub fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
     let x_pos = 9 + 25 * x;
     let y_pos = 9 + 25 * y;
     if x == 0 {let x_pos = 9;};
@@ -119,13 +119,4 @@ pub fn print_ship(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_
         }
     }
 }
-
-pub fn printRedCross(mut layer_2: Layer<FramebufferAl88>) {
-
-}
-
-pub fn printWhiteCross(mut layer_2: Layer<FramebufferAl88>) {
-
-}
-
 
