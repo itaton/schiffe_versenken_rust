@@ -64,7 +64,7 @@ fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
     write_in_field(7, 0, text_writer, "7");
     write_in_field(8, 0, text_writer, "8");
     write_in_field(9, 0, text_writer, "9");
-    //write_in_field(10, 0, text_writer, "10");
+    write_in_field(10, 0, text_writer, "0");
     //we need a special case here since '10' is to characters
     //text_writer.x_pos=255;
     //text_writer.y_pos=9;
