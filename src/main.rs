@@ -16,7 +16,7 @@ use stm32f7_discovery::{
     gpio::{GpioPort, OutputPin},
     init,
     system_clock::{self, Hz},
-    lcd::{self,Color},
+    lcd::{self,Color,TextWriter,FramebufferArgb8888,Layer},
     touch,
 };
 //use lcd::Framebuffer;
@@ -178,6 +178,10 @@ fn main() -> ! {
     text_writer.y_pos=260;
     text_writer.write_str("j");
 
+
+    write_in_field(1,0,&mut text_writer,"1");
+    write_in_field(1,0,&mut text_writer,"1");
+    
     write_in_field(3,3,&mut text_writer,"X");
     write_in_field(4,4,&mut text_writer,"O");
     //write_in_field(3,3, text_writer,"O");
@@ -244,7 +248,11 @@ fn main() -> ! {
     }
 }
 
-fn write_in_field(x: usize, y: usize, mut text_writer: &mut stm32f7_discovery::lcd::TextWriter<stm32f7_discovery::lcd::FramebufferArgb8888>, letter: &str) {
+fn init_gamefield(mut text_writer: &mut TextWriter<FramebufferArgb8888>, mut layer: &mut Layer<FramebufferArgb8888>) {
+
+}
+
+fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
     let x_pos = 9 + 25 * x;
     let y_pos = 9 + 25 * y;
     if x == 0 {let x_pos = 9;};
