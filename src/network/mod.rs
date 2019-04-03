@@ -9,11 +9,13 @@ use smoltcp::wire::{EthernetAddress, IpAddress, IpEndpoint, Ipv4Address};
 pub mod packets;
 use self::packets::ShootPacket;
 use self::packets::FeedbackPacket;
-use self::packets::WhoAmIPacket;
+use self::packets::WhoamiPacket;
+use self::packets::Serializable;
 
 use alloc::vec::Vec;
 use stm32f7::stm32f7x6::{RCC, SYSCFG, ETHERNET_MAC, ETHERNET_DMA};
 use stm32f7_discovery::{ethernet, system_clock};
+use cortex_m_semihosting::hprintln;
 
 const PORT: u16 = 1337;
 
@@ -120,4 +122,97 @@ pub fn init(
         sockets,
         partner_ip_addr,
     })
+}
+
+pub trait Connection {
+    fn send_shoot(&mut self, network: &mut Network, shoot: &ShootPacket);
+    fn recv_shoot(&mut self, network: &mut Network) -> ShootPacket;
+    fn send_feedback(&mut self, network: &mut Network, feedback: &FeedbackPacket);
+    fn recv_feedback(&mut self, network: &mut Network) -> FeedbackPacket;
+    fn is_other_connected(&mut self, network: &mut Network) -> bool;
+    fn send_whoami(&mut self, network: &mut Network);
+}
+
+pub struct Client {
+    shoot: ShootPacket,
+    feedback: FeedbackPacket,
+    is_server: bool,
+}
+
+impl Connection for Client {
+    fn send_shoot(&mut self, network: &mut Network, shoot: &ShootPacket) {
+        network.send_udp_packet(&shoot.serialize());
+    }
+
+    fn recv_shoot(&mut self, network: &mut Network) -> ShootPacket {
+        let result = network.get_udp_packet();
+        match result {
+            Ok(value) => match value {
+                Some(data) => {
+                    if data.len() == ShootPacket::len() {
+                        self.shoot = ShootPacket::deserialize(&data);
+                    }
+                }
+                None => {}
+            },
+            Err(smoltcp::Error::Exhausted) => {}
+            Err(smoltcp::Error::Unrecognized) => {}
+            Err(e) => {
+                hprintln!("error: {:?}", e);
+            }
+        }
+        self.shoot
+    }
+
+    fn send_feedback(&mut self, network: &mut Network, feedback: &FeedbackPacket) {
+        network.send_udp_packet(&feedback.serialize());
+    }
+
+    fn recv_feedback(&mut self, network: &mut Network) -> FeedbackPacket {
+        let result = network.get_udp_packet();
+        match result {
+            Ok(value) => match value {
+                Some(data) => {
+                    if data.len() == FeedbackPacket::len() {
+                        self.feedback = FeedbackPacket::deserialize(&data);
+                    }
+                }
+                None => {}
+            },
+            Err(smoltcp::Error::Exhausted) => {}
+            Err(smoltcp::Error::Unrecognized) => {}
+            Err(e) => {
+                hprintln!("error: {:?}", e);
+            }
+        }
+        self.feedback
+    }
+
+    fn is_other_connected(&mut self, network: &mut Network) -> bool {
+        let result = network.get_udp_packet();
+        match result {
+            Ok(value) => match value {
+                Some(data) => {
+                    if data.len() == WhoamiPacket::len() {
+                        return true;
+                    }
+                    if data.len() == FeedbackPacket::len() {
+                        return true;
+                    }
+                    if data.len() == ShootPacket::len() {
+                        return true;
+                    }
+                }
+                None => {}
+            },
+            Err(e) => {
+                hprintln!("error: {:?}", e);
+            }
+        }
+        false
+    }
+
+    fn send_whoami(&mut self, network: &mut Network) {
+        network.send_udp_packet(&WhoamiPacket {is_server: self.is_server}.serialize());
+    }
 }
