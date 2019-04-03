@@ -6,13 +6,19 @@ use smoltcp::socket::{Socket, SocketSet, UdpPacketMetadata, UdpSocket, UdpSocket
 use smoltcp::time::Instant;
 use smoltcp::wire::{EthernetAddress, IpAddress, IpEndpoint, Ipv4Address};
 
+pub mod packets;
+use self::packets::ShootPacket;
+use self::packets::FeedbackPacket;
+use self::packets::WhoAmIPacket;
+
+use alloc::vec::Vec;
 use stm32f7::stm32f7x6::{RCC, SYSCFG, ETHERNET_MAC, ETHERNET_DMA};
 use stm32f7_discovery::{ethernet, system_clock};
 
 const PORT: u16 = 1337;
 
 pub struct Network {
-    ethernet_interface: EthernetInterface<'static, 'static, 'static>,
+    ethernet_interface: EthernetInterface<'static, 'static, 'static, ethernet::EthernetDevice<'static>>,
     sockets: SocketSet<'static, 'static, 'static>,
     partner_ip_addr: Ipv4Address,
 }
@@ -81,8 +87,14 @@ impl Network {
     }
 }
 
-pub fn init(rcc: &mut RCC, syscfg: &mut SYSCFG, ethernet_mac: &mut ETHERNET_MAC, ethernet_dma: &mut ETHERNET_DMA,
-        ethernet_addr: EthernetAddress, ip_addr: Ipv4Address, partner_ip_addr: Ipv4Address) -> Result<Network, ethernet::PhyError> {
+pub fn init(
+    rcc: &mut RCC, 
+    syscfg: &mut SYSCFG, 
+    ethernet_mac: &'static mut ETHERNET_MAC, 
+    ethernet_dma: &'static mut ETHERNET_DMA,
+    ethernet_addr: EthernetAddress, 
+    ip_addr: Ipv4Address, 
+    partner_ip_addr: Ipv4Address) -> Result<Network, ethernet::PhyError> {
     let ethernet_interface = ethernet::EthernetDevice::new(
         Default::default(),
         Default::default(),

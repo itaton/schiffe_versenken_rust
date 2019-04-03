@@ -1,38 +1,39 @@
 #![warn(clippy::all)]
-struct ShootPacket {
-    line: u8;
-    column: u8;     
+
+pub struct ShootPacket {
+    line: u8,
+    column: u8,     
 }
 
-struct FeedbackPacket {
-    hit: bool;
+pub struct FeedbackPacket {
+    hit: bool,
 }
 
-struct WhoAmIPacket {
-    is_server: bool;
+pub struct WhoAmIPacket {
+    is_server: bool,
 }
 
 impl ShootPacket {
-    fn new(line: u8, column: u8) -> ShootPacket {
+    fn new(l: u8, c: u8) -> ShootPacket {
         ShootPacket {
-            line: line,
-            line: column
+            line: l,
+            column: c,
         }
     }
 }
 
 impl FeedbackPacket {
-    fn new(hit: bool) -> FeedbackPacket {
+    fn new(h: bool) -> FeedbackPacket {
         FeedbackPacket {
-            hit: hit
+            hit: h
         }
     }
 }
 
 impl WhoAmIPacket {
-    fn new(is_server: bool) -> WhoAmIPacket {
+    fn new(serv: bool) -> WhoAmIPacket {
         WhoAmIPacket {
-            is_server: is_server;
+            is_server: serv
         }
     }
 }
