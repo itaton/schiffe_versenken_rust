@@ -27,18 +27,43 @@ fn set_background_color(color: Color,mut lcd: Lcd) {
 }
 
 fn print_background(mut layer_1: Layer<FramebufferArgb8888>) {
-    let arr = [24,48,72,96,120,144,168,192,216,240,264];
+    let arr = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250,274,275];
     let arr2 = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250];
     for c in arr.iter() {
-        for i in 0..272 {
-            layer_1.print_point_color_at(*c, i, black);
+            //let i1 = 124 + 5 * c;
+            //let i2 = 356 - 5 * c;
+            //let j1 = 10 + 5 * c;
+            //let j2 = 262 - 5 * c;
+            //for i in i1..i2 {
+            for i in 0..272 {
+                layer_1.print_point_color_at(*c, i, black);
+                //for j in j1..j2 {
+                //    layer_1.print_point_color_at(i, j, blue);
+                //}
             }
-    }
+        }
         for c in arr2.iter() {
-            for i in 0..480 {
+            for i in 0..275 {
                 layer_1.print_point_color_at(i, *c, black);
             }
         }
+
 }        
+
+pub fn printShip(mut layer_2: Layer<FramebufferAl88>) {
+    for c in 53..72 {
+        for i in 78..172 {
+            layer_2.print_point_color_at(c, i, grey);
+        }
+    }
+}
+
+pub fn printRedCross(mut layer_2: Layer<FramebufferAl88>) {
+
+}
+
+pub fn printWhiteCross(mut layer_2: Layer<FramebufferAl88>) {
+
+}
 
 
