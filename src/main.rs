@@ -118,6 +118,9 @@ fn main() -> ! {
             //     touch.y as usize,
             //     Color::from_hex(0xffffff),
             // );
+            if (x,y) != (0,0) {
+                display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut text_writer, "x");
+            }
         }
 
         let ticks = system_clock::ticks();
@@ -158,7 +161,7 @@ fn SysTick() {
 
 
 fn calculate_touch_block(x: u16, y: u16) -> (u16,u16) {
-    if x<=272 && x>=24 && y <= 272 && y >= 24 {
+    if x<=272 && x>24 && y <= 272 && y > 24 {
         let x_block = x/25;
         let y_block = y/25;
         (x_block,y_block)

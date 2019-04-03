@@ -29,7 +29,7 @@ pub fn init_display(mut lcd: &mut Lcd) {
     //set_background_color(blue, *lcd);
     lcd.set_background_color(blue);
     print_indicies(&mut text_writer);
-    print_ship(layer_2, 4, 2, 2, false);
+    print_ship(layer_2, 4, 5, 5, true);
     // print_ship(layer_2, 2, 4, 5, true);
     // printShip(layer_2, 6, 6, 1, false);
 }  
@@ -127,11 +127,11 @@ pub fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<Frame
  */
 pub fn print_ship(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_start_location: usize, y_ship_start_location: usize, vertical: bool) {
     let block_size = 25;
-    let x_start_pixel = x_ship_start_location*block_size;
-    let y_start_pixel = y_ship_start_location*block_size;
+    let x_start_pixel = x_ship_start_location*block_size+2;
+    let y_start_pixel = y_ship_start_location*block_size+2;
     if vertical {
-        let x_end_pixel = x_start_pixel + block_size;
-        let y_end_pixel = y_start_pixel + (block_size*ship_size);
+        let x_end_pixel = x_start_pixel + block_size - 4;
+        let y_end_pixel = y_start_pixel + (block_size*ship_size) - 4;
         //vertical
         for c in x_start_pixel..x_end_pixel {
             for i in y_start_pixel..y_end_pixel {
@@ -139,8 +139,8 @@ pub fn print_ship(mut layer_2: Layer<FramebufferAl88>, ship_size: usize, x_ship_
             }
         }
     } else {
-        let x_end_pixel = x_start_pixel + (block_size*ship_size);
-        let y_end_pixel = y_start_pixel + block_size;
+        let x_end_pixel = x_start_pixel + (block_size*ship_size) - 4;
+        let y_end_pixel = y_start_pixel + block_size - 4;
         //horizontal
         for c in x_start_pixel..x_end_pixel {
             for i in y_start_pixel..y_end_pixel {
