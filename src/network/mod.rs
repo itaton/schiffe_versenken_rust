@@ -110,7 +110,11 @@ pub fn init<'a>(
         ethernet_mac,
         ethernet_dma,
         ethernet_addr,
-    ).map(|device| device.into_interface());
+    ).map(|device| {
+        let iface = device.into_interface();
+        let prev_ip_addr = iface.ipv4_addr().unwrap();
+        (iface, prev_ip_addr)
+    });
     if let Err(e) = ethernet_interface { return Err(e);}
 
     let mut sockets = SocketSet::new(Vec::new());
