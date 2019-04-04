@@ -73,40 +73,17 @@ fn main() -> ! {
 
     display::init_display(&mut lcd);
 
-
     let mut layer_1 = lcd.layer_1().unwrap();
-    let mut layer_2 = lcd.layer_2().unwrap();
-    let bg_color = Color{red: 255,green: 0 ,blue: 0,alpha: 255};
-    let blue = Color{red: 0,green: 0 ,blue: 255,alpha: 255};
-    let green = Color{red: 0,green: 255 ,blue: 0,alpha: 255};
-    let black = Color{red: 0,green: 0 ,blue: 0,alpha: 255};
-    let grey = Color{red: 127,green: 127 ,blue: 127,alpha: 255};
-    //layer_1.clear();
-    //layer_2.clear();
-    //lcd.set_background_color(blue);
-
     let mut i2c_3 = init::init_i2c_3(peripherals.I2C3, &mut rcc);
     i2c_3.test_2();
     i2c_3.test_2();
     //we need an empty loop here to wait for the touch scree to be initialized. Otherwise the release build crashes
     let ticks = system_clock::ticks();
-    while system_clock::ticks() - ticks <= 10 {
-
-    }
+    while system_clock::ticks() - ticks <= 10 {}
     touch::check_family_id(&mut i2c_3).unwrap();
 
-    //cortex_m::asm::bkpt();
-    //let mut text_writer = layer_1.text_writer();
-    //TODO: never pass the text_writer as reference, always only the layer. Then initialize a new text writer when needed. 
-    //ALSO: remove pub from x_pos, y_pos and add a second layer.text_writer() with arguments position.
-    //display::setup_ship_5(&mut layer_1, &mut text_writer);
-
-    
     display::write_in_field(3,3,&mut layer_1,"X");
     display::write_in_field(4,4,&mut layer_1,"O");
-    //write_in_field(3,3, text_writer,"O");
-    //lib_writer.write_at(framebuffer, "hi", 50, 50);
-    //text_writer.x_pos = 20;
     
     display::setup_ship_5(&mut layer_1);
     //let ship1 = []
@@ -118,15 +95,10 @@ fn main() -> ! {
     
     loop {
 
-// poll for new touch data  u
+        // poll for new touch data  u
         for touch in &touch::touches(&mut i2c_3).unwrap() {
             let (x,y) = calculate_touch_block(touch.x, touch.y);
             display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut layer_1," ");
-            // layer_2.print_point_color_at(
-            //     touch.x as usize,
-            //     touch.y as usize,
-            //     Color::from_hex(0xffffff),
-            // );
             if (x,y) != (0,0) {
                 display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut layer_1, "x");
             }
@@ -138,27 +110,12 @@ fn main() -> ! {
             pins.led.toggle();
             last_led_toggle = ticks;
         }
-        for c in 53..72 {
-            for i in 78..172 {
-                layer_2.print_point_color_at(c, i, grey);
-            }
-        }
         //layer_1.clear();
         //layer_2.clear();
 
         
     }
 }
-
-//fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
-//    let x_pos = 9 + 25 * x;
-//    let y_pos = 9 + 25 * y;
-//    if x == 0 {let x_pos = 9;};
-//    if y == 0 {let y_pos = 9;};
-//    text_writer.x_pos = x_pos;
-//    text_writer.y_pos = y_pos;
-//    text_writer.write_str(letter);
-//}
 
 #[global_allocator]
 static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
