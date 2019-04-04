@@ -1,20 +1,24 @@
 #![warn(clippy::all)]
+#![allow(dead_code)]
 
 use alloc::vec::Vec;
 
+#[derive(Debug, Copy, Clone)]
 pub struct ShootPacket {
     line: u8,
     column: u8,     
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct FeedbackPacket {
     hit: bool,
     sunk: u8,
     you_win: bool,
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct WhoamiPacket {
-    is_server: bool,
+    pub is_server: bool,
 }
 
 impl ShootPacket {

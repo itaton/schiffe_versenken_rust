@@ -20,6 +20,7 @@ use stm32f7_discovery::{
     touch,
 };
 mod display;
+mod network;
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
