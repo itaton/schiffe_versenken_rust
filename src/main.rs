@@ -25,6 +25,8 @@ mod network;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
+const is_server: bool = true;
+
 #[entry]
 fn main() -> ! {
     let core_peripherals = CorePeripherals::take().unwrap();
@@ -72,6 +74,8 @@ fn main() -> ! {
     pins.backlight.set(true);
 
     display::init_display(&mut lcd);
+
+    network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, is_server);
 
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut layer_2 = lcd.layer_2().unwrap();
@@ -169,6 +173,21 @@ fn calculate_touch_block(x: u16, y: u16) -> (u16,u16) {
         (x_block,y_block)
     } else {
         (0,0)
+    }
+}
+
+fn test_network() {
+
+    let result = network::
+    match result {
+        Ok(value) => {
+            // send whoami packets
+            let is_server = true;
+
+        },
+        Err(e) => {
+
+        }
     }
 }
 

@@ -18,6 +18,10 @@ use stm32f7_discovery::{ethernet, system_clock};
 use cortex_m_semihosting::hprintln;
 
 const PORT: u16 = 1337;
+const CLIENT_ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x11, 0x22, 0x33, 0x44, 0x01]);
+const CLIENT_IP_ADDR: Ipv4Address = Ipv4Address([141, 52, 46, 2]);
+const SERVER_ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x11, 0x22, 0x33, 0x44, 0x02]);
+const SERVER_IP_ADDR: Ipv4Address = Ipv4Address([141, 52, 46, 1]);
 
 pub struct Network {
     ethernet_interface: EthernetInterface<'static, 'static, 'static, ethernet::EthernetDevice<'static>>,
@@ -94,9 +98,10 @@ pub fn init(
     syscfg: &mut SYSCFG, 
     ethernet_mac: &'static mut ETHERNET_MAC, 
     ethernet_dma: &'static mut ETHERNET_DMA,
-    ethernet_addr: EthernetAddress, 
-    ip_addr: Ipv4Address, 
-    partner_ip_addr: Ipv4Address) -> Result<Network, ethernet::PhyError> {
+    is_server: bool) -> Result<Network, ethernet::PhyError> {
+    let ethernet_addr = if is_server {SERVER_ETH_ADDR} else {CLIENT_ETH_ADDR};
+    let ip_addr = if is_server {SERVER_IP_ADDR} else {CLIENT_IP_ADDR};
+    let partner_ip_addr = if is_server {CLIENT_IP_ADDR} else {SERVER_IP_ADDR};
     let ethernet_interface = ethernet::EthernetDevice::new(
         Default::default(),
         Default::default(),
