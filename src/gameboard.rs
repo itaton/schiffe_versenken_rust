@@ -10,6 +10,10 @@ pub struct Block {
     y: u8,
 }
 
+pub fn gameboard_init() -> Board {
+    
+}
+
 pub fn calculate_touch_block(x: u16, y: u16) -> Block {
     if x<=272 && x>24 && y <= 272 && y > 24 {
         let x_block = x/25;
