@@ -100,6 +100,7 @@ fn main() -> ! {
     //lib_writer.write_at(framebuffer, "hi", 50, 50);
     //text_writer.x_pos = 20;
     
+    display::setup_ship_5(&mut layer_1);
 
     //let ship1 = []
 
