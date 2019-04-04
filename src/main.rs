@@ -72,6 +72,7 @@ fn main() -> ! {
 
     display::init_display(&mut lcd);
 
+
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut layer_2 = lcd.layer_2().unwrap();
     let bg_color = Color{red: 255,green: 0 ,blue: 0,alpha: 255};
@@ -86,9 +87,15 @@ fn main() -> ! {
     let mut i2c_3 = init::init_i2c_3(peripherals.I2C3, &mut rcc);
     i2c_3.test_2();
     i2c_3.test_2();
+    //we need an empty loop here to wait for the touch scree to be initialized. Otherwise the release build crashes
+    let ticks = system_clock::ticks();
+    while system_clock::ticks() - ticks <= 10 {
+
+    }
     touch::check_family_id(&mut i2c_3).unwrap();
 
-    let mut text_writer = layer_1.text_writer();
+    //cortex_m::asm::bkpt();
+    //let mut text_writer = layer_1.text_writer();
     //TODO: never pass the text_writer as reference, always only the layer. Then initialize a new text writer when needed. 
     //ALSO: remove pub from x_pos, y_pos and add a second layer.text_writer() with arguments position.
     //display::setup_ship_5(&mut layer_1, &mut text_writer);
@@ -101,13 +108,13 @@ fn main() -> ! {
     //text_writer.x_pos = 20;
     
     display::setup_ship_5(&mut layer_1);
-
     //let ship1 = []
 
     // turn led on
     pins.led.set(true);
 
     let mut last_led_toggle = system_clock::ticks();
+    
     loop {
 
 // poll for new touch data  u
