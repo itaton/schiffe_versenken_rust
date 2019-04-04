@@ -22,7 +22,7 @@ pub struct WhoamiPacket {
 }
 
 impl ShootPacket {
-    fn new(l: u8, c: u8) -> ShootPacket {
+    pub fn new(l: u8, c: u8) -> ShootPacket {
         ShootPacket {
             line: l,
             column: c,
@@ -31,7 +31,7 @@ impl ShootPacket {
 }
 
 impl FeedbackPacket {
-    fn new(h: bool, s: u8, w: bool) -> FeedbackPacket {
+    pub fn new(h: bool, s: u8, w: bool) -> FeedbackPacket {
         FeedbackPacket {
             hit: h,
             sunk: s,

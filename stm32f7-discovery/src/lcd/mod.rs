@@ -5,13 +5,10 @@
 
 pub use self::color::Color;
 pub use self::init::init;
-pub use self::stdout::init as init_stdout;
 
 use core::{fmt, ptr};
 use stm32f7::stm32f7x6::LTDC;
 
-#[macro_use]
-pub mod stdout;
 mod color;
 mod init;
 

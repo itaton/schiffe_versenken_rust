@@ -23,13 +23,13 @@ const CLIENT_IP_ADDR: Ipv4Address = Ipv4Address([141, 52, 46, 2]);
 const SERVER_ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x11, 0x22, 0x33, 0x44, 0x02]);
 const SERVER_IP_ADDR: Ipv4Address = Ipv4Address([141, 52, 46, 1]);
 
-pub struct Network {
-    ethernet_interface: EthernetInterface<'static, 'static, 'static, ethernet::EthernetDevice<'static>>,
+pub struct Network<'a> {
+    ethernet_interface: EthernetInterface<'static, 'static, 'static, ethernet::EthernetDevice<'a>>,
     sockets: SocketSet<'static, 'static, 'static>,
     partner_ip_addr: Ipv4Address,
 }
 
-impl Network {
+impl<'a> Network<'a> {
     pub fn get_udp_packet(&mut self) -> Result<Option<Vec<u8>>, smoltcp::Error> {
         match self.ethernet_interface.poll(
             &mut self.sockets,
@@ -93,12 +93,12 @@ impl Network {
     }
 }
 
-pub fn init(
+pub fn init<'a>(
     rcc: &mut RCC, 
     syscfg: &mut SYSCFG, 
-    ethernet_mac: &'static mut ETHERNET_MAC, 
-    ethernet_dma: &'static mut ETHERNET_DMA,
-    is_server: bool) -> Result<Network, ethernet::PhyError> {
+    ethernet_mac: &mut ETHERNET_MAC, 
+    ethernet_dma: &'a mut stm32f7::stm32f7x6::ETHERNET_DMA,
+    is_server: bool) -> Result<Network<'a>, ethernet::PhyError> {
     let ethernet_addr = if is_server {SERVER_ETH_ADDR} else {CLIENT_ETH_ADDR};
     let ip_addr = if is_server {SERVER_IP_ADDR} else {CLIENT_IP_ADDR};
     let partner_ip_addr = if is_server {CLIENT_IP_ADDR} else {SERVER_IP_ADDR};
@@ -138,13 +138,23 @@ pub trait Connection {
     fn send_whoami(&mut self, network: &mut Network);
 }
 
-pub struct Client {
+pub struct EthClient {
     shoot: ShootPacket,
     feedback: FeedbackPacket,
-    is_server: bool,
+    is_server: bool
 }
 
-impl Connection for Client {
+impl EthClient {
+    pub fn new(server: bool) -> EthClient {
+        EthClient {
+            shoot: ShootPacket::new(0, 0),
+            feedback: FeedbackPacket::new(false, 0, false),
+            is_server: server
+        }
+    }
+}
+
+impl Connection for EthClient {
     fn send_shoot(&mut self, network: &mut Network, shoot: &ShootPacket) {
         network.send_udp_packet(&shoot.serialize());
     }
