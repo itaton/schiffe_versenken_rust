@@ -41,6 +41,9 @@ extern crate smoltcp;
 extern crate volatile;
 
 #[macro_use]
+extern crate cortex_m_semihosting as sh;
+
+#[macro_use]
 pub mod lcd;
 pub mod ethernet;
 pub mod future_mutex;

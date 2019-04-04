@@ -11,6 +11,7 @@ use core::fmt::Write;
 use core::alloc::Layout as AllocLayout;
 use core::panic::PanicInfo;
 use cortex_m_rt::{entry, exception};
+use cortex_m_semihosting::hprintln;
 use stm32f7::stm32f7x6::{CorePeripherals, Peripherals};
 use stm32f7_discovery::{
     gpio::{GpioPort, OutputPin},
@@ -21,9 +22,15 @@ use stm32f7_discovery::{
 };
 mod display;
 mod network;
+use network::EthClient;
+use network::Connection;
+mod game;
+mod gameboard;
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
+
+const is_server: bool = true;
 
 #[entry]
 fn main() -> ! {
@@ -73,6 +80,12 @@ fn main() -> ! {
     pins.backlight.set(true);
 
     let mut display = display::init_display(&mut lcd);
+
+    // Initialize the allocator BEFORE you use it
+    unsafe { ALLOCATOR.init(cortex_m_rt::heap_start() as usize, 50_000) }
+
+    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, is_server);
+    // test_network(net);
 
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut i2c_3 = init::init_i2c_3(peripherals.I2C3, &mut rcc);
@@ -142,6 +155,25 @@ fn calculate_touch_block(x: u16, y: u16) -> (u16,u16) {
     }
 }
 
+fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyError>) {
+    match net {
+        Ok(value) => {
+            // send whoami packets
+            let mut nw: network::Network = value;
+            let mut client = EthClient::new(is_server);
+
+            client.send_whoami(&mut nw);
+            if client.is_other_connected(&mut nw) {
+                hprintln!("connected");
+            }
+        },
+        Err(e) => {
+            hprintln!("connection error");
+            cortex_m::asm::bkpt();
+        }
+    }
+}
+
 // define what happens in an Out Of Memory (OOM) condition
 #[alloc_error_handler]
 fn rust_oom(_: AllocLayout) -> ! {
@@ -159,7 +191,7 @@ fn panic(info: &PanicInfo) -> ! {
     }
 
     // OK to fire a breakpoint here because we know the microcontroller is connected to a debugger
-    asm::bkpt();
+    // asm::bkpt();
 
     loop {}
 }
