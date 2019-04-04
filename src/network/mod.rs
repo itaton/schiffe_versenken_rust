@@ -145,7 +145,7 @@ pub trait Connection {
 pub struct EthClient {
     shoot: ShootPacket,
     feedback: FeedbackPacket,
-    is_server: bool
+    pub is_server: bool
 }
 
 impl EthClient {
