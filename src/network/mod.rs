@@ -147,13 +147,10 @@ impl Connection for Client {
     fn recv_shoot(&mut self, network: &mut Network) -> ShootPacket {
         let result = network.get_udp_packet();
         match result {
-            Ok(value) => match value {
-                Some(data) => {
-                    if data.len() == ShootPacket::len() {
-                        self.shoot = ShootPacket::deserialize(&data);
-                    }
+            Ok(value) => if let Some(data) = value {
+                if data.len() == ShootPacket::len() {
+                    self.shoot = ShootPacket::deserialize(&data);
                 }
-                None => {}
             },
             Err(smoltcp::Error::Exhausted) => {}
             Err(smoltcp::Error::Unrecognized) => {}
