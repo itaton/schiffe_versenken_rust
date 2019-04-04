@@ -22,9 +22,10 @@ use stm32f7_discovery::{
 };
 mod display;
 mod network;
-
 use network::EthClient;
 use network::Connection;
+mod game;
+mod gameboard;
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
