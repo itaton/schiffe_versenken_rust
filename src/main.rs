@@ -21,6 +21,7 @@ use stm32f7_discovery::{
 };
 mod display;
 mod network;
+mod game;
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
