@@ -21,14 +21,15 @@ pub fn init_display(mut lcd: &mut Lcd) {
     layer_1.clear();
     layer_2.clear();
     print_background(&mut layer_1);
-    let mut text_writer = layer_1.text_writer();
+    //let mut text_writer = layer_1.text_writer();
     
 
     //let bg_color = Color{red: 0,green: 0 ,blue: 255,alpha: 190};
     //set_background_color(bg_color, lcd);
     //set_background_color(blue, *lcd);
     lcd.set_background_color(blue);
-    print_indicies(&mut text_writer);
+    //print_indicies(&mut text_writer);
+    print_indicies(&mut layer_1);
     print_ship(layer_2, 4, 5, 5, true);
     // print_ship(layer_2, 2, 4, 5, true);
     // printShip(layer_2, 6, 6, 1, false);
@@ -54,71 +55,76 @@ fn print_background(mut layer_1: &mut Layer<FramebufferArgb8888>) {
 
 }
 
-pub fn setup_ship_5(mut layer_1: &mut Layer<FramebufferArgb8888>, mut text_writer : &mut TextWriter<FramebufferArgb8888>) {
+pub fn setup_ship_5(mut layer: &mut Layer<FramebufferArgb8888>) {
     let arr = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250,274,275];
     //let arr2 = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250];
     let arr = [299,300,380,381];
     let arr2 = [199,200,249,250];
-    for i in 299..300 {
+    for i in 299..301 {
         for j in 199..250 {
-            layer_1.print_point_color_at(i, j, black);
+            layer.print_point_color_at(i, j, black);
         }
     }
-    for i in 380..381 {
+    for i in 455..457 {
         for j in 199..250 {
-            layer_1.print_point_color_at(i, j, black);
+            layer.print_point_color_at(i, j, black);
         }
     }
-    for i in 299..381 {
-        for j in 199..200 {
-            layer_1.print_point_color_at(i, j, black);
+    for i in 299..457 {
+        for j in 199..201 {
+            layer.print_point_color_at(i, j, black);
         }
     }
-    for i in 299..381 {
-        for j in 249..250 {
-            layer_1.print_point_color_at(i, j, black);
+    for i in 299..457 {
+        for j in 249..251 {
+            layer.print_point_color_at(i, j, black);
         }
     }
-    text_writer.x_pos = 300;
-    text_writer.y_pos = 100;
-    text_writer.write_str("Please set up your 5 ship");
+    let mut text_writer = layer.text_writer_at(300,100);
+    text_writer.write_str("Please set up your");
+    let mut text_writer = layer.text_writer_at(300, 120);
+    text_writer.write_str("5 ship");
 } 
 
-fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
-    write_in_field(1, 0, text_writer, "1");
-    write_in_field(2, 0, text_writer, "2");
-    write_in_field(3, 0, text_writer, "3");
-    write_in_field(4, 0, text_writer, "4");
-    write_in_field(5, 0, text_writer, "5");
-    write_in_field(6, 0, text_writer, "6");
-    write_in_field(7, 0, text_writer, "7");
-    write_in_field(8, 0, text_writer, "8");
-    write_in_field(9, 0, text_writer, "9");
-    write_in_field(10, 0, text_writer, "0");
+//fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
+fn print_indicies(mut layer: &mut Layer<FramebufferArgb8888>) {
+    let text_writer = layer.text_writer();
+    write_in_field(1, 0, layer, "1");
+    write_in_field(2, 0, layer, "2");
+    write_in_field(3, 0, layer, "3");
+    write_in_field(4, 0, layer, "4");
+    write_in_field(5, 0, layer, "5");
+    write_in_field(6, 0, layer, "6");
+    write_in_field(7, 0, layer, "7");
+    write_in_field(8, 0, layer, "8");
+    write_in_field(9, 0, layer, "9");
+    write_in_field(10, 0, layer, "0");
     //we need a special case here since '10' is to characters
-    //text_writer.x_pos=255;
-    //text_writer.y_pos=9;
-    //text_writer.write_str("10")
-    write_in_field(0, 1, text_writer, "a");
-    write_in_field(0, 2, text_writer, "b");
-    write_in_field(0, 3, text_writer, "c");
-    write_in_field(0, 4, text_writer, "d");
-    write_in_field(0, 5, text_writer, "e");
-    write_in_field(0, 6, text_writer, "f");
-    write_in_field(0, 7, text_writer, "g");
-    write_in_field(0, 8, text_writer, "h");
-    write_in_field(0, 9, text_writer, "i");
-    write_in_field(0, 10, text_writer, "j");
+    //layer.x_pos=255;
+    //layer.y_pos=9;
+    //layer.write_str("10")
+    write_in_field(0, 1, layer, "a");
+    write_in_field(0, 2, layer, "b");
+    write_in_field(0, 3, layer, "c");
+    write_in_field(0, 4, layer, "d");
+    write_in_field(0, 5, layer, "e");
+    write_in_field(0, 6, layer, "f");
+    write_in_field(0, 7, layer, "g");
+    write_in_field(0, 8, layer, "h");
+    write_in_field(0, 9, layer, "i");
+    write_in_field(0, 10, layer, "j");
 
 }
 
-pub fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
+//pub fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
+pub fn write_in_field(x: usize, y: usize, mut layer: &mut Layer<FramebufferArgb8888>, letter: &str) {
     let x_pos = 9 + 25 * x;
     let y_pos = 9 + 25 * y;
     if x == 0 {let x_pos = 9;};
     if y == 0 {let y_pos = 9;};
-    text_writer.x_pos = x_pos;
-    text_writer.y_pos = y_pos;
+    //text_writer.x_pos = x_pos;
+    //text_writer.y_pos = y_pos;
+    let mut text_writer = layer.text_writer_at(x_pos, y_pos);
     text_writer.write_str(letter);
 }
 

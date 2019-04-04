@@ -209,6 +209,15 @@ impl<T: Framebuffer> Layer<T> {
             y_pos: 0,
         }
     }
+
+    /// Creates a text writer on this layer at the specified position
+    pub fn text_writer_at(&mut self, x: usize, y: usize) -> TextWriter<T> {
+        TextWriter {
+            layer: self,
+            x_pos: x,
+            y_pos: y,
+        }
+    }
 }
 
 /// Allows to print audio data.
@@ -284,8 +293,8 @@ impl AudioWriter {
 /// to use the `writeln!` macro with this struct.
 pub struct TextWriter<'a, T: Framebuffer + 'a> {
     layer: &'a mut Layer<T>,
-    pub x_pos: usize,
-    pub y_pos: usize,
+    x_pos: usize,
+    y_pos: usize,
 }
 
 impl<'a, T: Framebuffer> TextWriter<'a, T> {
