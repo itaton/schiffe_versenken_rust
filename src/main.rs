@@ -94,8 +94,8 @@ fn main() -> ! {
     //display::setup_ship_5(&mut layer_1, &mut text_writer);
 
     
-    write_in_field(3,3,&mut text_writer,"X");
-    write_in_field(4,4,&mut text_writer,"O");
+    display::write_in_field(3,3,&mut layer_1,"X");
+    display::write_in_field(4,4,&mut layer_1,"O");
     //write_in_field(3,3, text_writer,"O");
     //lib_writer.write_at(framebuffer, "hi", 50, 50);
     //text_writer.x_pos = 20;
@@ -112,14 +112,14 @@ fn main() -> ! {
 // poll for new touch data  u
         for touch in &touch::touches(&mut i2c_3).unwrap() {
             let (x,y) = calculate_touch_block(touch.x, touch.y);
-            display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut text_writer," ");
+            display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut layer_1," ");
             // layer_2.print_point_color_at(
             //     touch.x as usize,
             //     touch.y as usize,
             //     Color::from_hex(0xffffff),
             // );
             if (x,y) != (0,0) {
-                display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut text_writer, "x");
+                display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut layer_1, "x");
             }
         }
 
@@ -141,15 +141,15 @@ fn main() -> ! {
     }
 }
 
-fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
-    let x_pos = 9 + 25 * x;
-    let y_pos = 9 + 25 * y;
-    if x == 0 {let x_pos = 9;};
-    if y == 0 {let y_pos = 9;};
-    text_writer.x_pos = x_pos;
-    text_writer.y_pos = y_pos;
-    text_writer.write_str(letter);
-}
+//fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
+//    let x_pos = 9 + 25 * x;
+//    let y_pos = 9 + 25 * y;
+//    if x == 0 {let x_pos = 9;};
+//    if y == 0 {let y_pos = 9;};
+//    text_writer.x_pos = x_pos;
+//    text_writer.y_pos = y_pos;
+//    text_writer.write_str(letter);
+//}
 
 #[global_allocator]
 static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
