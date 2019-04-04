@@ -68,10 +68,11 @@ fn main() -> ! {
 
     init::init_sdram(&mut rcc, &mut fmc);
     let mut lcd = init::init_lcd(&mut ltdc, &mut rcc);
+
     pins.display_enable.set(true);
     pins.backlight.set(true);
 
-    display::init_display(&mut lcd);
+    let mut display = display::init_display(&mut lcd);
 
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut i2c_3 = init::init_i2c_3(peripherals.I2C3, &mut rcc);
@@ -82,10 +83,15 @@ fn main() -> ! {
     while system_clock::ticks() - ticks <= 10 {}
     touch::check_family_id(&mut i2c_3).unwrap();
 
-    display::write_in_field(3,3,&mut layer_1,"X");
-    display::write_in_field(4,4,&mut layer_1,"O");
+    //display.write_in_field(3,3,&mut layer_1,"X");
+    //display::write_in_field(4,4,&mut layer_1,"O");
+    display.write_in_field(3,3,"X");
+    display.write_in_field(4,4,"O");
     
-    display::setup_ship_5(&mut layer_1);
+    display.print_ship(4, 5, 5, true);
+
+
+    display.setup_ship(5);
     //let ship1 = []
 
     // turn led on
@@ -98,9 +104,9 @@ fn main() -> ! {
         // poll for new touch data  u
         for touch in &touch::touches(&mut i2c_3).unwrap() {
             let (x,y) = calculate_touch_block(touch.x, touch.y);
-            display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut layer_1," ");
+            display.write_in_field((x,y).0 as usize, (x,y).1 as usize, " ");
             if (x,y) != (0,0) {
-                display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut layer_1, "x");
+                display.write_in_field((x,y).0 as usize, (x,y).1 as usize, "x");
             }
         }
 

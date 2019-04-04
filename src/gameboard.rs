@@ -3,6 +3,7 @@ struct Board {
     game_field:[[Block];Block],
     ships:[Ship],
     fields_shot:[[bool]bool],
+    display: Display,
 }
 
 pub struct Block {
@@ -24,11 +25,12 @@ pub fn calculate_touch_block(x: u16, y: u16) -> Block {
     }
 }
 
+impl Board {
+    pub fn setup_ship(&mut self, length: u8) {
+        self.display.setup_ship(ship_len: u8)
 
-pub fn setup_ship(length: u8) {
-
+    }
 }
-
 fn check_valid_ship(ship: Ship) {
 
 }
