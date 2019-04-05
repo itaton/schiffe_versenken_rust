@@ -30,7 +30,7 @@ mod gameboard;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const is_server: bool = true;
+const is_server: bool = false;
 
 #[entry]
 fn main() -> ! {
@@ -85,7 +85,7 @@ fn main() -> ! {
     unsafe { ALLOCATOR.init(cortex_m_rt::heap_start() as usize, 50_000) }
 
     let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, is_server);
-    // test_network(net);
+    test_network(net);
 
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut i2c_3 = init::init_i2c_3(peripherals.I2C3, &mut rcc);
@@ -163,9 +163,9 @@ fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyEr
             let mut client = EthClient::new(is_server);
 
             client.send_whoami(&mut nw);
-            if client.is_other_connected(&mut nw) {
-                hprintln!("connected");
-            }
+            // if client.is_other_connected(&mut nw) {
+            //     hprintln!("connected");
+            // }
         },
         Err(e) => {
             hprintln!("connection error");
