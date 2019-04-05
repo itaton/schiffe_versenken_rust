@@ -1,3 +1,5 @@
+use alloc::string::String;
+use alloc::vec::Vec;
 use core::fmt::Write;
 use stm32f7_discovery::{
     lcd::Color, lcd::FramebufferAl88, lcd::FramebufferArgb8888, lcd::Layer, lcd::Lcd,
@@ -93,6 +95,23 @@ impl Display {
             for i in 0..275 {
                 self.layer1.print_point_color_at(i, *c, black);
             }
+        }
+    }
+
+    pub fn print_text_on_display(&mut self, text: String) {
+        assert!(text.len() < 50); //TODO check max string length for the gui
+
+
+        let split = text.split_whitespace();
+        let mut y = 50;
+        for word in split {
+            let mut text_writer = self.layer1.text_writer_at(350, y);
+            let result = text_writer.write_str(word);
+            match result {
+                Ok(result) => result,
+                Err(error) => panic!("error while writing text on display: {}", error),
+            };
+            y += 20;
         }
     }
 
