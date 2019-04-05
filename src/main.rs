@@ -24,13 +24,15 @@ mod display;
 mod network;
 use network::EthClient;
 use network::Connection;
-// mod game;
-// mod gameboard;
+mod ships;
+//mod game;
+//mod gameboard;
+
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const is_server: bool = true;
+const is_server: bool = false;
 
 #[entry]
 fn main() -> ! {
@@ -162,6 +164,10 @@ fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyEr
             let mut nw: network::Network = value;
             let mut client = EthClient::new(is_server);
 
+            client.send_whoami(&mut nw);
+            // if client.is_other_connected(&mut nw) {
+            //     hprintln!("connected");
+            // }
             // cortex_m::asm::bkpt();
 
             // client.send_whoami(&mut nw);

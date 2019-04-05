@@ -11,10 +11,11 @@ use crate::display::{
     Display
 };
 
-struct Game {
+struct Game<'a> {
     game_state: Gamestate,
     board: gameboard, //TODO: 
     display: Display,
+    network: Network<'a>,
     ethernet_c: EthClient,
 }
 
@@ -27,8 +28,7 @@ enum Gamestate {
 
 //start game, init field and wait for other player
 pub fn init_new_game(display: Display) -> Game {
-    Game::new(display)    
-
+    Game::new(display, is_server)    
 }
 
 
@@ -40,8 +40,9 @@ impl Game {
         Game {
             game_state: Gamestate::GameStart,
             board: gameboard::init,
-            display: display,
-            network: mods::init(),
+            display,
+            network: network.new(),
+            ethernet_c: EthClient::new()
         }
     }
 
@@ -60,6 +61,7 @@ impl Game {
 
     }
 
+    //TODO: check if gameboard and network is implemented
     fn wait_and_check_enemy_shot(&self) {
         //recvn enemy shot packet and check hit 
         let enemy_shot = self.ethernet_c.recv_shoot(self.ethernet_c, self.network);
@@ -77,16 +79,20 @@ impl Game {
     }
 
     //send shoot packet and check hit
-    fn fire(block: Block) {
-        let shoot_packet = packets::ShootPacket::new(block.y, block.x);
+    fn fire(&self, block: Block) {
+        let shoot_packet = packets::ShootPacket::new(block.y, block.x); //TODO set x,y public
         //use network file and send package
-
+        self.ethernet_c.send_shoot(self.network, shoot_packet); 
         //wait for answer
-    }
-
-    //receive shoot packet and check hit
-    fn check_enemy_shot() {
-        gameboard::shot_at(block: Block)
+        let feedback_packet = self.ethernet_c.recv_feedback(self.network);
+        if feedback_packet.you_win = true {
+            self.game_state = Gamestate::Won;
+        } else if feedback_packet.hit {
+            let sunk_size = feedback_packet.sunk;
+            //TODO: set red cross on display 
+        } else {
+            //TODO: set white cross and set corresponding field as shot in gameboard
+        }
     }
 
     //check if coordinates hit one of the your ship
@@ -105,16 +111,18 @@ impl Game {
         self.select_ship_locations(3);
         self.select_ship_locations(2);
 
-        //wait for other player
+        //TODO: send ready packet and wait for other players ready packet
 
-        //change game state: your turn / enemy turn
-        // self.game_state = Gamestate::WaitForEnemy;
-        // self.game_state = Gamestate::YourTurn;
+        if self.ethernet_c.is_server {
+            self.game_state = Gamestate::YourTurn;
+        } else {
+            self.game_state = Gamestate::WaitForEnemy;
+        }
     }
 
     fn select_ship_locations(&self, ship_size: u8) {
         //for each ship, select location and confirm with button
-        let ship_one_selections = self.display.get_touch_locations(ship_size);
+        let ship_one_selections = self.display.get_touch_locations(ship_size); //TODO implement get touch location in display
         for selection in ship_one_selections {
             gameboard::calculate_touch_block(x: u16, y: u16);
             gameboard::setup_ship(ship_size);
@@ -122,7 +130,7 @@ impl Game {
     }
 
 
-
+    //TODO: change -> new gameboard and display 
     fn select_shoot_location(&self) {
         let confirmed = false;
         let block;
