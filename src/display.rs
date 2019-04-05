@@ -1,5 +1,6 @@
 use alloc::string::String;
 use alloc::vec::Vec;
+use core::ptr;
 use core::fmt::Write;
 use stm32f7_discovery::{
     lcd::Color, lcd::FramebufferAl88, lcd::FramebufferArgb8888, lcd::Layer, lcd::Lcd,
@@ -7,7 +8,7 @@ use stm32f7_discovery::{
     touch,
 };
 use stm32f7::stm32f7x6::I2C3;
-
+pub static BACKGROUND: &'static [u8] = include_bytes!("../water.bmp");
 static blue: Color = Color {
     red: 0,
     green: 0,
@@ -44,6 +45,11 @@ pub struct Display {
     layer2: Layer<FramebufferAl88>,
     touchscreen: I2C<I2C3>,
 }
+struct Bmp {
+    width: usize,
+    height: usize,
+    color: [Color; 24500],
+}
 
 impl Display {
     pub fn new(layer1: Layer<FramebufferArgb8888>, layer2: Layer<FramebufferAl88>, touchscreen: I2C<I2C3>) -> Display {
@@ -59,12 +65,18 @@ pub fn init_display(mut lcd: &mut Lcd, mut touchscreen: I2C<I2C3>) -> Display {
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut layer_2 = lcd.layer_2().unwrap();
     let mut display = Display::new(layer_1, layer_2, touchscreen);
-
+    // display.draw_background(0,
+    //                   0,
+    //                   (480, 272), BACKGROUND);  
     display.layer1.clear();
     display.layer2.clear();
+
     //print_background(&mut layer_1);
+
+    display.draw_background_with_bitmap();
     display.print_background();
-    lcd.set_background_color(blue);
+    lcd.set_background_color(black);
+
     //print_indicies(&mut layer_1);
     display.print_indicies();
     //print_ship(display.layer2, 4, 5, 5, true);
@@ -282,6 +294,35 @@ impl Display {
         //calculate_touch_block(touch_x, touch_y)
     }
 
+    pub fn render_bg(&mut self, x: u16, y: u16, color: u16) {
+        let addr: u32 = 0xC000_0000;
+        let pixel = (y as u32) * 480 + (x as u32);
+        let pixel_color = (addr + pixel * 2) as *mut u16;
+        unsafe { ptr::write_volatile(pixel_color, color) };
+    }
+
+    pub fn draw_background(&mut self, x: u16, y: u16, size: (u16, u16), dump: &[u8]) {
+        let img_cnt = size.0 as usize * size.1 as usize;
+        for i in 0..img_cnt {
+            let idx = i * 4;
+            let dsp_y = y + (i / size.0 as usize) as u16;
+            let dsp_x = x + (i % size.0 as usize) as u16;
+            let c = self.from_rgb_with_alpha(dump[idx + 3],
+                                                  dump[idx],
+                                                  dump[idx + 1],
+                                                  dump[idx + 2]);
+            self.render_bg(dsp_x, dsp_y, c)
+        }
+    } 
+    
+    fn from_rgb_with_alpha(&mut self, a: u8, r: u8, g: u8, b: u8) -> u16 {
+        let r_f = (r / 8) as u16;
+        let g_f = (g / 8) as u16;
+        let b_f = (b / 8) as u16;
+        let c: u16 = if a >= 42 { 1 << 15 } else { 0 };
+        c | (r_f << 10) | (g_f << 5) | b_f
+    } 
+
     //TODO delete this and use the one in gameboard. Then get x and y from the Block returned
     pub fn calculate_touch_block(&mut self, x: u16, y: u16) -> (u16,u16) {
         if x<=272 && x>24 && y <= 272 && y > 24 {
@@ -290,6 +331,34 @@ impl Display {
             (x_block,y_block)
         } else {
             (0,0)
+        }
+    }
+
+
+
+    fn read_bmp(&mut self, map_format : &[u8]) -> Bmp {
+        let w = map_format[18] as usize; //get image width
+        let h = map_format[22] as usize; //get image height
+        let colormap_offset = map_format[10] as usize; //get offset of the colormap
+        let mut image_colors = [grey; 24500];
+        let mut current_index = colormap_offset;
+        for i in 0..(w * h - 1) { //get colors from colormap
+            current_index += 3;
+            image_colors[i] = Color{blue: map_format[current_index], green: map_format[current_index + 1], red: map_format[current_index + 2],alpha: 255};
+        }
+        Bmp{width: w, height: h , color: image_colors,}
+    }
+
+    fn draw_background_with_bitmap(&mut self) {
+        let bmp = self.read_bmp(BACKGROUND);
+        for l in 0..5 {
+            for k in 0..5 {
+                for i in 0..bmp.height {
+                    for j in 0..bmp.width { 
+                        self.layer1.print_point_color_at(j+(k*bmp.width), i+(l*bmp.height), bmp.color[(bmp.height - i - 1) * bmp.width + j]);
+                    }
+                }
+            }
         }
     }
 }
