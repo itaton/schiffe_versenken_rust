@@ -99,8 +99,8 @@ fn main() -> ! {
 
     let mut layer_1 = lcd.layer_1().unwrap();
 
-    //display.write_in_field(3,3,&mut layer_1,"X");
-    //display::write_in_field(4,4,&mut layer_1,"O");
+    // display.write_in_field(3,3,&mut layer_1,"X");
+    // display::write_in_field(4,4,&mut layer_1,"O");
     display.write_in_field(3,3,"X");
     display.write_in_field(4,4,"O");
     
@@ -113,16 +113,18 @@ fn main() -> ! {
     // turn led on
     pins.led.set(true);
 
+    gameboard::gameboard_init(display);
+
     let mut last_led_toggle = system_clock::ticks();
     
     loop {
 
-        let (x_pixel, y_pixel) = display.touch();
-        let (x_block, y_block) = display.calculate_touch_block(x_pixel, y_pixel);
+        //let (x_pixel, y_pixel) = display.touch();
+        //let (x_block, y_block) = display.calculate_touch_block(x_pixel, y_pixel);
         //display.write_in_field(x_block, y_block, "x")
-        if (x_block, y_block) != (0,0) {
-            display.write_in_field(x_block as usize, y_block as usize, "x");
-        }
+        //if (x_block, y_block) != (0,0) {
+        //    display.write_in_field(x_block as usize, y_block as usize, "x");
+        //}
 
         let ticks = system_clock::ticks();
         // every 0.5 seconds (we have 20 ticks per second)
