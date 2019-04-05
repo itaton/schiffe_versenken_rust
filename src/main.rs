@@ -32,7 +32,7 @@ mod ships;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const is_server: bool = true;
+const is_server: bool = false;
 
 #[entry]
 fn main() -> ! {

@@ -97,7 +97,7 @@ pub fn init<'a>(
     rcc: &mut RCC, 
     syscfg: &mut SYSCFG, 
     ethernet_mac: &mut ETHERNET_MAC, 
-    ethernet_dma: &'a mut stm32f7::stm32f7x6::ETHERNET_DMA,
+    ethernet_dma: &'a mut ETHERNET_DMA,
     is_server: bool) -> Result<Network<'a>, ethernet::PhyError> {
     let ethernet_addr = if is_server {SERVER_ETH_ADDR} else {CLIENT_ETH_ADDR};
     let ip_addr = if is_server {SERVER_IP_ADDR} else {CLIENT_IP_ADDR};
@@ -127,7 +127,7 @@ pub fn init<'a>(
     sockets.add(udp_socket);
 
     Ok(Network {
-        ethernet_interface: ethernet_interface.unwrap(),
+        ethernet_interface: ethernet_interface.unwrap().0,
         sockets,
         partner_ip_addr,
     })
