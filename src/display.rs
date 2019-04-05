@@ -6,6 +6,8 @@ use stm32f7_discovery::{
     lcd::Color, lcd::FramebufferAl88, lcd::FramebufferArgb8888, lcd::Layer, lcd::Lcd,
     i2c::I2C,
     touch,
+    system_clock::{self, Hz},
+
 };
 use stm32f7::stm32f7x6::I2C3;
 pub static BACKGROUND: &'static [u8] = include_bytes!("../water.bmp");
@@ -278,6 +280,7 @@ impl Display {
 
     pub fn check_confirm_button_touched(&mut self) -> bool {
         let (x,y) = self.touch();
+
         (x,y).0 < 457 && (x,y).0 >= 299 && (x,y).1 < 251 && (x,y).1 >= 199
     }
 
@@ -285,11 +288,20 @@ impl Display {
     pub fn touch(&mut self) -> (u16, u16) {
         let mut touch_x = 0;
         let mut touch_y = 0;
+
+
+        
         for touch in &touch::touches(&mut self.touchscreen).unwrap() {
             //let (x,y) = calculate_touch_block(touch.x, touch.y);
             touch_x = touch.x;
             touch_y = touch.y;
         }
+
+        // let ticks = system_clock::ticks();
+        // while system_clock::ticks()-ticks <= 3 {
+
+        // }
+
         (touch_x, touch_y)
         //calculate_touch_block(touch_x, touch_y)
     }

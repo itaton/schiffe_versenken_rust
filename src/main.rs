@@ -32,6 +32,9 @@ mod display;
 mod ships;
 //mod game;
 mod gameboard;
+mod network;
+use network::EthClient;
+use network::Connection;
 
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
@@ -103,22 +106,26 @@ fn main() -> ! {
 
     let mut layer_1 = lcd.layer_1().unwrap();
 
-    //display.write_in_field(3,3,&mut layer_1,"X");
-    //display::write_in_field(4,4,&mut layer_1,"O");
-    display.write_in_field(3,3,"X");
-    display.write_in_field(4,4,"O");
+    // display.write_in_field(3,3,&mut layer_1,"X");
+    // display::write_in_field(4,4,&mut layer_1,"O");
+    // display.write_in_field(3,3,"X");
+    // display.write_in_field(4,4,"O");
     
-    display.print_ship(4, 5, 5, true);
+    // display.print_ship(4, 5, 5, true);
 
 
-    display.setup_ship(5);
+    //display.setup_ship(5);
     //let ship1 = []
 
     // turn led on
     pins.led.set(true);
 
+    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, is_server);
+    test_network(net);
+    gameboard::gameboard_init(display);
 
-    let mut ethernet_interface = ethernet::EthernetDevice::new(
+
+    /*let mut ethernet_interface = ethernet::EthernetDevice::new(
         Default::default(),
         Default::default(),
         &mut rcc,
@@ -190,19 +197,19 @@ fn main() -> ! {
 			};
 
         }
-    }
+    }*/
 
 
     let mut last_led_toggle = system_clock::ticks();
     
     loop {
 
-        let (x_pixel, y_pixel) = display.touch();
-        let (x_block, y_block) = display.calculate_touch_block(x_pixel, y_pixel);
+        //let (x_pixel, y_pixel) = display.touch();
+        //let (x_block, y_block) = display.calculate_touch_block(x_pixel, y_pixel);
         //display.write_in_field(x_block, y_block, "x")
-        if (x_block, y_block) != (0,0) {
-            display.write_in_field(x_block as usize, y_block as usize, "x");
-        }
+        //if (x_block, y_block) != (0,0) {
+        //    display.write_in_field(x_block as usize, y_block as usize, "x");
+        //}
 
         let ticks = system_clock::ticks();
         // every 0.5 seconds (we have 20 ticks per second)
@@ -225,7 +232,7 @@ fn SysTick() {
     system_clock::tick();
 }
 
-fn poll_socket(socket: &mut Socket) -> Result<(), smoltcp::Error> {
+/*fn poll_socket(socket: &mut Socket) -> Result<(), smoltcp::Error> {
     match socket {
         &mut Socket::Tcp(ref mut socket) => match socket.local_endpoint().port {
             PORT => {
@@ -250,33 +257,45 @@ fn poll_socket(socket: &mut Socket) -> Result<(), smoltcp::Error> {
         _ => {}
     }
     Ok(())
+}*/
+
+
+fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyError>) {
+   match net {
+       Ok(value) => {
+           let mut nw: network::Network = value;
+           let mut client = EthClient::new(is_server);
+
+           //while !client.is_other_connected(&mut nw) {
+               // hprintln!("not yet connected");
+           //}
+           //hprintln!("connected");
+
+        //    loop {
+        //        client.send_whoami(&mut nw);
+        //    }
+
+            loop {
+                if is_server {
+                    client.send_whoami(&mut nw);
+                    hprintln!("ping");
+                }
+                while !client.is_other_connected(&mut nw) {
+
+                }
+                if !is_server {
+                    client.send_whoami(&mut nw);
+                    hprintln!("pong");
+                }
+            }
+
+       },
+       Err(e) => {
+           hprintln!("connection error");
+           cortex_m::asm::bkpt();
+       }
+   }
 }
-
-
-
-
-//fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyError>) {
-//    match net {
-//        Ok(value) => {
-//            // send whoami packets
-//            let mut nw: network::Network = value;
-//            let mut client = EthClient::new(is_server);
-//
-//            // cortex_m::asm::bkpt();
-//
-//            // client.send_whoami(&mut nw);
-//            while !client.is_other_connected(&mut nw) {
-//                hprintln!("not yet connected");
-//            }
-//            hprintln!("connected");
-//
-//        },
-//        Err(e) => {
-//            hprintln!("connection error");
-//            cortex_m::asm::bkpt();
-//        }
-//    }
-//}
 
 // define what happens in an Out Of Memory (OOM) condition
 #[alloc_error_handler]

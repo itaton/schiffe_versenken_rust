@@ -19,9 +19,9 @@ use cortex_m_semihosting::hprintln;
 
 const PORT: u16 = 1337;
 const CLIENT_ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x11, 0x22, 0x33, 0x44, 0x01]);
-const CLIENT_IP_ADDR: Ipv4Address = Ipv4Address([141, 52, 46, 2]);
+const CLIENT_IP_ADDR: Ipv4Address = Ipv4Address([192, 168, 42, 2]);
 const SERVER_ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x11, 0x22, 0x33, 0x44, 0x02]);
-const SERVER_IP_ADDR: Ipv4Address = Ipv4Address([141, 52, 46, 1]);
+const SERVER_IP_ADDR: Ipv4Address = Ipv4Address([192, 168, 42, 1]);
 
 pub struct Network<'a> {
     ethernet_interface: EthernetInterface<'static, 'static, 'static, ethernet::EthernetDevice<'a>>,
@@ -33,11 +33,11 @@ impl<'a> Network<'a> {
     pub fn get_udp_packet(&mut self) -> Result<Option<Vec<u8>>, smoltcp::Error> {
         match self.ethernet_interface.poll(
             &mut self.sockets,
-            Instant::from_millis(system_clock::ticks() as i64),
+            Instant::from_millis(system_clock::ms() as i64),
         ) {
             Err(smoltcp::Error::Exhausted) => {
                 // Exhausted may mean full -> we need to read more
-
+                hprintln!("exhausted");
                 // let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
                 for mut socket in self.sockets.iter_mut() {
                     return Network::poll_udp_packet(&mut socket);
@@ -46,6 +46,7 @@ impl<'a> Network<'a> {
             },
             Err(e) => Err(e),
             Ok(socket_changed) => if socket_changed {
+                hprintln!("ok");
                 // let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
                 for mut socket in self.sockets.iter_mut() {
                     return Network::poll_udp_packet(&mut socket);
@@ -59,7 +60,7 @@ impl<'a> Network<'a> {
 
     fn poll_udp_packet(socket: &mut Socket) -> Result<Option<Vec<u8>>, smoltcp::Error> {
         match socket {
-            &mut Socket::Udp(ref mut socket) => { 
+            Socket::Udp(ref mut socket) => { 
 
                 if socket.can_recv() {
                     match socket.recv() {
@@ -82,13 +83,10 @@ impl<'a> Network<'a> {
     }
 
     fn push_udp_packet(socket: &mut Socket, endpoint: IpEndpoint, data: &[u8]) {
-        match socket {
-            &mut Socket::Udp(ref mut socket) => {
-                if socket.can_send() {
-                    let _result = socket.send_slice(data, endpoint); // TODO: Error handling
-                }
+        if let Socket::Udp(ref mut socket) = socket {
+            if socket.can_send() {
+                let _result = socket.send_slice(data, endpoint); // TODO: Error handling
             }
-            _ => {}
         }
     }
 }
@@ -110,6 +108,7 @@ pub fn init<'a>(
         ethernet_mac,
         ethernet_dma,
         ethernet_addr,
+        ip_addr
     ).map(|device| {
         let iface = device.into_interface();
         let prev_ip_addr = iface.ipv4_addr().unwrap();
@@ -187,13 +186,10 @@ impl Connection for EthClient {
     fn recv_feedback(&mut self, network: &mut Network) -> FeedbackPacket {
         let result = network.get_udp_packet();
         match result {
-            Ok(value) => match value {
-                Some(data) => {
-                    if data.len() == FeedbackPacket::len() {
-                        self.feedback = FeedbackPacket::deserialize(&data);
-                    }
+            Ok(value) => if let Some(data) = value {
+                if data.len() == FeedbackPacket::len() {
+                    self.feedback = FeedbackPacket::deserialize(&data);
                 }
-                None => {}
             },
             Err(smoltcp::Error::Exhausted) => {}
             Err(smoltcp::Error::Unrecognized) => {}
@@ -207,22 +203,27 @@ impl Connection for EthClient {
     fn is_other_connected(&mut self, network: &mut Network) -> bool {
         let result = network.get_udp_packet();
         match result {
-            Ok(value) => match value {
-                Some(data) => {
-                    if data.len() == WhoamiPacket::len() {
-                        return true;
-                    }
-                    if data.len() == FeedbackPacket::len() {
-                        return true;
-                    }
-                    if data.len() == ShootPacket::len() {
-                        return true;
-                    }
+            Ok(value) => if let Some(data) = value {
+                if data.len() == 4 {
+                    hprintln!("{:?}", data);
+                    return true;
                 }
-                None => {}
+                if data.len() == WhoamiPacket::len() {
+                    return true;
+                }
+                if data.len() == FeedbackPacket::len() {
+                    return true;
+                }
+                if data.len() == ShootPacket::len() {
+                    return true;
+                }
             },
+            // Ok(value) => {
+            //     hprintln!("{:?}", value);
+            //     return true;
+            // }
             Err(e) => {
-                hprintln!("error: {:?}", e);
+                hprintln!("errortest: {:?}", e);
             }
         }
         false
