@@ -240,6 +240,7 @@ impl Display {
 
     }
 
+    //TODO delete this and use the one in gameboard. Then get x and y from the Block returned
     pub fn calculate_touch_block(&mut self, x: u16, y: u16) -> (u16,u16) {
         if x<=272 && x>24 && y <= 272 && y > 24 {
             let x_block = x/25;
