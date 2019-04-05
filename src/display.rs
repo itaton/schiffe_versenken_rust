@@ -1,7 +1,9 @@
 use core::fmt::Write;
 use stm32f7_discovery::{
     lcd::Color, lcd::FramebufferAl88, lcd::FramebufferArgb8888, lcd::Layer, lcd::Lcd,
+    i2c::I2C,
 };
+use stm32f7::stm32f7x6::I2C3;
 
 static blue: Color = Color {
     red: 0,
@@ -37,21 +39,23 @@ static white: Color = Color {
 pub struct Display {
     layer1: Layer<FramebufferArgb8888>,
     layer2: Layer<FramebufferAl88>,
+    touchscreen: I2C<I2C3>,
 }
 
 impl Display {
-    pub fn new(l1: Layer<FramebufferArgb8888>, l2: Layer<FramebufferAl88>) -> Display {
+    pub fn new(layer1: Layer<FramebufferArgb8888>, layer2: Layer<FramebufferAl88>, touchscreen: I2C<I2C3>) -> Display {
         Display {
-            layer1: l1,
-            layer2: l2,
+            layer1,
+            layer2,
+            touchscreen,
         }
     }
 }
 
-pub fn init_display(mut lcd: &mut Lcd) -> Display {
+pub fn init_display(mut lcd: &mut Lcd, mut touchscreen: I2C<I2C3>) -> Display {
     let mut layer_1 = lcd.layer_1().unwrap();
     let mut layer_2 = lcd.layer_2().unwrap();
-    let mut display = Display::new(layer_1, layer_2);
+    let mut display = Display::new(layer_1, layer_2, touchscreen);
 
     display.layer1.clear();
     display.layer2.clear();

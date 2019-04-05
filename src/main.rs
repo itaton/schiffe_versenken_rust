@@ -21,9 +21,9 @@ use stm32f7_discovery::{
     touch,
 };
 mod display;
-mod network;
-use network::EthClient;
-use network::Connection;
+//mod network;
+//use network::EthClient;
+//use network::Connection;
 mod ships;
 //mod game;
 //mod gameboard;
@@ -52,8 +52,8 @@ fn main() -> ! {
     let mut rng = peripherals.RNG;
     let mut sdmmc = peripherals.SDMMC1;
     let mut syscfg = peripherals.SYSCFG;
-    let mut ethernet_mac = peripherals.ETHERNET_MAC;
-    let mut ethernet_dma = peripherals.ETHERNET_DMA;
+//    let mut ethernet_mac = peripherals.ETHERNET_MAC;
+//    let mut ethernet_dma = peripherals.ETHERNET_DMA;
 
     let gpio_a = GpioPort::new(peripherals.GPIOA);
     let gpio_b = GpioPort::new(peripherals.GPIOB);
@@ -81,22 +81,23 @@ fn main() -> ! {
     pins.display_enable.set(true);
     pins.backlight.set(true);
 
-    let mut display = display::init_display(&mut lcd);
+    let mut touchscreen = init::init_i2c_3(peripherals.I2C3, &mut rcc);
+    touchscreen.test_2();
+    touchscreen.test_2();
+    //we need an empty loop here to wait for the touch scree to be initialized. Otherwise the release build crashes
+    let ticks = system_clock::ticks();
+    while system_clock::ticks() - ticks <= 10 {}
+    touch::check_family_id(&mut touchscreen).unwrap();
+
+    let mut display = display::init_display(&mut lcd, touchscreen);
 
     // Initialize the allocator BEFORE you use it
     unsafe { ALLOCATOR.init(cortex_m_rt::heap_start() as usize, 50_000) }
 
-    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, is_server);
-    test_network(net);
+    //let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, is_server);
+    //test_network(net);
 
     let mut layer_1 = lcd.layer_1().unwrap();
-    let mut i2c_3 = init::init_i2c_3(peripherals.I2C3, &mut rcc);
-    i2c_3.test_2();
-    i2c_3.test_2();
-    //we need an empty loop here to wait for the touch scree to be initialized. Otherwise the release build crashes
-    let ticks = system_clock::ticks();
-    while system_clock::ticks() - ticks <= 10 {}
-    touch::check_family_id(&mut i2c_3).unwrap();
 
     //display.write_in_field(3,3,&mut layer_1,"X");
     //display::write_in_field(4,4,&mut layer_1,"O");
@@ -117,7 +118,7 @@ fn main() -> ! {
     loop {
 
         // poll for new touch data  u
-        for touch in &touch::touches(&mut i2c_3).unwrap() {
+        for touch in &touch::touches(&mut touchscreen).unwrap() {
             let (x,y) = calculate_touch_block(touch.x, touch.y);
             display.write_in_field((x,y).0 as usize, (x,y).1 as usize, " ");
             if (x,y) != (0,0) {
@@ -157,28 +158,28 @@ fn calculate_touch_block(x: u16, y: u16) -> (u16,u16) {
     }
 }
 
-fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyError>) {
-    match net {
-        Ok(value) => {
-            // send whoami packets
-            let mut nw: network::Network = value;
-            let mut client = EthClient::new(is_server);
-
-            // cortex_m::asm::bkpt();
-
-            // client.send_whoami(&mut nw);
-            while !client.is_other_connected(&mut nw) {
-                hprintln!("not yet connected");
-            }
-            hprintln!("connected");
-
-        },
-        Err(e) => {
-            hprintln!("connection error");
-            cortex_m::asm::bkpt();
-        }
-    }
-}
+//fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyError>) {
+//    match net {
+//        Ok(value) => {
+//            // send whoami packets
+//            let mut nw: network::Network = value;
+//            let mut client = EthClient::new(is_server);
+//
+//            // cortex_m::asm::bkpt();
+//
+//            // client.send_whoami(&mut nw);
+//            while !client.is_other_connected(&mut nw) {
+//                hprintln!("not yet connected");
+//            }
+//            hprintln!("connected");
+//
+//        },
+//        Err(e) => {
+//            hprintln!("connection error");
+//            cortex_m::asm::bkpt();
+//        }
+//    }
+//}
 
 // define what happens in an Out Of Memory (OOM) condition
 #[alloc_error_handler]
