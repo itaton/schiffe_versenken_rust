@@ -31,7 +31,7 @@ use stm32f7_discovery::{
 mod display;
 mod ships;
 //mod game;
-//mod gameboard;
+mod gameboard;
 mod network;
 use network::EthClient;
 use network::Connection;
@@ -266,10 +266,10 @@ fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyEr
            let mut nw: network::Network = value;
            let mut client = EthClient::new(is_server);
 
-           while !client.is_other_connected(&mut nw) {
+           //while !client.is_other_connected(&mut nw) {
                // hprintln!("not yet connected");
-           }
-           hprintln!("connected");
+           //}
+           //hprintln!("connected");
 
         //    loop {
         //        client.send_whoami(&mut nw);
