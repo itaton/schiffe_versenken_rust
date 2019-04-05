@@ -2,7 +2,7 @@
 use crate::ships::Ship;
 use crate::display::Display;
 
-struct Board {
+pub struct Board {
     game_field:[[Block; 10];10],
     ships:[Ship; 5],
     fields_shot:[[bool; 10];10],
