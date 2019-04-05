@@ -2,6 +2,7 @@ use core::fmt::Write;
 use stm32f7_discovery::{
     lcd::Color, lcd::FramebufferAl88, lcd::FramebufferArgb8888, lcd::Layer, lcd::Lcd,
     i2c::I2C,
+    touch,
 };
 use stm32f7::stm32f7x6::I2C3;
 
@@ -203,6 +204,30 @@ impl Display {
                     self.layer2.print_point_color_at(c, i, white);
                 }
             }
+        }
+    }
+
+
+    pub fn touch(&mut self) -> (u16, u16) {
+        let mut touch_x = 0;
+        let mut touch_y = 0;
+        for touch in &touch::touches(&mut self.touchscreen).unwrap() {
+            //let (x,y) = calculate_touch_block(touch.x, touch.y);
+            touch_x = touch.x;
+            touch_y = touch.y;
+        }
+        (touch_x, touch_y)
+        //calculate_touch_block(touch_x, touch_y)
+
+    }
+
+    pub fn calculate_touch_block(&mut self, x: u16, y: u16) -> (u16,u16) {
+        if x<=272 && x>24 && y <= 272 && y > 24 {
+            let x_block = x/25;
+            let y_block = y/25;
+            (x_block,y_block)
+        } else {
+            (0,0)
         }
     }
 }
