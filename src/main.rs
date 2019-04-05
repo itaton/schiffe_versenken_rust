@@ -108,13 +108,13 @@ fn main() -> ! {
 
     // display.write_in_field(3,3,&mut layer_1,"X");
     // display::write_in_field(4,4,&mut layer_1,"O");
-    display.write_in_field(3,3,"X");
-    display.write_in_field(4,4,"O");
+    // display.write_in_field(3,3,"X");
+    // display.write_in_field(4,4,"O");
     
-    display.print_ship(4, 5, 5, true);
+    // display.print_ship(4, 5, 5, true);
 
 
-    display.setup_ship(5);
+    //display.setup_ship(5);
     //let ship1 = []
 
     // turn led on

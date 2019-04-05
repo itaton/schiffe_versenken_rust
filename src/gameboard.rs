@@ -2,6 +2,7 @@
 use crate::ships::Ship;
 use crate::display::Display;
 use alloc::vec::Vec;
+use stm32f7_discovery::system_clock::{self, Hz};
 
 pub struct Board {
 //    game_field:[[Block; 10];10],
@@ -44,23 +45,40 @@ impl Board {
 
     pub fn setup_ship(&mut self, length: u8) {
         self.display.setup_ship(length);
-        while self.display.touch_confirm_button() == false {
+        let ticks = system_clock::ticks();
+        while system_clock::ticks()-ticks <= 5 { }
+        while self.display.check_confirm_button_touched() == false {
             //touch loop
+
+            let ticks = system_clock::ticks();
+            while system_clock::ticks()-ticks <= 5 { }
+
             let (x,y) = self.display.touch();
             match self.calculate_touch_block(x, y) {
                 None => {},
                 Some(block) => {
-                    if self.setup_field[block.x as usize][block.y as usize] == false {
-                        self.setup_field[block.x as usize][block.y as usize] = true;
+                    let (x,y) = (block.x-1,block.y-1);
+                    // if self.setup_field[block.x as usize][block.y as usize] == false {
+                    //     self.setup_field[block.x as usize][block.y as usize] = true;
+                    //     self.display.write_in_field(block.x as usize, block.y as usize, "x");
+                    // }
+                    // else {
+                    //     self.setup_field[block.x as usize][block.y as usize] = false;
+                    //     self.display.write_in_field(block.x as usize, block.y as usize, " ");
+                    // }
+                    if self.setup_field[x as usize][y as usize] == false {
+                        self.setup_field[x as usize][y as usize] = true;
                         self.display.write_in_field(block.x as usize, block.y as usize, "x");
                     }
                     else {
-                        self.setup_field[block.x as usize][block.y as usize] = false;
+                        self.setup_field[x as usize][y as usize] = false;
                         self.display.write_in_field(block.x as usize, block.y as usize, " ");
                     }
                 }
             }
         }
+        let ticks = system_clock::ticks();
+        while system_clock::ticks()-ticks <= 3 { }
         self.get_valid_ship(length);
         //check if len blocks selected
         //check if blocks in a row
@@ -74,17 +92,21 @@ impl Board {
         let mut x_start = 0;
         let mut y_start = 0;
 
+        // cortex_m::asm::bkpt();
         //check if length is correct
         let mut marked_fields = 0;
-        for i in 1..=10 {
-            for j in 1..=10{
+        for i in 0..10 {
+            for j in 0..10{
                 if self.setup_field[i][j] {
+                    // cortex_m::asm::bkpt();
                     marked_fields = marked_fields + 1;
                 }
             }
         }
+        // cortex_m::asm::bkpt();
         if marked_fields != len {
             //Error - TODO what to do here
+            self.display.write_in_field(0, 0, "z");
         }
 
         //check if ship is in a line
@@ -93,8 +115,8 @@ impl Board {
         let mut found = false;
         let mut vertical = false;
         let mut direction_known = false;
-        for i in 1..=10 {
-            for j in 1..=10 {
+        for i in 0..10 {
+            for j in 0..10 {
                 if self.setup_field[i][j] {
                     if found == false {
                         found = true;
@@ -106,6 +128,7 @@ impl Board {
                     else {
                         if i != x_pos + 1 || j != y_pos + 1 {
                             //Error, the next block is not adjacent to the previous - TODO what to do here
+                            self.display.write_in_field(0, 0, "z");
                         }
                         if direction_known == false {
                             if i == x_pos + 1 {
@@ -122,12 +145,14 @@ impl Board {
                             if vertical == false {
                                 if i != x_pos + 1 {
                                     //Error, next block is at the wrong location
+                                    self.display.write_in_field(0, 0, "z");
                                 }
                                 x_pos = i;
                             }
                             else {
                                 if j != y_pos + 1 {
                                     //Error, next block is at the wrong location
+                                    self.display.write_in_field(0, 0, "z");
                                 }
                                 y_pos = j;
                             }
@@ -142,8 +167,9 @@ impl Board {
         //TODO
 
 
+        // cortex_m::asm::bkpt();
 
-        self.display.print_ship(len as usize, x_start, y_start, vertical);
+        self.display.print_ship(len as usize, x_start + 1, y_start + 1, vertical);
         let ship = Ship::new(len, x_start as u8, y_start as u8, vertical);
         ship
         //TODO: change this
@@ -174,22 +200,27 @@ impl Board {
     pub fn initial_setup(&mut self) {
 
         self.display.setup_ship(5); //only display right side here
+        self.setup_ship(5);
         //let ship: [Block; 5] = input_x();
         //get_valid_ship(5);
         //ships.push(ship);
         self.display.setup_ship(4);
+        self.setup_ship(4);
         //let ship: [Block; 4] = input_x();
         //get_valid_ship(ship, ships);
         //ships.push(ship);
         self.display.setup_ship(3);
+        self.setup_ship(3);
         //let ship: [Block; 3] = input_x();
         //get_valid_ship(ship, ships);
         //ships.push(ship);
         self.display.setup_ship(3);
+        self.setup_ship(3);
         //let ship: [Block; 3] = input_x();
         //get_valid_ship(ship, ships);
         //ships.push(ship);
         self.display.setup_ship(2);
+        self.setup_ship(2);
         //let ship: [Block; 2] = input_x();
         //get_valid_ship(ship, ships);
         //ships.push(ship);
