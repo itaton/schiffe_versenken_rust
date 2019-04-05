@@ -1,6 +1,7 @@
 
 use crate::ships::Ship;
 use crate::display::Display;
+use alloc::vec::Vec;
 
 struct Board {
     game_field:[[Block; 10];10],
@@ -26,27 +27,28 @@ pub struct Block {
 }
 
 pub fn gameboard_init(display: Display) -> Board {
-    //let mut ships : [Ship] = [];
+    //let mut ships : [Ship; 5] = [];
+    let mut ships = Vec::new();
     display.setup_ship(5); //only display right side here
     //let ship: [Block; 5] = input_x();
     //check_valid_ship(ship, ships);
-    //ships.push_back(ship);
+    //ships.push(ship);
     display.setup_ship(4);
     //let ship: [Block; 4] = input_x();
     //check_valid_ship(ship, ships);
-    //ships.push_back(ship);
+    //ships.push(ship);
     display.setup_ship(3);
     //let ship: [Block; 3] = input_x();
     //check_valid_ship(ship, ships);
-    //ships.push_back(ship);
+    //ships.push(ship);
     display.setup_ship(3);
     //let ship: [Block; 3] = input_x();
     //check_valid_ship(ship, ships);
-    //ships.push_back(ship);
+    //ships.push(ship);
     display.setup_ship(2);
     //let ship: [Block; 2] = input_x();
     //check_valid_ship(ship, ships);
-    //ships.push_back(ship);
+    //ships.push(ship);
 
     let fields_shot = [[false; 10];10];
 
@@ -70,8 +72,13 @@ pub fn calculate_touch_block(x: u16, y: u16) -> Block {
 
 impl Board {
     pub fn setup_ship(&mut self, length: u8) {
-        self.display.setup_ship(ship_len: u8)
-
+        self.display.setup_ship(length);
+        //wait for ok button
+        //check if len blocks selected
+        //check if blocks in a row
+        //?check if ship at a valid position?
+        //Ship:new(Blocks);
+        //return ship
     }
 }
 fn check_valid_ship(ship: Ship) {
