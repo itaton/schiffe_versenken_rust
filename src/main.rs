@@ -42,7 +42,7 @@ use network::Connection;
 
 const ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef]);
 const PORT: u16 = 1337;
-const is_server: bool = true;
+const is_server: bool = false;
 
 #[entry]
 fn main() -> ! {

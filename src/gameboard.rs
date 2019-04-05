@@ -80,6 +80,7 @@ impl Board {
         let ticks = system_clock::ticks();
         while system_clock::ticks()-ticks <= 3 { }
         self.get_valid_ship(length);
+        self.setup_field = [[false; 10];10];
         //check if len blocks selected
         //check if blocks in a row
         //?check if ship at a valid position?
