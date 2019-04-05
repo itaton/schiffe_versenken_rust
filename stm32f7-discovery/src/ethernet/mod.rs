@@ -29,6 +29,7 @@ pub struct EthernetDevice<'d> {
     tx: TxDevice,
     ethernet_dma: &'d mut ETHERNET_DMA,
     ethernet_address: EthernetAddress,
+    addr: Ipv4Address,
 }
 
 impl<'d> EthernetDevice<'d> {
@@ -50,6 +51,7 @@ impl<'d> EthernetDevice<'d> {
         ethernet_mac: &mut ETHERNET_MAC,
         ethernet_dma: &'d mut ETHERNET_DMA,
         ethernet_address: EthernetAddress,
+        addr: Ipv4Address
     ) -> Result<Self, PhyError> {
         use byteorder::{ByteOrder, LittleEndian};
 
@@ -81,6 +83,7 @@ impl<'d> EthernetDevice<'d> {
             tx: tx_device,
             ethernet_dma: ethernet_dma,
             ethernet_address: ethernet_address,
+            addr,
         })
     }
 
@@ -89,7 +92,7 @@ impl<'d> EthernetDevice<'d> {
         use alloc::collections::BTreeMap;
         use smoltcp::iface::NeighborCache;
 
-        let ip_addrs = [IpCidr::new(Ipv4Address::UNSPECIFIED.into(), 0)];
+        let ip_addrs = [IpCidr::new(self.addr.into(), 0)];
         let routes_storage = Box::leak(Box::new([None; 1]));
         let routes = Routes::new(&mut routes_storage[..]);
 

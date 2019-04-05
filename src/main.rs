@@ -31,7 +31,10 @@ use stm32f7_discovery::{
 mod display;
 mod ships;
 //mod game;
-mod gameboard;
+//mod gameboard;
+mod network;
+use network::EthClient;
+use network::Connection;
 
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
@@ -39,7 +42,7 @@ mod gameboard;
 
 const ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef]);
 const PORT: u16 = 1337;
-const is_server: bool = false;
+const is_server: bool = true;
 
 #[entry]
 fn main() -> ! {
@@ -117,8 +120,11 @@ fn main() -> ! {
     // turn led on
     pins.led.set(true);
 
+    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, is_server);
+    test_network(net);
 
-    let mut ethernet_interface = ethernet::EthernetDevice::new(
+
+    /*let mut ethernet_interface = ethernet::EthernetDevice::new(
         Default::default(),
         Default::default(),
         &mut rcc,
@@ -190,7 +196,7 @@ fn main() -> ! {
 			};
 
         }
-    }
+    }*/
 
 
     let mut last_led_toggle = system_clock::ticks();
@@ -225,7 +231,7 @@ fn SysTick() {
     system_clock::tick();
 }
 
-fn poll_socket(socket: &mut Socket) -> Result<(), smoltcp::Error> {
+/*fn poll_socket(socket: &mut Socket) -> Result<(), smoltcp::Error> {
     match socket {
         &mut Socket::Tcp(ref mut socket) => match socket.local_endpoint().port {
             PORT => {
@@ -250,33 +256,45 @@ fn poll_socket(socket: &mut Socket) -> Result<(), smoltcp::Error> {
         _ => {}
     }
     Ok(())
+}*/
+
+
+fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyError>) {
+   match net {
+       Ok(value) => {
+           let mut nw: network::Network = value;
+           let mut client = EthClient::new(is_server);
+
+           while !client.is_other_connected(&mut nw) {
+               // hprintln!("not yet connected");
+           }
+           hprintln!("connected");
+
+        //    loop {
+        //        client.send_whoami(&mut nw);
+        //    }
+
+            loop {
+                if is_server {
+                    client.send_whoami(&mut nw);
+                    hprintln!("ping");
+                }
+                while !client.is_other_connected(&mut nw) {
+
+                }
+                if !is_server {
+                    client.send_whoami(&mut nw);
+                    hprintln!("pong");
+                }
+            }
+
+       },
+       Err(e) => {
+           hprintln!("connection error");
+           cortex_m::asm::bkpt();
+       }
+   }
 }
-
-
-
-
-//fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyError>) {
-//    match net {
-//        Ok(value) => {
-//            // send whoami packets
-//            let mut nw: network::Network = value;
-//            let mut client = EthClient::new(is_server);
-//
-//            // cortex_m::asm::bkpt();
-//
-//            // client.send_whoami(&mut nw);
-//            while !client.is_other_connected(&mut nw) {
-//                hprintln!("not yet connected");
-//            }
-//            hprintln!("connected");
-//
-//        },
-//        Err(e) => {
-//            hprintln!("connection error");
-//            cortex_m::asm::bkpt();
-//        }
-//    }
-//}
 
 // define what happens in an Out Of Memory (OOM) condition
 #[alloc_error_handler]
