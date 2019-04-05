@@ -264,7 +264,7 @@ impl Display {
         }
     }
 
-    pub fn touch_confirm_button(&mut self) -> bool {
+    pub fn check_confirm_button_touched(&mut self) -> bool {
         let (x,y) = self.touch();
         (x,y).0 < 457 && (x,y).0 >= 299 && (x,y).1 < 251 && (x,y).1 >= 199
     }
