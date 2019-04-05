@@ -31,7 +31,7 @@ use stm32f7_discovery::{
 mod display;
 mod ships;
 //mod game;
-//mod gameboard;
+mod gameboard;
 
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;

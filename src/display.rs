@@ -1,3 +1,5 @@
+use alloc::string::String;
+use alloc::vec::Vec;
 use core::fmt::Write;
 use stm32f7_discovery::{
     lcd::Color, lcd::FramebufferAl88, lcd::FramebufferArgb8888, lcd::Layer, lcd::Lcd,
@@ -31,9 +33,9 @@ static grey: Color = Color {
     alpha: 127,
 };
 static white: Color = Color {
-    red: 0,
-    green: 0,
-    blue: 0,
+    red: 255,
+    green: 255,
+    blue: 255,
     alpha: 255,
 };
 
@@ -95,6 +97,61 @@ impl Display {
             }
         }
     }
+    
+    /**
+     * print a confirm button on the right side of the display
+     */
+    pub fn print_confirm_button(&mut self) {
+        for i in 299..301 {
+            for j in 199..250 {
+                //todo change this to lookup color since layer 2 is lookup only
+                self.layer1.print_point_color_at(i, j, black);
+            }
+        }
+        for i in 455..457 {
+            for j in 199..250 {
+                self.layer1.print_point_color_at(i, j, black);
+            }
+        }
+        for i in 299..457 {
+            for j in 199..201 {
+                self.layer1.print_point_color_at(i, j, black);
+            }
+        }
+        for i in 299..457 {
+            for j in 249..251 {
+                self.layer1.print_point_color_at(i, j, black);
+            }
+        }
+        for i in 299..457 {
+            for j in 199..251 {
+                self.layer1.print_point_color_at(i, j, black);
+            }
+        }
+        let mut text_writer = self.layer2.text_writer_at(350, 220);
+        let result = text_writer.write_str("CONFIRM");
+        match result {
+            Ok(result) => result,
+            Err(error) => panic!("error while writing text on display: {}", error),
+        };
+    }
+
+    pub fn print_text_on_display(&mut self, text: String) {
+        assert!(text.len() < 50); //TODO check max string length for the gui
+        let split = text.split_whitespace();
+        let mut y = 50;
+        for word in split {
+            let mut text_writer = self.layer1.text_writer_at(350, y);
+            let result = text_writer.write_str(word);
+            match result {
+                Ok(result) => result,
+                Err(error) => panic!("error while writing text on display: {}", error),
+            };
+            y += 20;
+        }
+    }
+
+
 
     pub fn setup_ship(&mut self, ship_len: u8) {
         let arr = [
@@ -207,6 +264,11 @@ impl Display {
         }
     }
 
+    pub fn touch_confirm_button(&mut self) -> bool {
+        let (x,y) = self.touch();
+        (x,y).0 < 457 && (x,y).0 >= 299 && (x,y).1 < 251 && (x,y).1 >= 199
+    }
+
 
     pub fn touch(&mut self) -> (u16, u16) {
         let mut touch_x = 0;
@@ -218,7 +280,6 @@ impl Display {
         }
         (touch_x, touch_y)
         //calculate_touch_block(touch_x, touch_y)
-
     }
 
     //TODO delete this and use the one in gameboard. Then get x and y from the Block returned
