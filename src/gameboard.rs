@@ -24,27 +24,28 @@ impl Board {
             display,
         }
     }
-    
-    pub fn calculate_touch_block(x: u16, y: u16) -> Block {
+
+
+    pub fn calculate_touch_block(x: u16, y: u16) -> Option<Block>{
         if x<=272 && x>24 && y <= 272 && y > 24 {
             let x_block = x/25;
             let y_block = y/25;
-            (x_block,y_block) //TODO: change to Block
+            assert!(x_block <=255);
+            assert!(y_block <=255);
+            some(Block {x: x_block as u8, y: y_block as u8})
         } else {
-            (0,0)
+            None
         }
     }
 
-    impl Board {
-        pub fn setup_ship(&mut self, length: u8) {
-            self.display.setup_ship(length);
+    pub fn setup_ship(&mut self, length: u8) {
+        self.display.setup_ship(length);
             //wait for ok button
             //check if len blocks selected
             //check if blocks in a row
             //?check if ship at a valid position?
             //Ship:new(Blocks);
             //return ship
-        }
     }
 
     fn check_valid_ship(ship: Ship) {
@@ -57,7 +58,7 @@ impl Board {
     }
 
     pub fn shot_at(block: Block) -> (bool,bool) {
-
+        
     }
 }
 
@@ -90,6 +91,5 @@ pub fn gameboard_init(display: Display) -> Board {
 
     let game_field = //TODO initialize with the blocks
 
-    board = Board::new(game_field, ships, fields_shot, display);
-    return board; 
+    Board::new(game_field, ships, fields_shot, display)
 }
