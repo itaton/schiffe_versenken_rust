@@ -26,7 +26,7 @@ mod display;
 //use network::Connection;
 mod ships;
 //mod game;
-//mod gameboard;
+mod gameboard;
 
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
