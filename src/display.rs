@@ -10,7 +10,8 @@ use stm32f7_discovery::{
 
 };
 use stm32f7::stm32f7x6::I2C3;
-pub static BACKGROUND: &'static [u8] = include_bytes!("../water.bmp");
+pub static BACKGROUNDSMALL: &'static [u8] = include_bytes!("../water.bmp");
+pub static BACKGROUND: &'static [u8] = include_bytes!("../waterBig.bmp");
 static blue: Color = Color {
     red: 0,
     green: 0,
@@ -57,7 +58,20 @@ struct Bmp {
     width: usize,
     height: usize,
     color: [Color; 24500],
+    // color: Vec<Color>,
 }
+struct BmpPixel<'a> {
+    red: &'a [u8],
+    green: &'a [u8],
+    blue: &'a [u8],
+}
+
+struct BmpPic<'a> {
+    width: &'a [u32],
+    height: &'a [u32],
+    pixels: Vec<BmpPixel<'a>>,
+}
+
 
 impl Display {
     pub fn new(layer1: Layer<FramebufferArgb8888>, layer2: Layer<FramebufferAl88>, touchscreen: I2C<I2C3>) -> Display {
@@ -361,23 +375,86 @@ impl Display {
         let colormap_offset = map_format[10] as usize; //get offset of the colormap
         let mut image_colors = [grey; 24500];
         let mut current_index = colormap_offset;
+        // let mut image_colors = Vec::new();
         for i in 0..(w * h - 1) { //get colors from colormap
             current_index += 3;
             image_colors[i] = Color{blue: map_format[current_index], green: map_format[current_index + 1], red: map_format[current_index + 2],alpha: 255};
+            // image_colors.push(Color {blue: map_format[current_index], green: map_format[current_index + 1], red: map_format[current_index + 2],alpha: 255});
         }
         Bmp{width: w, height: h , color: image_colors,}
     }
 
-    fn draw_background_with_bitmap(&mut self) {
+    pub fn draw_start_screen(&mut self) {
+
+    }
+
+    pub fn draw_button_at(&mut self) {
+
+    }
+
+    pub fn draw_background_with_bitmap(&mut self) {
         let bmp = self.read_bmp(BACKGROUND);
-        for l in 0..5 {
-            for k in 0..5 {
-                for i in 0..bmp.height {
-                    for j in 0..bmp.width { 
-                        self.layer1.print_point_color_at(j+(k*bmp.width), i+(l*bmp.height), bmp.color[(bmp.height - i - 1) * bmp.width + j]);
-                    }
+        // self.draw_test(bmp);
+        self.print_bmp_at_layer2(BACKGROUND, 0, 0);
+        // for l in 0..5 {
+        //     for k in 0..5 {
+        //         for i in 0..bmp.height {
+        //             for j in 0..bmp.width { 
+        //                 self.layer1.print_point_color_at(j+(k*bmp.width), i+(l*bmp.height), bmp.color[(bmp.height - i - 1) * bmp.width + j]);
+        //             }
+        //         }
+        //     }
+        // }
+    }
+    
+    pub fn print_bmp_at_layer2(&mut self, pic: &[u8], x: u32, y: u32) {
+        let pixels_start = pic[10] as u32;
+        let width = (pic[18] as u32) + ((pic[19] as u32) * 256_u32);
+        let height = (pic[22] as u32) + ((pic[23] as u32) * 256_u32);
+        let pixel_rest = width % 4;
+
+        let at_x = x;
+        let mut at_y = y;
+        let mut bytenr: u32 = pixels_start;
+        let pixel_end: u32 = pic.len() as u32 - 1;
+        // println!("{},{}",pixel_rest,pixel_end );
+
+        for i in 0..height {
+            bytenr = pixel_end + 1 - (pixel_rest + width * 3) * (i + 1);
+            for j in 0..width {
+                if pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
+                    && pic[(bytenr) as usize] > 245
+                {
+
+                } else {
+                    self.layer1.print_point_color_at(
+                        (j + at_x) as usize,
+                        (at_y + i) as usize,
+                        Color::rgba(
+                            pic[(bytenr + 2) as usize],
+                            pic[(bytenr + 1) as usize],
+                            pic[(bytenr) as usize],
+                            pic[(bytenr) as usize]-50,
+                        ),
+                    );
                 }
+                bytenr += 3;
             }
         }
     }
+
+
+    // fn draw_test(&mut self, pic: Bmp) {
+    //     for x in 0..= pic.width {
+    //         for y in 0..= pic.height {
+    //             let current_pixel_number = (x) * pic.width + y;
+    //             let current_pixel = pic.color[(current_pixel_number - 1) as usize];
+    //             self.layer1.print_point_color_at(
+    //                 x as usize,
+    //                 y as usize,
+    //                 Color::rgb(current_pixel.red, current_pixel.green, current_pixel.blue),
+    //             )
+    //         }
+    //     }
+    // }
 }
