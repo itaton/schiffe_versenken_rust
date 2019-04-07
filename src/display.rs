@@ -42,6 +42,12 @@ static white: Color = Color {
     blue: 255,
     alpha: 255,
 };
+static water_blue: Color = Color {
+    red: 49,
+    green: 190,
+    blue: 190,
+    alpha: 255,
+};
 
 pub struct Display {
     layer1: Layer<FramebufferArgb8888>,
@@ -91,7 +97,8 @@ pub fn init_display(mut lcd: &mut Lcd, mut touchscreen: I2C<I2C3>) -> Display {
 
     display.draw_background_with_bitmap();
     display.print_background();
-    lcd.set_background_color(black);
+    //lcd.set_background_color(black);
+    lcd.set_background_color(water_blue);
 
     //print_indicies(&mut layer_1);
     display.print_indicies();
