@@ -114,7 +114,7 @@ fn main() -> ! {
         Err(_e) => {hprintln!("failed to init network");}
     }
 
-    gameboard::gameboard_init(display);
+    //gameboard::gameboard_init(display);
 
     let mut last_led_toggle = system_clock::ticks();
     
