@@ -1,3 +1,4 @@
+use crate::gameboard;
 use crate::gameboard::{
     Block,
     Board,
@@ -20,6 +21,7 @@ struct Game<'a> {
     ethernet_c: EthClient,
 }
 
+#[derive(PartialEq, Eq)]
 enum Gamestate {
     YourTurn,
     WaitForEnemy,
@@ -29,7 +31,7 @@ enum Gamestate {
 }
 
 //start game, init field and wait for other player
-pub fn init_new_game(display: Display,is_server: bool) -> Game<'a> {
+pub fn init_new_game<'a>(display: Display,is_server: bool) -> Game<'a> {
     Game::new(display, is_server)    
 }
 
@@ -41,7 +43,8 @@ impl<'a> Game<'a> {
     fn new(display: Display, is_server: bool) -> Game<'a> {
         Game {
             game_state: Gamestate::GameStart,
-            board: Board::new(), //TODO: without params ? gameboard creates the start state ? 
+            // board: Board::new(), //TODO: without params ? gameboard creates the start state ? 
+            board: gameboard::gameboard_init(display),
             display,
             network: network.new(),
             ethernet_c: EthClient::new(is_server),
@@ -55,7 +58,7 @@ impl<'a> Game<'a> {
                 Gamestate::WaitForEnemy => self.wait_and_check_enemy_shot(),
                 Gamestate::Won => self.show_win_screen(),
                 Gamestate::SetupShips => self.setup_ships(),
-                Gamestate::GameStart => self.show_start_screen();
+                Gamestate::GameStart => self.show_start_screen(),
             } 
         }
     }
@@ -87,7 +90,7 @@ impl<'a> Game<'a> {
     fn show_start_screen(&self) {
         self.display.show_start_screen();
         loop {
-            (x,y) = self.display.touch();
+            let (x,y) = self.display.touch();
             if !((x,y) == (0,0)) {
                 self.set_game_state(Gamestate::SetupShips);
             }
@@ -151,8 +154,8 @@ impl<'a> Game<'a> {
         let mut block;
         //create methods in display to handle touch
         while !confirmed {
-            let (x,y) = display.touch();
-            match self.board.calculate_touch_block(touch.x, touch.y) {
+            let (x,y) = self.display.touch();
+            match self.board.calculate_touch_block(x, y) {
                 None => {
                     if (block_set && self.display.check_confirm_button_touched()) {
                       //shot location set   
@@ -160,12 +163,12 @@ impl<'a> Game<'a> {
                       confirmed = true;
                     }
                 }
-                Ok(ret_block) = {
+                Some(ret_block) => {
                     //delete old block and set new
                     if (block_set) {
                        self.board.clear_x_es(); 
                     }
-                    self.display.write_in_field(ret_block.x, ret_block.y, "x");
+                    self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
                     block = ret_block;
                 }
             }
