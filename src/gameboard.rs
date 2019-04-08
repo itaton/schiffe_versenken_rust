@@ -56,15 +56,22 @@ impl Board {
     pub fn setup_ship(&mut self, length: u8, display: &mut Display) {
         //self.display.setup_ship(length);
         display.setup_ship(length);
+        let mut confirmed = false;
         //let ticks = system_clock::ticks();
         //while system_clock::ticks() - ticks <= 5 {}
-        while !display.check_confirm_button_touched() {
+        while !confirmed {
+        // display.check_confirm_button_touched() {
+
             //touch loop
             // let ticks = system_clock::ticks();
             // while system_clock::ticks() - ticks <= 5 {}
             let (x, y) = display.touch();
             match self.calculate_touch_block(x, y) {
-                None => {}
+                None => {
+                    if display.check_confirm_button_touched(x,y) {
+                        confirmed = true;
+                    }
+                }
                 Some(block) => {
                     let (x, y) = (block.x - 1, block.y - 1);
                     if !self.setup_field[x as usize][y as usize] {
