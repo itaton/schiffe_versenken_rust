@@ -55,14 +55,14 @@ impl Board {
 
     pub fn setup_ship(&mut self, length: u8) {
         self.display.setup_ship(length);
-        let ticks = system_clock::ticks();
-        while system_clock::ticks() - ticks <= 5 {}
+        //let ticks = system_clock::ticks();
+        //while system_clock::ticks() - ticks <= 5 {}
         //something like on_touch_release would be best - but not sure if available
         while self.display.check_confirm_button_touched() == false {
             //touch loop
 
-            let ticks = system_clock::ticks();
-            while system_clock::ticks() - ticks <= 5 {}
+            // let ticks = system_clock::ticks();
+            // while system_clock::ticks() - ticks <= 5 {}
 
             let (x, y) = self.display.touch();
             match self.calculate_touch_block(x, y) {
@@ -89,8 +89,8 @@ impl Board {
                 }
             }
         }
-        let ticks = system_clock::ticks();
-        while system_clock::ticks() - ticks <= 3 {}
+        //let ticks = system_clock::ticks();
+        //while system_clock::ticks() - ticks <= 3 {}
         match self.get_valid_ship(length) {
             None => {
                 //TODO is this retry correct?
@@ -163,7 +163,7 @@ impl Board {
                             y_pos = j;
                         } else {
                             if !vertical {
-                                cortex_m::asm::bkpt();
+                                //cortex_m::asm::bkpt();
                                 if i != x_pos + 1 || j != y_pos {
                                     //Error, next block is at the wrong location
                                     self.display.write_in_field(0, 0, "x");

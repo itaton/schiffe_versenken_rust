@@ -12,6 +12,7 @@ use stm32f7_discovery::{
 use stm32f7::stm32f7x6::I2C3;
 pub static BACKGROUNDSMALL: &'static [u8] = include_bytes!("../water.bmp");
 pub static BACKGROUND: &'static [u8] = include_bytes!("../waterBig.bmp");
+
 static blue: Color = Color {
     red: 0,
     green: 0,
@@ -53,6 +54,7 @@ pub struct Display {
     layer1: Layer<FramebufferArgb8888>,
     layer2: Layer<FramebufferAl88>,
     touchscreen: I2C<I2C3>,
+    lastTouch: usize,
 }
 struct Bmp {
     width: usize,
@@ -79,6 +81,7 @@ impl Display {
             layer1,
             layer2,
             touchscreen,
+            lastTouch: system_clock::ticks(),
         }
     }
 }
@@ -95,7 +98,8 @@ pub fn init_display(mut lcd: &mut Lcd, mut touchscreen: I2C<I2C3>) -> Display {
 
     //print_background(&mut layer_1);
 
-    display.draw_background_with_bitmap();
+    display.print_bmp_at_location(BACKGROUND, 0, 0);
+    // display.draw_background_with_bitmap();
     display.print_background();
     //lcd.set_background_color(black);
     lcd.set_background_color(water_blue);
@@ -310,20 +314,26 @@ impl Display {
         let mut touch_x = 0;
         let mut touch_y = 0;
 
-
+        let mut curr_ticks = system_clock::ticks();
         
-        for touch in &touch::touches(&mut self.touchscreen).unwrap() {
-            //let (x,y) = calculate_touch_block(touch.x, touch.y);
-            touch_x = touch.x;
-            touch_y = touch.y;
+        if curr_ticks - self.lastTouch >= 8 {
+            for touch in &touch::touches(&mut self.touchscreen).unwrap() {
+                //cortex_m::asm::bkpt();
+                //let (x,y) = calculate_touch_block(touch.x, touch.y);
+                touch_x = touch.x;
+                touch_y = touch.y;
+                self.lastTouch = curr_ticks;
+            }
+            (touch_x, touch_y)
         }
-
+        else {
+            (0,0)
+        }
         // let ticks = system_clock::ticks();
         // while system_clock::ticks()-ticks <= 3 {
 
         // }
 
-        (touch_x, touch_y)
         //calculate_touch_block(touch_x, touch_y)
     }
 
@@ -369,22 +379,9 @@ impl Display {
 
 
 
-    fn read_bmp(&mut self, map_format : &[u8]) -> Bmp {
-        let w = map_format[18] as usize; //get image width
-        let h = map_format[22] as usize; //get image height
-        let colormap_offset = map_format[10] as usize; //get offset of the colormap
-        let mut image_colors = [grey; 24500];
-        let mut current_index = colormap_offset;
-        // let mut image_colors = Vec::new();
-        for i in 0..(w * h - 1) { //get colors from colormap
-            current_index += 3;
-            image_colors[i] = Color{blue: map_format[current_index], green: map_format[current_index + 1], red: map_format[current_index + 2],alpha: 255};
-            // image_colors.push(Color {blue: map_format[current_index], green: map_format[current_index + 1], red: map_format[current_index + 2],alpha: 255});
-        }
-        Bmp{width: w, height: h , color: image_colors,}
-    }
 
-    pub fn draw_start_screen(&mut self) {
+
+    pub fn show_start_screen(&mut self) {
 
     }
 
@@ -392,10 +389,14 @@ impl Display {
 
     }
 
-    pub fn draw_background_with_bitmap(&mut self) {
-        let bmp = self.read_bmp(BACKGROUND);
+    pub fn show_win_screen(&mut self) {
+
+    }
+
+    // pub fn draw_background_with_bitmap(&mut self) {
+        // let bmp = self.read_bmp(BACKGROUND);
         // self.draw_test(bmp);
-        self.print_bmp_at_layer2(BACKGROUND, 0, 0);
+        // self.print_bmp_at_location(BACKGROUND, 0, 0);
         // for l in 0..5 {
         //     for k in 0..5 {
         //         for i in 0..bmp.height {
@@ -405,16 +406,32 @@ impl Display {
         //         }
         //     }
         // }
-    }
-    
-    pub fn print_bmp_at_layer2(&mut self, pic: &[u8], x: u32, y: u32) {
-        let pixels_start = pic[10] as u32;
-        let width = (pic[18] as u32) + ((pic[19] as u32) * 256_u32);
-        let height = (pic[22] as u32) + ((pic[23] as u32) * 256_u32);
+    // }
+
+    // fn read_bmp(&mut self, map_format : &[u8]) -> Bmp {
+    //     let colormap_offset = u32::from(map_format[10]);
+    //     let width = u32::from(map_format[18]) + (u32::from(map_format[19]) * 256_u32);
+    //     let height = u32::from(map_format[22]) + (u32::from(map_format[23]) * 256_u32);
+
+    //     let mut image_colors = [grey; 24500];
+    //     let mut current_index = colormap_offset;
+    //     // let mut image_colors = Vec::new();
+    //     for i in 0..(w * h - 1) { //get colors from colormap
+    //         current_index += 3;
+    //         image_colors[i] = Color{blue: map_format[current_index], green: map_format[current_index + 1], red: map_format[current_index + 2],alpha: 255};
+    //         // image_colors.push(Color {blue: map_format[current_index], green: map_format[current_index + 1], red: map_format[current_index + 2],alpha: 255});
+    //     }
+    //     Bmp{width: w, height: h , color: image_colors,}
+    // }   
+
+    pub fn print_bmp_at_location(&mut self, pic: &[u8], x: u32, y: u32) {
+        let pixels_start = u32::from(pic[10]);
+        let width = u32::from(pic[18]) + (u32::from(pic[19]) * 256_u32);
+        let height = u32::from(pic[22]) + (u32::from(pic[23]) * 256_u32);
         let pixel_rest = width % 4;
 
-        let at_x = x;
-        let mut at_y = y;
+        let loc_x = x;
+        let loc_y = y;
         let mut bytenr: u32 = pixels_start;
         let pixel_end: u32 = pic.len() as u32 - 1;
         // println!("{},{}",pixel_rest,pixel_end );
@@ -422,14 +439,11 @@ impl Display {
         for i in 0..height {
             bytenr = pixel_end + 1 - (pixel_rest + width * 3) * (i + 1);
             for j in 0..width {
-                if pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
-                    && pic[(bytenr) as usize] > 245
-                {
-
-                } else {
+                if !(pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
+                    && pic[(bytenr) as usize] > 245) {
                     self.layer1.print_point_color_at(
-                        (j + at_x) as usize,
-                        (at_y + i) as usize,
+                        (loc_x + j) as usize,
+                        (loc_y + i) as usize,
                         Color::rgba(
                             pic[(bytenr + 2) as usize],
                             pic[(bytenr + 1) as usize],
@@ -442,19 +456,4 @@ impl Display {
             }
         }
     }
-
-
-    // fn draw_test(&mut self, pic: Bmp) {
-    //     for x in 0..= pic.width {
-    //         for y in 0..= pic.height {
-    //             let current_pixel_number = (x) * pic.width + y;
-    //             let current_pixel = pic.color[(current_pixel_number - 1) as usize];
-    //             self.layer1.print_point_color_at(
-    //                 x as usize,
-    //                 y as usize,
-    //                 Color::rgb(current_pixel.red, current_pixel.green, current_pixel.blue),
-    //             )
-    //         }
-    //     }
-    // }
 }
