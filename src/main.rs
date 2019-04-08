@@ -34,7 +34,7 @@ use network::packets::ShootPacket;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const IS_SERVER: bool = true;
+const IS_SERVER: bool = false;
 
 #[entry]
 fn main() -> ! {
@@ -162,8 +162,10 @@ fn SysTick() {
 fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) {
     if IS_SERVER {
         let shoot = ShootPacket::new(5, 5);
-        eth_client.send_shoot(net, &shoot);
-        // hprintln!("send shoot");
+        for i in 0..1000 {
+            eth_client.send_shoot(net, &shoot);
+        }
+        hprintln!("send shoot");
     }
     else {
         let shoot = eth_client.recv_shoot(net);

@@ -173,8 +173,8 @@ impl Connection for EthClient {
                     hprintln!("wrong package length");
                 }
             },
-            Err(smoltcp::Error::Exhausted) => {}
-            Err(smoltcp::Error::Unrecognized) => {}
+            //Err(smoltcp::Error::Exhausted) => {}
+            //Err(smoltcp::Error::Unrecognized) => {}
             Err(e) => {
                 hprintln!("error: {:?}", e);
             }
