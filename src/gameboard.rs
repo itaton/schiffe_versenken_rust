@@ -4,7 +4,7 @@ use alloc::vec::Vec;
 use stm32f7_discovery::system_clock::{self, Hz};
 
 pub struct Board {
-    //    game_field:[[Block; 10];10],
+    //game_field:[[Block; 10];10],
     //ships:[Ship; 5],
     ships: Vec<Ship>,
     fields_shot: [[bool; 10]; 10],
@@ -20,7 +20,6 @@ pub struct Block {
 }
 
 impl Board {
-    //pub fn new(game_field: [[Block; 10];10], ships: Vec<Ship>, fields_shot:[[bool; 10];10], display: Display, setup_field:[[bool; 10];10]) -> Board {
     pub fn new(
         ships: Vec<Ship>,
         fields_shot: [[bool; 10]; 10],
@@ -57,27 +56,15 @@ impl Board {
         self.display.setup_ship(length);
         //let ticks = system_clock::ticks();
         //while system_clock::ticks() - ticks <= 5 {}
-        //something like on_touch_release would be best - but not sure if available
-        while self.display.check_confirm_button_touched() == false {
-            //touch loop
-
+        while !self.display.check_confirm_button_touched() { //touch loop
             // let ticks = system_clock::ticks();
             // while system_clock::ticks() - ticks <= 5 {}
-
             let (x, y) = self.display.touch();
             match self.calculate_touch_block(x, y) {
                 None => {}
                 Some(block) => {
                     let (x, y) = (block.x - 1, block.y - 1);
-                    // if self.setup_field[block.x as usize][block.y as usize] == false {
-                    //     self.setup_field[block.x as usize][block.y as usize] = true;
-                    //     self.display.write_in_field(block.x as usize, block.y as usize, "x");
-                    // }
-                    // else {
-                    //     self.setup_field[block.x as usize][block.y as usize] = false;
-                    //     self.display.write_in_field(block.x as usize, block.y as usize, " ");
-                    // }
-                    if self.setup_field[x as usize][y as usize] == false {
+                    if !self.setup_field[x as usize][y as usize] {
                         self.setup_field[x as usize][y as usize] = true;
                         self.display
                             .write_in_field(block.x as usize, block.y as usize, "x");
@@ -93,7 +80,6 @@ impl Board {
         //while system_clock::ticks() - ticks <= 3 {}
         match self.get_valid_ship(length) {
             None => {
-                //TODO is this retry correct?
                 self.clear_x_es();
                 self.setup_field = [[false; 10]; 10];
                 self.setup_ship(length);
@@ -104,11 +90,6 @@ impl Board {
                 self.ships.push(ship);
             }
         }
-        //check if len blocks selected
-        //check if blocks in a row
-        //?check if ship at a valid position?
-        //Ship:new(Blocks);
-        //return ship
     }
 
     fn get_valid_ship(&mut self, len: u8) -> Option<Ship> {
@@ -125,10 +106,8 @@ impl Board {
             }
         }
         if marked_fields != len {
-            //Error - TODO what to do here
-            self.display.write_in_field(0, 0, "z");
-            //cortex_m::asm::bkpt();
-            return None;
+            //wrong number of blocks set
+            return None; 
         }
 
         //check if ship is in a line
@@ -140,7 +119,7 @@ impl Board {
         for i in 0..10 {
             for j in 0..10 {
                 if self.setup_field[i][j] {
-                    if !found {
+                    if !found { //find start field of the ship
                         found = true;
                         x_start = i; //for ship init
                         y_start = j; //for ship init
@@ -148,11 +127,10 @@ impl Board {
                         y_pos = j;
                     } else {
                         if i != x_pos + 1 && j != y_pos + 1 {
-                            //Error, the next block is not adjacent to the previous - TODO what to do here
-                            self.display.write_in_field(0, 0, "y");
+                            // Next block is neither right nor below the previous
                             return None;
                         }
-                        if !direction_known {
+                        if !direction_known { //find 
                             if i == x_pos + 1 {
                                 vertical = false;
                             } else {
@@ -163,17 +141,14 @@ impl Board {
                             y_pos = j;
                         } else {
                             if !vertical {
-                                //cortex_m::asm::bkpt();
                                 if i != x_pos + 1 || j != y_pos {
                                     //Error, next block is at the wrong location
-                                    self.display.write_in_field(0, 0, "x");
                                     return None;
                                 }
                                 x_pos = i;
                             } else {
-                                if j != y_pos + 1 || i != x_pos{
+                                if j != y_pos + 1 || i != x_pos {
                                     //Error, next block is at the wrong location
-                                    self.display.write_in_field(0, 0, "w");
                                     return None;
                                 }
                                 y_pos = j;
@@ -185,56 +160,32 @@ impl Board {
         }
 
         //check if ship not adjacent to existing ship
-        //TODO make this cleaner - this is bs code
         for i in 0..10 {
             for j in 0..10 {
                 if self.setup_field[i][j] {
-                    for k in if i == 0 {0..=1} else if i == 9 {8..=9} else {i-1..=i+1} {
-                        for l in if j == 0 {0..=1} else if j == 9 {8..=9} else {j-1..=j+1} {
+                    // i love R
+                    for k in if i == 0 {
+                        0..=1
+                    } else if i == 9 {
+                        8..=9
+                    } else {
+                        i - 1..=i + 1
+                    } {
+                        for l in if j == 0 {
+                            0..=1
+                        } else if j == 9 {
+                            8..=9
+                        } else {
+                            j - 1..=j + 1
+                        } {
                             if self.placed_ships[k][l] {
                                 return None;
                             }
                         }
                     }
-                    // //upper left corner
-                    // if i == 0 && j == 0 {
-                    //     for k in 0..=1 {
-                    //         for l in 0..=1 {
-                    //             if self.placed_ships[k][l] {
-                    //                 return None;
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
-                    // //lower left corner, i guess
-                    // else if i == 0 && j == 9 {
-                    //     for k in 0..=1 {
-                    //         for l in 8..=9 {
-                    //             if self.placed_ships[k][l] {
-                    //                 return None;
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
-                    // //upper right corner
-                    // else if i == 9 && j == 0 {
-                    //     for k in 8..=9 {
-                    //         for l in 0..=1 {
-                    //             if self.placed_ships[k][l] {
-                    //                 return None;
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
-                    //Test
                 }
             }
         }
-
-        // cortex_m::asm::bkpt();
 
         //save ship - TODO maybe do this nicer via Ship or sth. Quick and dirty solution
         for i in 0..10 {
@@ -245,18 +196,15 @@ impl Board {
             }
         }
 
-
         self.display
             .print_ship(len as usize, x_start + 1, y_start + 1, vertical);
         let ship = Ship::new(len, x_start as u8, y_start as u8, vertical);
         Some(ship)
-        //TODO: change this
-        //let x = 5
     }
 
     fn clear_x_es(&mut self) {
         for i in 1..11 {
-            for j in 1 ..11 {
+            for j in 1..11 {
                 self.display.write_in_field(i, j, " ");
             }
         }
@@ -275,7 +223,7 @@ impl Board {
     }
 
     //returns if hit and if sunk
-    pub fn shot_at(block: Block) -> (bool, bool) {
+    pub fn shoot_at(block: Block) -> (bool, bool) {
         return (false, false);
     }
 
