@@ -14,6 +14,7 @@ pub struct Board {
     placed_ships: [[bool; 10]; 10],
 }
 
+#[derive(Copy, Clone)]
 pub struct Block {
     pub x: u8,
     pub y: u8,
@@ -301,7 +302,7 @@ impl Board {
     }
 }
 
-pub fn gameboard_init(display: &mut Display) -> Board {
+pub fn gameboard_init() -> Board {
     //let mut ships : [Ship; 5] = [];
     let mut ships = Vec::new();
 
@@ -313,7 +314,7 @@ pub fn gameboard_init(display: &mut Display) -> Board {
     // let mut board = Board::new(ships, fields_shot, display, setup_field, placed_ships);
     let mut board = Board::new(ships, fields_shot, setup_field, placed_ships);
 
-    board.initial_setup(display);
+    // board.initial_setup(display);
     board
 
     //let game_field = //TODO initialize with the blocks
