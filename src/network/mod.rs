@@ -223,10 +223,6 @@ impl Connection for EthClient {
                     return true;
                 }
             },
-            // Ok(value) => {
-            //     hprintln!("{:?}", value);
-            //     return true;
-            // }
             Err(e) => {
                 hprintln!("errortest: {:?}", e);
             }
