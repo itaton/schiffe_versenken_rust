@@ -172,7 +172,7 @@ impl EthClient {
 impl Connection for EthClient {
     fn send_shoot(&mut self, network: &mut Network, shoot: ShootPacket) {
         network.send_udp_packet(&shoot.serialize());
-        hprintln!("shoot called");
+        // hprintln!("shoot called");
     }
 
     fn recv_shoot(&mut self, network: &mut Network) -> Option<ShootPacket> {
@@ -181,7 +181,7 @@ impl Connection for EthClient {
             Ok(value) => if let Some(data) = value {
                 if data.len() == ShootPacket::len() {
                     // self.shoot = ShootPacket::deserialize(&data);
-                    Some(ShootPacket::deserialize(&data));
+                    return Some(ShootPacket::deserialize(&data));
                 }
                 else {
                     hprintln!("wrong package length");
