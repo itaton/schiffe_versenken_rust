@@ -5,15 +5,15 @@ use alloc::vec::Vec;
 
 #[derive(Debug, Copy, Clone)]
 pub struct ShootPacket {
-    line: u8,
-    column: u8,     
+    pub line: u8,
+    pub column: u8,     
 }
 
 #[derive(Debug, Copy, Clone)]
 pub struct FeedbackPacket {
-    hit: bool,
-    sunk: u8,
-    you_win: bool,
+    pub hit: bool,
+    pub sunk: u8,
+    pub you_win: bool,
 }
 
 #[derive(Debug, Copy, Clone)]
