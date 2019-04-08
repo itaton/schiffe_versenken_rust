@@ -85,7 +85,11 @@ impl<'a> Network<'a> {
     fn push_udp_packet(socket: &mut Socket, endpoint: IpEndpoint, data: &[u8]) {
         if let Socket::Udp(ref mut socket) = socket {
             if socket.can_send() {
-                let _result = socket.send_slice(data, endpoint); // TODO: Error handling
+                let result = socket.send_slice(data, endpoint); // TODO: Error handling
+                match result {
+                    Ok(_) => {}
+                    Err(e) => {hprintln!("error {:?}", e);}
+                }
             }
         }
     }
@@ -118,6 +122,7 @@ pub fn init<'a>(
 
     let mut sockets = SocketSet::new(Vec::new());
     let endpoint = IpEndpoint::new(IpAddress::Ipv4(ip_addr), PORT);
+    hprintln!("IP: {:?}", ip_addr);
 
     let udp_rx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 3], vec![0u8; 512]);
     let udp_tx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 1], vec![0u8; 512]);
@@ -133,9 +138,9 @@ pub fn init<'a>(
 }
 
 pub trait Connection {
-    fn send_shoot(&mut self, network: &mut Network, shoot: &ShootPacket);
+    fn send_shoot(&mut self, network: &mut Network, shoot: ShootPacket);
     fn recv_shoot(&mut self, network: &mut Network) -> ShootPacket;
-    fn send_feedback(&mut self, network: &mut Network, feedback: &FeedbackPacket);
+    fn send_feedback(&mut self, network: &mut Network, feedback: FeedbackPacket);
     fn recv_feedback(&mut self, network: &mut Network) -> FeedbackPacket;
     fn is_other_connected(&mut self, network: &mut Network) -> bool;
     fn send_whoami(&mut self, network: &mut Network);
@@ -158,8 +163,9 @@ impl EthClient {
 }
 
 impl Connection for EthClient {
-    fn send_shoot(&mut self, network: &mut Network, shoot: &ShootPacket) {
+    fn send_shoot(&mut self, network: &mut Network, shoot: ShootPacket) {
         network.send_udp_packet(&shoot.serialize());
+        hprintln!("shoot called");
     }
 
     fn recv_shoot(&mut self, network: &mut Network) -> ShootPacket {
@@ -182,7 +188,7 @@ impl Connection for EthClient {
         self.shoot
     }
 
-    fn send_feedback(&mut self, network: &mut Network, feedback: &FeedbackPacket) {
+    fn send_feedback(&mut self, network: &mut Network, feedback: FeedbackPacket) {
         network.send_udp_packet(&feedback.serialize());
     }
 

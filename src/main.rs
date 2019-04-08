@@ -34,7 +34,7 @@ use network::packets::ShootPacket;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const IS_SERVER: bool = false;
+const IS_SERVER: bool = true;
 
 #[entry]
 fn main() -> ! {
@@ -108,10 +108,7 @@ fn main() -> ! {
             let mut nw: network::Network = value;
             let mut eth_client = EthClient::new(IS_SERVER);
             wait_for_connection(&mut eth_client, &mut nw);
-            let ticks = system_clock::ticks();
-            while system_clock::ticks() - ticks <= 5 {
-
-            }
+            hprintln!("connected");
             test_packet(&mut eth_client, &mut nw);
         }
         Err(e) => {hprintln!("failed to init network");}
@@ -162,10 +159,10 @@ fn SysTick() {
 fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) {
     if IS_SERVER {
         let shoot = ShootPacket::new(5, 5);
-        for i in 0..1000 {
-            eth_client.send_shoot(net, &shoot);
+        for i in 0..10 {
+            eth_client.send_shoot(net, shoot);
+            hprintln!("send shoot");
         }
-        hprintln!("send shoot");
     }
     else {
         let shoot = eth_client.recv_shoot(net);
@@ -174,16 +171,10 @@ fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) 
 }
 
 fn wait_for_connection(eth_client: &mut network::EthClient, net: &mut network::Network) {
-    if IS_SERVER {
-        while !eth_client.is_other_connected(net) {
-
-        }
+    while !eth_client.is_other_connected(net) {
         eth_client.send_whoami(net);
-    }
-    else {
-        while !eth_client.is_other_connected(net) {
-            eth_client.send_whoami(net);
-        }
+        let ticks = system_clock::ticks();
+        while system_clock::ticks() - ticks <= 5 {}
     }
 }
 
