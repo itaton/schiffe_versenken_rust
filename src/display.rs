@@ -10,40 +10,40 @@ use stm32f7_discovery::{
 
 };
 use stm32f7::stm32f7x6::I2C3;
-pub static BACKGROUNDSMALL: &'static [u8] = include_bytes!("../water.bmp");
+//pub static BACKGROUNDSMALL: &'static [u8] = include_bytes!("../water.bmp");
 pub static BACKGROUND: &'static [u8] = include_bytes!("../waterBig.bmp");
 
-static blue: Color = Color {
+static BLUE: Color = Color {
     red: 0,
     green: 0,
     blue: 255,
     alpha: 255,
 };
-static green: Color = Color {
+static GREEN: Color = Color {
     red: 0,
     green: 255,
     blue: 0,
     alpha: 255,
 };
-static black: Color = Color {
+static BLACK: Color = Color {
     red: 0,
     green: 0,
     blue: 0,
     alpha: 255,
 };
-static grey: Color = Color {
+static GREY: Color = Color {
     red: 127,
     green: 127,
     blue: 127,
     alpha: 127,
 };
-static white: Color = Color {
+static WHITE: Color = Color {
     red: 255,
     green: 255,
     blue: 255,
     alpha: 255,
 };
-static water_blue: Color = Color {
+static WATER_BLUE: Color = Color {
     red: 49,
     green: 190,
     blue: 190,
@@ -54,7 +54,7 @@ pub struct Display {
     layer1: Layer<FramebufferArgb8888>,
     layer2: Layer<FramebufferAl88>,
     touchscreen: I2C<I2C3>,
-    lastTouch: usize,
+    last_touch: usize,
 }
 struct Bmp {
     width: usize,
@@ -74,14 +74,13 @@ struct BmpPic<'a> {
     pixels: Vec<BmpPixel<'a>>,
 }
 
-
 impl Display {
     pub fn new(layer1: Layer<FramebufferArgb8888>, layer2: Layer<FramebufferAl88>, touchscreen: I2C<I2C3>) -> Display {
         Display {
             layer1,
             layer2,
             touchscreen,
-            lastTouch: system_clock::ticks(),
+            last_touch: system_clock::ticks(),
         }
     }
 }
@@ -102,7 +101,7 @@ pub fn init_display(mut lcd: &mut Lcd, mut touchscreen: I2C<I2C3>) -> Display {
     // display.draw_background_with_bitmap();
     display.print_background();
     //lcd.set_background_color(black);
-    lcd.set_background_color(water_blue);
+    lcd.set_background_color(WATER_BLUE);
 
     //print_indicies(&mut layer_1);
     display.print_indicies();
@@ -111,11 +110,7 @@ pub fn init_display(mut lcd: &mut Lcd, mut touchscreen: I2C<I2C3>) -> Display {
     // printShip(layer_2, 6, 6, 1, false);
     display
 }
-//fn set_background_color(color: Color,mut lcd: Lcd) {
-//    lcd.set_background_color(color);
-//}
 impl Display {
-    //fn print_background(mut layer_1: &mut Layer<FramebufferArgb8888>) {
     fn print_background(&mut self) {
         let xarr = [
             24, 25, 49, 50, 74, 75, 99, 100, 124, 125, 149, 150, 174, 175, 199, 200, 224, 225, 249,
@@ -127,12 +122,12 @@ impl Display {
         ];
         for c in xarr.iter() {
             for i in 0..272 {
-                self.layer1.print_point_color_at(*c, i, black);
+                self.layer1.print_point_color_at(*c, i, BLACK);
             }
         }
         for c in yarr.iter() {
             for i in 0..275 {
-                self.layer1.print_point_color_at(i, *c, black);
+                self.layer1.print_point_color_at(i, *c, BLACK);
             }
         }
     }
@@ -144,27 +139,27 @@ impl Display {
         for i in 299..301 {
             for j in 199..250 {
                 //todo change this to lookup color since layer 2 is lookup only
-                self.layer1.print_point_color_at(i, j, black);
+                self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
         for i in 455..457 {
             for j in 199..250 {
-                self.layer1.print_point_color_at(i, j, black);
+                self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
         for i in 299..457 {
             for j in 199..201 {
-                self.layer1.print_point_color_at(i, j, black);
+                self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
         for i in 299..457 {
             for j in 249..251 {
-                self.layer1.print_point_color_at(i, j, black);
+                self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
         for i in 299..457 {
             for j in 199..251 {
-                self.layer1.print_point_color_at(i, j, black);
+                self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
         let mut text_writer = self.layer2.text_writer_at(350, 220);
@@ -190,8 +185,6 @@ impl Display {
         }
     }
 
-
-
     pub fn setup_ship(&mut self, ship_len: u8) {
         let arr = [
             24, 25, 49, 50, 74, 75, 99, 100, 124, 125, 149, 150, 174, 175, 199, 200, 224, 225, 249,
@@ -203,22 +196,22 @@ impl Display {
         for i in 299..301 {
             for j in 199..250 {
                 //todo change this to lookup color since layer 2 is lookup only
-                self.layer1.print_point_color_at(i, j, black);
+                self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
         for i in 455..457 {
             for j in 199..250 {
-                self.layer1.print_point_color_at(i, j, black);
+                self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
         for i in 299..457 {
             for j in 199..201 {
-                self.layer1.print_point_color_at(i, j, black);
+                self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
         for i in 299..457 {
             for j in 249..251 {
-                self.layer1.print_point_color_at(i, j, black);
+                self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
         let mut text_writer = self.layer1.text_writer_at(300, 100);
@@ -306,7 +299,7 @@ impl Display {
             //vertical
             for c in x_start_pixel..x_end_pixel {
                 for i in y_start_pixel..y_end_pixel {
-                    self.layer2.print_point_color_at(c, i, white);
+                    self.layer2.print_point_color_at(c, i, WHITE);
                 }
             }
         } else {
@@ -316,7 +309,7 @@ impl Display {
             //horizontal
             for c in x_start_pixel..x_end_pixel {
                 for i in y_start_pixel..y_end_pixel {
-                    self.layer2.print_point_color_at(c, i, white);
+                    self.layer2.print_point_color_at(c, i, WHITE);
                 }
             }
         }
@@ -333,15 +326,15 @@ impl Display {
         let mut touch_x = 0;
         let mut touch_y = 0;
 
-        let mut curr_ticks = system_clock::ticks();
+        let curr_ticks = system_clock::ticks();
         
-        if curr_ticks - self.lastTouch >= 8 {
+        if curr_ticks - self.last_touch >= 8 {
             for touch in &touch::touches(&mut self.touchscreen).unwrap() {
                 //cortex_m::asm::bkpt();
                 //let (x,y) = calculate_touch_block(touch.x, touch.y);
                 touch_x = touch.x;
                 touch_y = touch.y;
-                self.lastTouch = curr_ticks;
+                self.last_touch = curr_ticks;
             }
             (touch_x, touch_y)
         }
@@ -395,10 +388,6 @@ impl Display {
             (0,0)
         }
     }
-
-
-
-
 
     pub fn show_start_screen(&mut self) {
 
