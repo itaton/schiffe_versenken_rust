@@ -34,7 +34,7 @@ use network::packets::ShootPacket;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const IS_SERVER: bool = false;
+const IS_SERVER: bool = true;
 
 #[entry]
 fn main() -> ! {
@@ -157,7 +157,10 @@ fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) 
         net.pull_all();
         eth_client.send_shoot(net, shoot);
         let recv_shoot = eth_client.recv_shoot(net);
-        hprintln!("recv_shoot: {:?}", recv_shoot);
+        match recv_shoot {
+            None => {}
+            Some(some) => {hprintln!("recv_shoot: {:?}", some);}
+        }
     }
     
 }

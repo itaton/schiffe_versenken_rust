@@ -146,7 +146,7 @@ pub fn init<'a>(
 
 pub trait Connection {
     fn send_shoot(&mut self, network: &mut Network, shoot: ShootPacket);
-    fn recv_shoot(&mut self, network: &mut Network) -> ShootPacket;
+    fn recv_shoot(&mut self, network: &mut Network) -> Option<ShootPacket>;
     fn send_feedback(&mut self, network: &mut Network, feedback: FeedbackPacket);
     fn recv_feedback(&mut self, network: &mut Network) -> FeedbackPacket;
     fn is_other_connected(&mut self, network: &mut Network) -> bool;
@@ -175,12 +175,13 @@ impl Connection for EthClient {
         hprintln!("shoot called");
     }
 
-    fn recv_shoot(&mut self, network: &mut Network) -> ShootPacket {
+    fn recv_shoot(&mut self, network: &mut Network) -> Option<ShootPacket> {
         let result = network.get_udp_packet();
         match result {
             Ok(value) => if let Some(data) = value {
                 if data.len() == ShootPacket::len() {
-                    self.shoot = ShootPacket::deserialize(&data);
+                    // self.shoot = ShootPacket::deserialize(&data);
+                    Some(ShootPacket::deserialize(&data));
                 }
                 else {
                     hprintln!("wrong package length");
@@ -192,7 +193,7 @@ impl Connection for EthClient {
                 hprintln!("error: {:?}", e);
             }
         }
-        self.shoot
+        None
     }
 
     fn send_feedback(&mut self, network: &mut Network, feedback: FeedbackPacket) {
