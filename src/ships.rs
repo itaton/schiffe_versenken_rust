@@ -1,10 +1,11 @@
 
 pub struct Ship {
-    size: u8,
-    x_start_location: u8,
-    y_start_location: u8,
+    pub size: u8,
+    pub x_start_location: u8,
+    pub y_start_location: u8,
     //direction: Direction,
-    vertical: bool,
+    pub vertical: bool,
+    pub sunken_fields: u8,
 }
 //enum for direction ?
 enum Direction {
@@ -19,6 +20,7 @@ impl Ship {
             x_start_location: x_location,
             y_start_location: y_location,
             vertical,
+            sunken_fields: 0,
         }
     }
 

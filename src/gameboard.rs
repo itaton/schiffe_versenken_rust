@@ -56,7 +56,8 @@ impl Board {
         self.display.setup_ship(length);
         //let ticks = system_clock::ticks();
         //while system_clock::ticks() - ticks <= 5 {}
-        while !self.display.check_confirm_button_touched() { //touch loop
+        while !self.display.check_confirm_button_touched() {
+            //touch loop
             // let ticks = system_clock::ticks();
             // while system_clock::ticks() - ticks <= 5 {}
             let (x, y) = self.display.touch();
@@ -107,7 +108,7 @@ impl Board {
         }
         if marked_fields != len {
             //wrong number of blocks set
-            return None; 
+            return None;
         }
 
         //check if ship is in a line
@@ -119,7 +120,8 @@ impl Board {
         for i in 0..10 {
             for j in 0..10 {
                 if self.setup_field[i][j] {
-                    if !found { //find start field of the ship
+                    if !found {
+                        //find start field of the ship
                         found = true;
                         x_start = i; //for ship init
                         y_start = j; //for ship init
@@ -130,7 +132,8 @@ impl Board {
                             // Next block is neither right nor below the previous
                             return None;
                         }
-                        if !direction_known { //find 
+                        if !direction_known {
+                            //find
                             if i == x_pos + 1 {
                                 vertical = false;
                             } else {
@@ -212,19 +215,60 @@ impl Board {
 
     pub fn check_win(&mut self) -> bool {
         for ship in self.ships.iter() {
-            //if ship.sunk() == false {
-            //    return false;
-            //}
+            if ship.size != ship.sunken_fields {
+                return true;
+            }
         }
-        //true
-
-        //stub:
         false
     }
 
     //returns if hit and if sunk
-    pub fn shoot_at(block: Block) -> (bool, bool) {
-        return (false, false);
+    pub fn shoot_at(&mut self, block: Block) -> (bool, bool) {
+        //todo check index
+        if !self.fields_shot[block.x as usize - 1][block.y as usize - 1]
+            && self.placed_ships[block.x as usize - 1][block.y as usize - 1]
+        {
+            //ship = getShip(x,y)
+            match self.get_ship_at(block.x - 1, block.y - 1) {
+                None => {
+                    return (false, false);
+                }
+                Some(mut ship) => {
+                    ship.sunken_fields += 1; //TODO am I really working on the ship from the vector here or on a copy?
+                    if ship.sunken_fields == ship.size {
+                        return (true, true);
+                    } else {
+                        return (true, false);
+                    }
+                }
+            }
+        }
+        (false, false)
+    }
+
+    fn get_ship_at(&mut self, x: u8, y: u8) -> Option<&mut Ship> {
+        for ship in self.ships.iter_mut() {
+            if ship.vertical {
+                if x != ship.x_start_location {
+                    continue;
+                }
+                for i in 0..ship.size {
+                    if y == ship.y_start_location + i {
+                        return Some(ship);
+                    }
+                }
+            } else {
+                if y != ship.y_start_location {
+                    continue;
+                }
+                for i in 0..ship.size {
+                    if y == ship.y_start_location + i {
+                        return Some(ship);
+                    }
+                }
+            }
+        }
+        None
     }
 
     pub fn initial_setup(&mut self) {

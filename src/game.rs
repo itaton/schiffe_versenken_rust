@@ -1,3 +1,4 @@
+use crate::gameboard;
 use crate::gameboard::{
     Block,
     Board,
@@ -20,6 +21,7 @@ struct Game<'a> {
     ethernet_c: EthClient,
 }
 
+#[derive(PartialEq, Eq)]
 enum Gamestate {
     YourTurn,
     WaitForEnemy,
@@ -29,7 +31,7 @@ enum Gamestate {
 }
 
 //start game, init field and wait for other player
-pub fn init_new_game(display: Display,is_server: bool) -> Game<'a> {
+pub fn init_new_game<'a>(display: Display,is_server: bool) -> Game<'a> {
     Game::new(display, is_server)    
 }
 
@@ -41,7 +43,8 @@ impl<'a> Game<'a> {
     fn new(display: Display, is_server: bool) -> Game<'a> {
         Game {
             game_state: Gamestate::GameStart,
-            board: Board::new(), //TODO: without params ? gameboard creates the start state ? 
+            // board: Board::new(), //TODO: without params ? gameboard creates the start state ? 
+            board: gameboard::gameboard_init(display),
             display,
             network: network.new(),
             ethernet_c: EthClient::new(is_server),
@@ -55,7 +58,7 @@ impl<'a> Game<'a> {
                 Gamestate::WaitForEnemy => self.wait_and_check_enemy_shot(),
                 Gamestate::Won => self.show_win_screen(),
                 Gamestate::SetupShips => self.setup_ships(),
-                Gamestate::GameStart => self.show_start_screen();
+                Gamestate::GameStart => self.show_start_screen(),
             } 
         }
     }
@@ -87,7 +90,7 @@ impl<'a> Game<'a> {
     fn show_start_screen(&self) {
         self.display.show_start_screen();
         loop {
-            (x,y) = self.display.touch();
+            let (x,y) = self.display.touch();
             if !((x,y) == (0,0)) {
                 self.set_game_state(Gamestate::SetupShips);
             }
@@ -135,12 +138,7 @@ impl<'a> Game<'a> {
     }
     
     fn setup_ships(&self) {
-        self.select_ship_locations(5);
-        self.select_ship_locations(4);
-        self.select_ship_locations(3);
-        self.select_ship_locations(3);
-        self.select_ship_locations(2);
-
+        self.board.initial_setup();
         //TODO: send ready packet and wait for other players ready packet
 
         if self.ethernet_c.is_server {
@@ -150,69 +148,31 @@ impl<'a> Game<'a> {
         }
     }
 
-    fn select_ship_locations(&self, ship_size: u8) {
-        //for each ship, select location and confirm with button
-        let ship_one_selections = self.display.get_touch_locations(ship_size); //TODO implement get touch location in display
-        for selection in ship_one_selections {
-            self.board.calculate_touch_block(x: u16, y: u16);
-            gameboard::setup_ship(ship_size);
-        }
-    }
-
-
-    //TODO: change -> new gameboard and display 
     fn select_shoot_location(&self) {
         let confirmed = false;
         let block_set = false;
-        let block;
+        let mut block;
         //create methods in display to handle touch
         while !confirmed {
-            let (x,y) = display.touch();
-            match self.board.calculate_touch_block(touch.x, touch.y) {
+            let (x,y) = self.display.touch();
+            match self.board.calculate_touch_block(x, y) {
                 None => {
                     if (block_set && self.display.check_confirm_button_touched()) {
                       //shot location set   
-                      self.fire(block);
+                      self.fire(block); //TODO: in fire -> update gameboard information
+                      confirmed = true;
                     }
                 }
-                Ok(ret_block) = {
+                Some(ret_block) => {
                     //delete old block and set new
                     if (block_set) {
                        self.board.clear_x_es(); 
-                       self.display.
                     }
+                    self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
                     block = ret_block;
                 }
             }
-                if block.x == 0 && block.y == 0 {
-                    if touch_confirm() {
-                        confirmed = true;
-                        fire(block);
-                    }
-                } else {
-                    //TODO: delete last block marker first
-
-                    //set new block 
-                    on display
-                    //TODO: write method in display to avoid the layer parameter !
-                    display::write_in_field(block.x as usize, block.y as usize, &mut layer_1, "x");
-                }
-            // }
         }
-        //select a block and confirm your choise
-        for touch in &touch::touches(&mut i2c_3).unwrap() {
-            let (x,y) = calculate_touch_block(touch.x, touch.y);
-            if (x,y) != (0,0) {
-                display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut layer_1, "x");
-            }
-        }
-        for touch in &touch::touches(&mut i2c_3).unwrap() {
-            if touch_confirm(touch.x, touch.y) {
-
-            }
-            //remove last choise and set new.
-
-        }  
     }
 }
 
