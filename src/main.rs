@@ -35,6 +35,7 @@ mod gameboard;
 mod network;
 use network::EthClient;
 use network::Connection;
+use network::packets::ShootPacket;
 
 //use lcd::Framebuffer;
 //use lcd::FramebufferL8;
@@ -121,84 +122,22 @@ fn main() -> ! {
     pins.led.set(true);
 
     let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, is_server);
-    test_network(net);
-    gameboard::gameboard_init(display);
-
-
-    /*let mut ethernet_interface = ethernet::EthernetDevice::new(
-        Default::default(),
-        Default::default(),
-        &mut rcc,
-        &mut syscfg,
-        &mut ethernet_mac,
-        &mut ethernet_dma,
-        ETH_ADDR
-    ).map(|device| {
-        let iface = device.into_interface();
-        let prev_ip_addr = iface.ipv4_addr().unwrap();
-        (iface, prev_ip_addr)
-    });
-    if let Err(e) = ethernet_interface {
-        hprintln!("ethernet init failed: {:?}", e);
-    };
-
-    let mut sockets = SocketSet::new(Vec::new());
-
-    if let Ok((ref mut iface, ref mut prev_ip_addr)) = ethernet_interface {
-        iface.update_ip_addrs(|ipa| *(ipa.first_mut().unwrap()) = IpCidr::new(smoltcp::wire::IpAddress::v4(192, 168, 42, 2), 24));
-        hprintln!("assigned {}", iface.ipv4_addr().unwrap());
-
-        let endpoint = IpEndpoint::new(iface.ipv4_addr().unwrap().into(), PORT);
-
-        let udp_rx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 3], vec![0u8; 256]);
-        let udp_tx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 1], vec![0u8; 128]);
-        let mut udp_socket = UdpSocket::new(udp_rx_buffer, udp_tx_buffer);
-        udp_socket.bind(endpoint).unwrap();
-        sockets.add(udp_socket);
-
-        let tcp_rx_buffer = TcpSocketBuffer::new(vec![0; ethernet::MTU]);
-        let tcp_tx_buffer = TcpSocketBuffer::new(vec![0; ethernet::MTU]);
-        let mut tcp_socket = TcpSocket::new(tcp_rx_buffer, tcp_tx_buffer);
-        sockets.add(tcp_socket);
-
-        loop {
-            if let Ok((ref mut iface, ref mut prev_ip_addr)) = ethernet_interface {
-			    let timestamp = Instant::from_millis(system_clock::ms() as i64);
-				for mut sock in sockets.iter_mut() {
-				    if let Socket::Tcp(ref mut sockt) = *sock {
-					    if sockt.state() == smoltcp::socket::TcpState::CloseWait {
-						    sockt.close();
-						}
-						if sockt.state() == smoltcp::socket::TcpState::Closed {
-						    sockt.listen(endpoint);
-						}
-					}
-				}
-				match iface.poll(&mut sockets, timestamp) {
-				    Err(::smoltcp::Error::Exhausted) => {
-					    continue;
-					}
-					Err(::smoltcp::Error::Unrecognized) => {
-                        hprintln!("U");
-                    }
-					Err(e) => {
-                        hprintln!("Network error: {:?}", e);
-                    }
-					Ok(socket_changed) => {
-					    if socket_changed {
-						    for mut socket in sockets.iter_mut() {
-							    poll_socket(&mut socket).expect("socket poll failed");
-							}
-						}
-					}
-				}
-				iface
-				    .poll_delay(&sockets, timestamp);
-			};
-
+    
+    match net {
+        Ok(value) => {
+            let mut nw: network::Network = value;
+            let mut eth_client = EthClient::new(is_server);
+            wait_for_connection(&mut eth_client, &mut nw);
+            test_packet(&mut eth_client, &mut nw);
         }
-    }*/
+        Err(e) => {hprintln!("failed to init network");}
+    }
+    
+    // test_network(net);
 
+
+
+    gameboard::gameboard_init(display);
 
     let mut last_led_toggle = system_clock::ticks();
     
@@ -232,69 +171,49 @@ fn SysTick() {
     system_clock::tick();
 }
 
-/*fn poll_socket(socket: &mut Socket) -> Result<(), smoltcp::Error> {
-    match socket {
-        &mut Socket::Tcp(ref mut socket) => match socket.local_endpoint().port {
-            PORT => {
-                if !socket.may_recv() {
-                    return Ok(());
-                }
-                let reply = socket.recv(|data| {
-                    if data.len() > 0 {
-                        (data.len(), 1)
-                    }
-                    else {
-                        (data.len(), 0)
-                    }
-                })?;
-                if reply == 1 {
-                    hprintln!("recv success");
-                    socket.send_slice(b"received packet");
-                }
-            }
-            _ => {}
-        },
-        _ => {}
-    }
-    Ok(())
+
+/*fn test_network(mut nw: &network::Network) { 
+    let mut client = EthClient::new(is_server);
+
+    loop {
+        if is_server {
+            client.send_whoami(&mut nw);
+            hprintln!("ping");
+        }
+        while !client.is_other_connected(&mut nw) {
+
+        }
+        if !is_server {
+            client.send_whoami(&mut nw);
+            hprintln!("pong");
+        }
+    }       
 }*/
 
+fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) {
+    if is_server {
+        let shoot = ShootPacket::new(5, 5);
+        eth_client.send_shoot(net, &shoot);
+        hprintln!("send shoot");
+    }
+    else {
+        let shoot = eth_client.recv_shoot(net);
+        hprintln!("received shoot at {}, {}", shoot.line, shoot.column);
+    }
+}
 
-fn test_network(net: Result<network::Network, stm32f7_discovery::ethernet::PhyError>) {
-   match net {
-       Ok(value) => {
-           let mut nw: network::Network = value;
-           let mut client = EthClient::new(is_server);
+fn wait_for_connection(eth_client: &mut network::EthClient, net: &mut network::Network) {
+    if is_server {
+        while !eth_client.is_other_connected(net) {
 
-           //while !client.is_other_connected(&mut nw) {
-               // hprintln!("not yet connected");
-           //}
-           //hprintln!("connected");
-
-        //    loop {
-        //        client.send_whoami(&mut nw);
-        //    }
-
-            loop {
-                if is_server {
-                    client.send_whoami(&mut nw);
-                    hprintln!("ping");
-                }
-                while !client.is_other_connected(&mut nw) {
-
-                }
-                if !is_server {
-                    client.send_whoami(&mut nw);
-                    hprintln!("pong");
-                }
-            }
-
-       },
-       Err(e) => {
-           hprintln!("connection error");
-           cortex_m::asm::bkpt();
-       }
-   }
+        }
+        eth_client.send_whoami(net);
+    }
+    else {
+        while !eth_client.is_other_connected(net) {
+            eth_client.send_whoami(net);
+        }
+    }
 }
 
 // define what happens in an Out Of Memory (OOM) condition
