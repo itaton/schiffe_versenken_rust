@@ -107,14 +107,14 @@ fn main() -> ! {
         Ok(value) => {
             let mut nw: network::Network = value;
             let mut eth_client = EthClient::new(IS_SERVER);
-            wait_for_connection(&mut eth_client, &mut nw);
+            // wait_for_connection(&mut eth_client, &mut nw);
             hprintln!("connected");
             test_packet(&mut eth_client, &mut nw);
         }
         Err(_e) => {hprintln!("failed to init network");}
     }
 
-    gameboard::gameboard_init(display);
+    //gameboard::gameboard_init(display);
 
     let mut last_led_toggle = system_clock::ticks();
     
@@ -153,11 +153,13 @@ fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) 
     }*/
 
     let shoot = ShootPacket::new(5, 5);
-    while eth_client.is_other_connected(net) {
+    loop {
+        net.pull_all();
         eth_client.send_shoot(net, shoot);
         let recv_shoot = eth_client.recv_shoot(net);
         hprintln!("recv_shoot: {:?}", recv_shoot);
     }
+    
 }
 
 fn wait_for_connection(eth_client: &mut network::EthClient, net: &mut network::Network) {
