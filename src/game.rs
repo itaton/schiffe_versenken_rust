@@ -164,7 +164,7 @@ impl<'a> Game<'a> {
     fn select_shoot_location(&self) {
         let confirmed = false;
         let block_set = false;
-        let block;
+        let mut block;
         //create methods in display to handle touch
         while !confirmed {
             let (x,y) = display.touch();
@@ -172,47 +172,20 @@ impl<'a> Game<'a> {
                 None => {
                     if (block_set && self.display.check_confirm_button_touched()) {
                       //shot location set   
-                      self.fire(block);
+                      self.fire(block); //TODO: in fire -> update gameboard information
+                      confirmed = true;
                     }
                 }
                 Ok(ret_block) = {
                     //delete old block and set new
                     if (block_set) {
                        self.board.clear_x_es(); 
-                       self.display.
                     }
+                    self.display.write_in_field(ret_block.x, ret_block.y, "x");
                     block = ret_block;
                 }
             }
-                if block.x == 0 && block.y == 0 {
-                    if touch_confirm() {
-                        confirmed = true;
-                        fire(block);
-                    }
-                } else {
-                    //TODO: delete last block marker first
-
-                    //set new block 
-                    on display
-                    //TODO: write method in display to avoid the layer parameter !
-                    display::write_in_field(block.x as usize, block.y as usize, &mut layer_1, "x");
-                }
-            // }
         }
-        //select a block and confirm your choise
-        for touch in &touch::touches(&mut i2c_3).unwrap() {
-            let (x,y) = calculate_touch_block(touch.x, touch.y);
-            if (x,y) != (0,0) {
-                display::write_in_field((x,y).0 as usize, (x,y).1 as usize, &mut layer_1, "x");
-            }
-        }
-        for touch in &touch::touches(&mut i2c_3).unwrap() {
-            if touch_confirm(touch.x, touch.y) {
-
-            }
-            //remove last choise and set new.
-
-        }  
     }
 }
 
