@@ -8,7 +8,7 @@ pub struct Board {
     //ships:[Ship; 5],
     ships: Vec<Ship>,
     fields_shot: [[bool; 10]; 10],
-    display: Display,
+    //display: Display,
     setup_field: [[bool; 10]; 10],
     //TODO: maybe do this more beautiful?
     placed_ships: [[bool; 10]; 10],
@@ -23,7 +23,7 @@ impl Board {
     pub fn new(
         ships: Vec<Ship>,
         fields_shot: [[bool; 10]; 10],
-        display: Display,
+        //display: Display,
         setup_field: [[bool; 10]; 10],
         placed_ships: [[bool; 10]; 10],
     ) -> Board {
@@ -31,7 +31,7 @@ impl Board {
             //game_field,
             ships,
             fields_shot,
-            display,
+            //display,
             setup_field,
             placed_ships,
         }
@@ -52,26 +52,27 @@ impl Board {
         }
     }
 
-    pub fn setup_ship(&mut self, length: u8) {
-        self.display.setup_ship(length);
+    pub fn setup_ship(&mut self, length: u8, display: &mut Display) {
+        //self.display.setup_ship(length);
+        display.setup_ship(length);
         //let ticks = system_clock::ticks();
         //while system_clock::ticks() - ticks <= 5 {}
-        while !self.display.check_confirm_button_touched() {
+        while !display.check_confirm_button_touched() {
             //touch loop
             // let ticks = system_clock::ticks();
             // while system_clock::ticks() - ticks <= 5 {}
-            let (x, y) = self.display.touch();
+            let (x, y) = display.touch();
             match self.calculate_touch_block(x, y) {
                 None => {}
                 Some(block) => {
                     let (x, y) = (block.x - 1, block.y - 1);
                     if !self.setup_field[x as usize][y as usize] {
                         self.setup_field[x as usize][y as usize] = true;
-                        self.display
+                        display
                             .write_in_field(block.x as usize, block.y as usize, "x");
                     } else {
                         self.setup_field[x as usize][y as usize] = false;
-                        self.display
+                        display
                             .write_in_field(block.x as usize, block.y as usize, " ");
                     }
                 }
@@ -79,21 +80,21 @@ impl Board {
         }
         //let ticks = system_clock::ticks();
         //while system_clock::ticks() - ticks <= 3 {}
-        match self.get_valid_ship(length) {
+        match self.get_valid_ship(length, display) {
             None => {
-                self.clear_x_es();
+                self.clear_x_es(display);
                 self.setup_field = [[false; 10]; 10];
-                self.setup_ship(length);
+                self.setup_ship(length, display);
             }
             Some(ship) => {
-                self.clear_x_es();
+                self.clear_x_es(display);
                 self.setup_field = [[false; 10]; 10];
                 self.ships.push(ship);
             }
         }
     }
 
-    fn get_valid_ship(&mut self, len: u8) -> Option<Ship> {
+    fn get_valid_ship(&mut self, len: u8, display: &mut Display) -> Option<Ship> {
         let mut x_start = 0;
         let mut y_start = 0;
 
@@ -199,16 +200,16 @@ impl Board {
             }
         }
 
-        self.display
+        display
             .print_ship(len as usize, x_start + 1, y_start + 1, vertical);
         let ship = Ship::new(len, x_start as u8, y_start as u8, vertical);
         Some(ship)
     }
 
-    fn clear_x_es(&mut self) {
+    pub fn clear_x_es(&mut self, display: &mut Display) {
         for i in 1..11 {
             for j in 1..11 {
-                self.display.write_in_field(i, j, " ");
+                display.write_in_field(i, j, " ");
             }
         }
     }
@@ -271,36 +272,36 @@ impl Board {
         None
     }
 
-    pub fn initial_setup(&mut self) {
-        self.display.setup_ship(5); //only display right side here
-        self.setup_ship(5);
+    pub fn initial_setup(&mut self, display: &mut Display) {
+        display.setup_ship(5); //only display right side here
+        self.setup_ship(5, display);
         //let ship: [Block; 5] = input_x();
         //get_valid_ship(5);
         //ships.push(ship);
-        self.display.setup_ship(4);
-        self.setup_ship(4);
+        display.setup_ship(4);
+        self.setup_ship(4, display);
         //let ship: [Block; 4] = input_x();
         //get_valid_ship(ship, ships);
         //ships.push(ship);
-        self.display.setup_ship(3);
-        self.setup_ship(3);
+        display.setup_ship(3);
+        self.setup_ship(3, display);
         //let ship: [Block; 3] = input_x();
         //get_valid_ship(ship, ships);
         //ships.push(ship);
-        self.display.setup_ship(3);
-        self.setup_ship(3);
+        display.setup_ship(3);
+        self.setup_ship(3, display);
         //let ship: [Block; 3] = input_x();
         //get_valid_ship(ship, ships);
         //ships.push(ship);
-        self.display.setup_ship(2);
-        self.setup_ship(2);
+        display.setup_ship(2);
+        self.setup_ship(2, display);
         //let ship: [Block; 2] = input_x();
         //get_valid_ship(ship, ships);
         //ships.push(ship);
     }
 }
 
-pub fn gameboard_init(display: Display) -> Board {
+pub fn gameboard_init(display: &mut Display) -> Board {
     //let mut ships : [Ship; 5] = [];
     let mut ships = Vec::new();
 
@@ -309,9 +310,10 @@ pub fn gameboard_init(display: Display) -> Board {
     let placed_ships = [[false; 10]; 10];
 
     //Board::new(game_field, ships, fields_shot, display, setup_field)
-    let mut board = Board::new(ships, fields_shot, display, setup_field, placed_ships);
+    // let mut board = Board::new(ships, fields_shot, display, setup_field, placed_ships);
+    let mut board = Board::new(ships, fields_shot, setup_field, placed_ships);
 
-    board.initial_setup();
+    board.initial_setup(display);
     board
 
     //let game_field = //TODO initialize with the blocks
