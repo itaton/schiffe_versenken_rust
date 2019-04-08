@@ -185,7 +185,54 @@ impl Board {
         }
 
         //check if ship not adjacent to existing ship
-        //TODO
+        //TODO make this cleaner - this is bs code
+        for i in 0..10 {
+            for j in 0..10 {
+                if self.setup_field[i][j] {
+                    for k in if i == 0 {0..=1} else if i == 9 {8..=9} else {i-1..=i+1} {
+                        for l in if j == 0 {0..=1} else if j == 9 {8..=9} else {j-1..=j+1} {
+                            if self.placed_ships[k][l] {
+                                return None;
+                            }
+                        }
+                    }
+                    // //upper left corner
+                    // if i == 0 && j == 0 {
+                    //     for k in 0..=1 {
+                    //         for l in 0..=1 {
+                    //             if self.placed_ships[k][l] {
+                    //                 return None;
+                    //             }
+                    //         }
+                    //     }
+                    // }
+
+                    // //lower left corner, i guess
+                    // else if i == 0 && j == 9 {
+                    //     for k in 0..=1 {
+                    //         for l in 8..=9 {
+                    //             if self.placed_ships[k][l] {
+                    //                 return None;
+                    //             }
+                    //         }
+                    //     }
+                    // }
+
+                    // //upper right corner
+                    // else if i == 9 && j == 0 {
+                    //     for k in 8..=9 {
+                    //         for l in 0..=1 {
+                    //             if self.placed_ships[k][l] {
+                    //                 return None;
+                    //             }
+                    //         }
+                    //     }
+                    // }
+
+                    //Test
+                }
+            }
+        }
 
         // cortex_m::asm::bkpt();
 

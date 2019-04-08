@@ -284,7 +284,8 @@ impl Display {
         let y_start_pixel = ship_start_yblock * block_size + 2;
         if vertical {
             let x_end_pixel = x_start_pixel + block_size - 5;
-            let y_end_pixel = y_start_pixel + (block_size * ship_size) - 4;
+            let mut y_end_pixel = y_start_pixel + (block_size * ship_size) - 5;
+            if y_end_pixel >= 272 {y_end_pixel = 271;}
             //vertical
             for c in x_start_pixel..x_end_pixel {
                 for i in y_start_pixel..y_end_pixel {
@@ -293,7 +294,8 @@ impl Display {
             }
         } else {
             let x_end_pixel = x_start_pixel + (block_size * ship_size) - 5;
-            let y_end_pixel = y_start_pixel + block_size - 4;
+            let mut y_end_pixel = y_start_pixel + block_size - 5;
+            if y_end_pixel >= 272 {y_end_pixel = 271;}
             //horizontal
             for c in x_start_pixel..x_end_pixel {
                 for i in y_start_pixel..y_end_pixel {
