@@ -6,19 +6,12 @@
 #[macro_use]
 extern crate alloc;
 
-use smoltcp::{
-    socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer, UdpPacketMetadata, UdpSocket, UdpSocketBuffer},
-    time::{Instant},
-    wire::{EthernetAddress, IpCidr, IpEndpoint},
-};
-
-use alloc::vec::Vec;
 use alloc_cortex_m::CortexMHeap;
 use core::fmt::Write;
 use core::alloc::Layout as AllocLayout;
 use core::panic::PanicInfo;
 use cortex_m_rt::{entry, exception};
-use cortex_m_semihosting::{hprint, hprintln};
+use cortex_m_semihosting::{hprintln};
 use stm32f7::stm32f7x6::{CorePeripherals, Peripherals};
 use stm32f7_discovery::{
     ethernet,
@@ -41,9 +34,7 @@ use network::packets::ShootPacket;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef]);
-const PORT: u16 = 1337;
-const is_server: bool = true;
+const IS_SERVER: bool = true;
 
 #[entry]
 fn main() -> ! {
@@ -107,26 +98,15 @@ fn main() -> ! {
 
     let mut layer_1 = lcd.layer_1().unwrap();
 
-    // display.write_in_field(3,3,&mut layer_1,"X");
-    // display::write_in_field(4,4,&mut layer_1,"O");
-    // display.write_in_field(3,3,"X");
-    // display.write_in_field(4,4,"O");
-    
-    // display.print_ship(4, 5, 5, true);
-
-
-    //display.setup_ship(5);
-    //let ship1 = []
-
     // turn led on
     pins.led.set(true);
 
-    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, is_server);
+    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, IS_SERVER);
     
     match net {
         Ok(value) => {
             let mut nw: network::Network = value;
-            let mut eth_client = EthClient::new(is_server);
+            let mut eth_client = EthClient::new(IS_SERVER);
             wait_for_connection(&mut eth_client, &mut nw);
             let ticks = system_clock::ticks();
             while system_clock::ticks() - ticks <= 5 {
@@ -136,10 +116,6 @@ fn main() -> ! {
         }
         Err(e) => {hprintln!("failed to init network");}
     }
-    
-    // test_network(net);
-
-
 
     gameboard::gameboard_init(display);
 
@@ -147,23 +123,12 @@ fn main() -> ! {
     
     loop {
 
-        //let (x_pixel, y_pixel) = display.touch();
-        //let (x_block, y_block) = display.calculate_touch_block(x_pixel, y_pixel);
-        //display.write_in_field(x_block, y_block, "x")
-        //if (x_block, y_block) != (0,0) {
-        //    display.write_in_field(x_block as usize, y_block as usize, "x");
-        //}
-
         let ticks = system_clock::ticks();
         // every 0.5 seconds (we have 20 ticks per second)
         if ticks - last_led_toggle >= 10 {
             pins.led.toggle();
             last_led_toggle = ticks;
         }
-        //layer_1.clear();
-        //layer_2.clear();
-
-        
     }
 }
 
@@ -195,10 +160,10 @@ fn SysTick() {
 }*/
 
 fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) {
-    if is_server {
+    if IS_SERVER {
         let shoot = ShootPacket::new(5, 5);
         eth_client.send_shoot(net, &shoot);
-        hprintln!("send shoot");
+        // hprintln!("send shoot");
     }
     else {
         let shoot = eth_client.recv_shoot(net);
@@ -207,7 +172,7 @@ fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) 
 }
 
 fn wait_for_connection(eth_client: &mut network::EthClient, net: &mut network::Network) {
-    if is_server {
+    if IS_SERVER {
         while !eth_client.is_other_connected(net) {
 
         }
@@ -237,7 +202,7 @@ fn panic(info: &PanicInfo) -> ! {
     }
 
     // OK to fire a breakpoint here because we know the microcontroller is connected to a debugger
-    // asm::bkpt();
+    asm::bkpt();
 
     loop {}
 }

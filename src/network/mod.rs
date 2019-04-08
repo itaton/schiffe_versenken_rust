@@ -169,6 +169,9 @@ impl Connection for EthClient {
                 if data.len() == ShootPacket::len() {
                     self.shoot = ShootPacket::deserialize(&data);
                 }
+                else {
+                    hprintln!("wrong package length");
+                }
             },
             Err(smoltcp::Error::Exhausted) => {}
             Err(smoltcp::Error::Unrecognized) => {}
