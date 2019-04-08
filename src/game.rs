@@ -135,12 +135,7 @@ impl<'a> Game<'a> {
     }
     
     fn setup_ships(&self) {
-        self.select_ship_locations(5);
-        self.select_ship_locations(4);
-        self.select_ship_locations(3);
-        self.select_ship_locations(3);
-        self.select_ship_locations(2);
-
+        self.board.initial_setup();
         //TODO: send ready packet and wait for other players ready packet
 
         if self.ethernet_c.is_server {
@@ -150,17 +145,6 @@ impl<'a> Game<'a> {
         }
     }
 
-    fn select_ship_locations(&self, ship_size: u8) {
-        //for each ship, select location and confirm with button
-        let ship_one_selections = self.display.get_touch_locations(ship_size); //TODO implement get touch location in display
-        for selection in ship_one_selections {
-            self.board.calculate_touch_block(x: u16, y: u16);
-            gameboard::setup_ship(ship_size);
-        }
-    }
-
-
-    //TODO: change -> new gameboard and display 
     fn select_shoot_location(&self) {
         let confirmed = false;
         let block_set = false;
