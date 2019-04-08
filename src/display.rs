@@ -53,6 +53,7 @@ pub struct Display {
     layer1: Layer<FramebufferArgb8888>,
     layer2: Layer<FramebufferAl88>,
     touchscreen: I2C<I2C3>,
+    lastTouch: usize,
 }
 struct Bmp {
     width: usize,
@@ -79,6 +80,7 @@ impl Display {
             layer1,
             layer2,
             touchscreen,
+            lastTouch: system_clock::ticks(),
         }
     }
 }
@@ -310,20 +312,26 @@ impl Display {
         let mut touch_x = 0;
         let mut touch_y = 0;
 
-
+        let mut curr_ticks = system_clock::ticks();
         
-        for touch in &touch::touches(&mut self.touchscreen).unwrap() {
-            //let (x,y) = calculate_touch_block(touch.x, touch.y);
-            touch_x = touch.x;
-            touch_y = touch.y;
+        if curr_ticks - self.lastTouch >= 8 {
+            for touch in &touch::touches(&mut self.touchscreen).unwrap() {
+                //cortex_m::asm::bkpt();
+                //let (x,y) = calculate_touch_block(touch.x, touch.y);
+                touch_x = touch.x;
+                touch_y = touch.y;
+                self.lastTouch = curr_ticks;
+            }
+            (touch_x, touch_y)
         }
-
+        else {
+            (0,0)
+        }
         // let ticks = system_clock::ticks();
         // while system_clock::ticks()-ticks <= 3 {
 
         // }
 
-        (touch_x, touch_y)
         //calculate_touch_block(touch_x, touch_y)
     }
 
