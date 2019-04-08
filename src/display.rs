@@ -98,9 +98,9 @@ pub fn init_display(mut lcd: &mut Lcd, mut touchscreen: I2C<I2C3>) -> Display {
 
     //print_background(&mut layer_1);
 
-    display.print_bmp_at_location(BACKGROUND, 0, 0);
+    // display.print_bmp_at_location(BACKGROUND, 0, 0);
     // display.draw_background_with_bitmap();
-    display.print_background();
+    // display.print_background();
     //lcd.set_background_color(black);
     lcd.set_background_color(WATER_BLUE);
 
@@ -112,7 +112,10 @@ pub fn init_display(mut lcd: &mut Lcd, mut touchscreen: I2C<I2C3>) -> Display {
     display
 }
 impl Display {
-    fn print_background(&mut self) {
+    
+    pub fn print_background(&mut self) {
+        
+        self.print_bmp_at_location(BACKGROUND, 0, 0);
         let xarr = [
             24, 25, 49, 50, 74, 75, 99, 100, 124, 125, 149, 150, 174, 175, 199, 200, 224, 225, 249,
             250, 274, 275,
@@ -131,6 +134,7 @@ impl Display {
                 self.layer1.print_point_color_at(i, *c, BLACK);
             }
         }
+        self.print_indicies();
     }
     
     /**
