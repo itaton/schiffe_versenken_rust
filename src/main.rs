@@ -34,7 +34,7 @@ use network::packets::ShootPacket;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const IS_SERVER: bool = true;
+const IS_SERVER: bool = false;
 
 #[entry]
 fn main() -> ! {
@@ -163,6 +163,8 @@ fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) 
             None => {}
             Some(some) => {hprintln!("recv_shoot: {:?}", some);}
         }
+        let ticks = system_clock::ticks();
+        while system_clock::ticks() - ticks <= 10 {}
     }
     
 }
