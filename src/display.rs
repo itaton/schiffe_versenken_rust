@@ -225,6 +225,8 @@ impl Display {
         text_writer.write_str("Please set up your");
         let mut text_writer = self.layer1.text_writer_at(300, 120);
         text_writer.write_fmt(format_args!("{} ship", ship_len));
+        let mut text_writer = self.layer1.text_writer_at(350, 220);
+        text_writer.write_str("Confirm");
     }
 
     //fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
