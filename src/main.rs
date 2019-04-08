@@ -34,7 +34,7 @@ use network::packets::ShootPacket;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const IS_SERVER: bool = true;
+const IS_SERVER: bool = false;
 
 #[entry]
 fn main() -> ! {
@@ -111,7 +111,7 @@ fn main() -> ! {
             hprintln!("connected");
             test_packet(&mut eth_client, &mut nw);
         }
-        Err(e) => {hprintln!("failed to init network");}
+        Err(_e) => {hprintln!("failed to init network");}
     }
 
     gameboard::gameboard_init(display);
@@ -137,27 +137,8 @@ fn SysTick() {
     system_clock::tick();
 }
 
-
-/*fn test_network(mut nw: &network::Network) { 
-    let mut client = EthClient::new(is_server);
-
-    loop {
-        if is_server {
-            client.send_whoami(&mut nw);
-            hprintln!("ping");
-        }
-        while !client.is_other_connected(&mut nw) {
-
-        }
-        if !is_server {
-            client.send_whoami(&mut nw);
-            hprintln!("pong");
-        }
-    }       
-}*/
-
 fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) {
-    if IS_SERVER {
+    /*if IS_SERVER {
         let shoot = ShootPacket::new(5, 5);
         for i in 0..10 {
             eth_client.send_shoot(net, shoot);
@@ -165,8 +146,17 @@ fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) 
         }
     }
     else {
-        let shoot = eth_client.recv_shoot(net);
-        hprintln!("received shoot at {}, {}", shoot.line, shoot.column);
+        loop {
+            let shoot = eth_client.recv_shoot(net);
+            hprintln!("received shoot at {}, {}", shoot.line, shoot.column);
+        }
+    }*/
+
+    let shoot = ShootPacket::new(5, 5);
+    while eth_client.is_other_connected(net) {
+        eth_client.send_shoot(net, shoot);
+        let recv_shoot = eth_client.recv_shoot(net);
+        hprintln!("recv_shoot: {:?}", recv_shoot);
     }
 }
 
