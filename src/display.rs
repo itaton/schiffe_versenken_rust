@@ -271,6 +271,21 @@ impl Display {
         text_writer.write_str(letter);
     }
 
+    pub fn write_in_field_layer2(&mut self, x: usize, y: usize, letter: &str) {
+        let x_pos = 9 + 25 * x;
+        let y_pos = 9 + 25 * y;
+        if x == 0 {
+            let x_pos = 9;
+        };
+        if y == 0 {
+            let y_pos = 9;
+        };
+        //text_writer.x_pos = x_pos;
+        //text_writer.y_pos = y_pos;
+        let mut text_writer = self.layer2.text_writer_at(x_pos, y_pos);
+        text_writer.write_str(letter);
+    }
+
     /**
      * draw ship on x, y coordination. The direction is vertical for true and horizontal for false.
      */
