@@ -43,7 +43,7 @@ use network::packets::ShootPacket;
 
 const ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef]);
 const PORT: u16 = 1337;
-const is_server: bool = false;
+const is_server: bool = true;
 
 #[entry]
 fn main() -> ! {
@@ -128,6 +128,10 @@ fn main() -> ! {
             let mut nw: network::Network = value;
             let mut eth_client = EthClient::new(is_server);
             wait_for_connection(&mut eth_client, &mut nw);
+            let ticks = system_clock::ticks();
+            while system_clock::ticks() - ticks <= 5 {
+
+            }
             test_packet(&mut eth_client, &mut nw);
         }
         Err(e) => {hprintln!("failed to init network");}

@@ -37,7 +37,7 @@ impl<'a> Network<'a> {
         ) {
             Err(smoltcp::Error::Exhausted) => {
                 // Exhausted may mean full -> we need to read more
-                hprintln!("exhausted");
+                // hprintln!("exhausted");
                 // let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
                 for mut socket in self.sockets.iter_mut() {
                     return Network::poll_udp_packet(&mut socket);
@@ -46,7 +46,7 @@ impl<'a> Network<'a> {
             },
             Err(e) => Err(e),
             Ok(socket_changed) => if socket_changed {
-                hprintln!("ok");
+                // hprintln!("ok");
                 // let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
                 for mut socket in self.sockets.iter_mut() {
                     return Network::poll_udp_packet(&mut socket);
@@ -204,10 +204,6 @@ impl Connection for EthClient {
         let result = network.get_udp_packet();
         match result {
             Ok(value) => if let Some(data) = value {
-                if data.len() == 4 {
-                    hprintln!("{:?}", data);
-                    return true;
-                }
                 if data.len() == WhoamiPacket::len() {
                     return true;
                 }
