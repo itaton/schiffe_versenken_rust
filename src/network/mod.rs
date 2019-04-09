@@ -195,6 +195,9 @@ impl Connection for EthClient {
 
     fn send_feedback(&mut self, network: &mut Network, feedback: FeedbackPacket) {
         //hprintln!("sent: {:?}", feedback);
+        if feedback.sunk != 0 {
+            hprintln!("{:?}", feedback);
+        }
         network.send_udp_packet(&feedback.serialize());
     }
 
@@ -205,6 +208,9 @@ impl Connection for EthClient {
                 if data.len() == FeedbackPacket::len() {
                     let feedback = FeedbackPacket::deserialize(&data);
                     // hprintln!("received: {:?}", feedback);
+                    if feedback.sunk != 0 {
+                        hprintln!("{:?}", feedback);
+                    }
                     return Some(feedback);
                 }
             },
