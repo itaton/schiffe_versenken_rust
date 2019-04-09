@@ -23,7 +23,7 @@ use stm32f7_discovery::{
 };
 mod display;
 mod ships;
-//mod game;
+mod game;
 mod gameboard;
 mod network;
 use network::EthClient;
@@ -34,7 +34,7 @@ use network::packets::ShootPacket;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const IS_SERVER: bool = false;
+const IS_SERVER: bool = true;
 
 #[entry]
 fn main() -> ! {
@@ -115,6 +115,8 @@ fn main() -> ! {
     }
 
     //gameboard::gameboard_init(display);
+    let mut game = game::init_new_game(display , IS_SERVER);
+    game.run_game();
 
     let mut last_led_toggle = system_clock::ticks();
     

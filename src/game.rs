@@ -21,7 +21,7 @@ pub struct Game {
     pub ethernet_c: EthClient,
 }
 
-#[derive(PartialEq, Eq)]
+// #[derive(Eq)]
 enum Gamestate {
     YourTurn,
     WaitForEnemy,
@@ -57,7 +57,10 @@ impl Game {
                 Gamestate::WaitForEnemy => self.wait_and_check_enemy_shot(),
                 Gamestate::Won => self.show_win_screen(),
                 Gamestate::SetupShips => self.setup_ships(),
-                Gamestate::GameStart => self.show_start_screen(),
+                Gamestate::GameStart => {
+                    self.display.show_start_screen();
+                    self.wait_for_start_screen_interaction();
+                },
             } 
         }
     }
@@ -65,19 +68,19 @@ impl Game {
     fn set_game_state(&mut self, state: Gamestate) {
         match state {
             Gamestate::YourTurn => {
-                assert!(self.game_state == Gamestate::WaitForEnemy);
+                // assert!(self.game_state == Gamestate::WaitForEnemy);
                 self.game_state = Gamestate::YourTurn;
             },
             Gamestate::WaitForEnemy => {
-                assert!(self.game_state == Gamestate::YourTurn);
+                // assert!(self.game_state == Gamestate::YourTurn);
                 self.game_state = Gamestate::WaitForEnemy;
             },
             Gamestate::Won => {
-                assert!(self.game_state == Gamestate::YourTurn || self.game_state == Gamestate::WaitForEnemy);
+                // assert!(self.game_state == Gamestate::YourTurn || self.game_state == Gamestate::WaitForEnemy);
                 self.game_state = Gamestate::Won;
             },
             Gamestate::SetupShips => {
-                assert!(self.game_state == Gamestate::GameStart);
+                // assert!(self.game_state == Gamestate::GameStart);
                 self.game_state = Gamestate::SetupShips;
             }
             Gamestate::GameStart => {
@@ -86,13 +89,11 @@ impl Game {
         }
     }
 
-    fn show_start_screen(&mut self) {
-        self.display.show_start_screen();
-        loop {
-            let (x,y) = self.display.touch();
-            if (x,y) != (0,0) {
-                self.set_game_state(Gamestate::SetupShips);
-            }
+    fn wait_for_start_screen_interaction(&mut self) {
+        let (x,y) = self.display.touch();
+        if (x,y) != (0,0) {
+            self.set_game_state(Gamestate::SetupShips);
+            self.display.print_background();
         }
     }
 
@@ -167,9 +168,7 @@ impl Game {
                 }
                 Some(ret_block) => {
                     //delete old block and set new
-                    if (block_set) {
-                       self.board.clear_x_es(&mut self.display); 
-                    }
+                    self.board.clear_x_es(&mut self.display); 
                     self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
                     block = ret_block;
                 }
