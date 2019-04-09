@@ -23,13 +23,13 @@ const CLIENT_IP_ADDR: Ipv4Address = Ipv4Address([192, 168, 42, 2]);
 const SERVER_ETH_ADDR: EthernetAddress = EthernetAddress([0x00, 0x11, 0x22, 0x33, 0x44, 0x02]);
 const SERVER_IP_ADDR: Ipv4Address = Ipv4Address([192, 168, 42, 1]);
 
-pub struct Network<'a> {
-    ethernet_interface: EthernetInterface<'static, 'static, 'static, ethernet::EthernetDevice<'a>>,
+pub struct Network {
+    ethernet_interface: EthernetInterface<'static, 'static, 'static, ethernet::EthernetDevice>,
     sockets: SocketSet<'static, 'static, 'static>,
     partner_ip_addr: Ipv4Address,
 }
 
-impl<'a> Network<'a> {
+impl Network {
     pub fn get_udp_packet(&mut self) -> Result<Option<Vec<u8>>, smoltcp::Error> {
         match self.ethernet_interface.poll(
             &mut self.sockets,
@@ -102,12 +102,12 @@ impl<'a> Network<'a> {
     }
 }
 
-pub fn init<'a>(
+pub fn init(
     rcc: &mut RCC, 
     syscfg: &mut SYSCFG, 
     ethernet_mac: &mut ETHERNET_MAC, 
-    ethernet_dma: &'a mut ETHERNET_DMA,
-    is_server: bool) -> Result<Network<'a>, ethernet::PhyError> {
+    ethernet_dma: ETHERNET_DMA,
+    is_server: bool) -> Result<Network, ethernet::PhyError> {
     let ethernet_addr = if is_server {SERVER_ETH_ADDR} else {CLIENT_ETH_ADDR};
     let ip_addr = if is_server {SERVER_IP_ADDR} else {CLIENT_IP_ADDR};
     let partner_ip_addr = if is_server {CLIENT_IP_ADDR} else {SERVER_IP_ADDR};

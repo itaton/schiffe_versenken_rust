@@ -94,7 +94,7 @@ fn main() -> ! {
     // turn led on
     pins.led.set(true);
 
-    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, IS_SERVER);
+    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, ethernet_dma, IS_SERVER);
     
     match net {
         Ok(value) => {
