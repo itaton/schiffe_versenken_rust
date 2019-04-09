@@ -250,6 +250,8 @@ impl Board {
                 }
                 Some(mut ship) => {
                     ship.sunken_fields += 1; //TODO am I really working on the ship from the vector here or on a copy?
+                    cortex_m_semihosting::hprintln!("{}", ship.size);
+                    cortex_m_semihosting::hprintln!("{}", ship.sunken_fields);
                     if ship.sunken_fields == ship.size {
                         return (true, true);
                     } else {
