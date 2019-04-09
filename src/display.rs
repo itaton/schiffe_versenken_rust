@@ -295,6 +295,19 @@ impl Display {
         self.layer2.clear();
     }
 
+    pub fn clear_text_on_display(&mut self) {
+        let mut y = 50;
+        for i in 0..6 {
+            let mut text_writer = self.layer2.text_writer_at(350, y);
+            let result = text_writer.write_str("               ");
+            match result {
+                Ok(result) => result,
+                Err(error) => panic!("error while writing text on display: {}", error),
+            };
+            y += 20;
+        }    
+    }
+
     /**
      * draw ship on x, y coordination. The direction is vertical for true and horizontal for false.
      */
