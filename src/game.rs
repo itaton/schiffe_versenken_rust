@@ -134,6 +134,7 @@ impl Game {
         let win = self.board.check_win();
         let feedback = packets::FeedbackPacket::new(hit, ship_sunk_size, win);
         self.ethernet_c.send_feedback(&mut self.network, feedback);
+        self.network.pull_all();
         if win {
             self.set_game_state(Gamestate::Lose);
        } else {
@@ -184,6 +185,7 @@ impl Game {
         self.board.initial_setup(&mut self.display);
         //TODO: send ready packet and wait for other players ready packet
 
+        self.display.layer_2_clear();
         self.display.print_background();
         if self.ethernet_c.is_server {
             self.set_game_state(Gamestate::YourTurn);
@@ -210,7 +212,8 @@ impl Game {
                 }
                 Some(ret_block) => {
                     //delete old block and set new
-                    self.board.clear_x_es(&mut self.display); 
+                    self.display.write_in_field(block.x as usize, block.y as usize, " ");
+                    // self.board.clear_x_es(&mut self.display); 
                     self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
                     block = ret_block;
                     block_set = true;

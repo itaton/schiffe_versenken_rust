@@ -291,6 +291,10 @@ impl Display {
         text_writer.write_str(letter);
     }
 
+    pub fn layer_2_clear(&mut self) {
+        self.layer2.clear();
+    }
+
     /**
      * draw ship on x, y coordination. The direction is vertical for true and horizontal for false.
      */
