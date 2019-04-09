@@ -279,7 +279,7 @@ impl Board {
                     continue;
                 }
                 for i in 0..ship.size {
-                    if y == ship.y_start_location + i {
+                    if x == ship.x_start_location + i {
                         return Some(ship);
                     }
                 }
