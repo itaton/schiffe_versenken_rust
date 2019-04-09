@@ -15,6 +15,7 @@ use stm32f7::stm32f7x6::I2C3;
 //pub static BACKGROUNDSMALL: &'static [u8] = include_bytes!("../water.bmp");
 pub static BACKGROUND: &'static [u8] = include_bytes!("../WaterBig3.bmp");
 pub static STARTSCREEN: &'static [u8] = include_bytes!("../StartScreen.bmp");
+// pub static WIN_FONT: &'static [u8] = include_bytes!("../win_font.bmp");
 
 static BLUE: Color = Color {
     red: 0,
@@ -408,9 +409,14 @@ impl Display {
     pub fn draw_button_at(&mut self) {
 
     }
+    
+    pub fn show_lose_screen(&mut self) {
+        self.show_start_screen();
+    }
 
     pub fn show_win_screen(&mut self) {
-
+        self.show_start_screen();
+        // self.print_bmp_at_location(WIN_FONT, 0, 0);
     }
 
     // pub fn draw_background_with_bitmap(&mut self) {
