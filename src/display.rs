@@ -190,6 +190,21 @@ impl Display {
         }
     }
 
+        pub fn print_text_on_display_layer2(&mut self, text: String) {
+        assert!(text.len() < 50); //TODO check max string length for the gui
+        let split = text.split_whitespace();
+        let mut y = 50;
+        for word in split {
+            let mut text_writer = self.layer2.text_writer_at(350, y);
+            let result = text_writer.write_str(word);
+            match result {
+                Ok(result) => result,
+                Err(error) => panic!("error while writing text on display: {}", error),
+            };
+            y += 20;
+        }
+    }
+
     pub fn setup_ship(&mut self, ship_len: u8) {
         let arr = [
             24, 25, 49, 50, 74, 75, 99, 100, 124, 125, 149, 150, 174, 175, 199, 200, 224, 225, 249,
