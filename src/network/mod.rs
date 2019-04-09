@@ -76,7 +76,7 @@ impl Network {
     }
 
     pub fn pull_all(&mut self) {
-        // self.ethernet_interface.poll(&mut self.sockets, Instant::from_millis(system_clock::ms() as i64));
+        self.ethernet_interface.poll(&mut self.sockets, Instant::from_millis(system_clock::ms() as i64));
         for mut socket in self.sockets.iter_mut() {
             Network::poll_udp_packet(&mut socket);
         }
