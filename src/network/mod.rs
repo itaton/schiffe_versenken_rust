@@ -129,7 +129,7 @@ pub fn init<'a>(
 
     let mut sockets = SocketSet::new(Vec::new());
     let endpoint = IpEndpoint::new(IpAddress::Ipv4(ip_addr), PORT);
-    hprintln!("IP: {:?}", ip_addr);
+    match hprintln!("IP: {:?}", ip_addr) {_ => {}}
 
     let udp_rx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 20], vec![0u8; 512]);
     let udp_tx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 20], vec![0u8; 512]);
@@ -148,22 +148,18 @@ pub trait Connection {
     fn send_shoot(&mut self, network: &mut Network, shoot: ShootPacket);
     fn recv_shoot(&mut self, network: &mut Network) -> Option<ShootPacket>;
     fn send_feedback(&mut self, network: &mut Network, feedback: FeedbackPacket);
-    fn recv_feedback(&mut self, network: &mut Network) -> FeedbackPacket;
+    fn recv_feedback(&mut self, network: &mut Network) -> Option<FeedbackPacket>;
     fn is_other_connected(&mut self, network: &mut Network) -> bool;
     fn send_whoami(&mut self, network: &mut Network);
 }
 
 pub struct EthClient {
-    shoot: ShootPacket,
-    feedback: FeedbackPacket,
     pub is_server: bool
 }
 
 impl EthClient {
     pub fn new(server: bool) -> EthClient {
         EthClient {
-            shoot: ShootPacket::new(0, 0),
-            feedback: FeedbackPacket::new(false, 0, false),
             is_server: server
         }
     }
@@ -200,12 +196,13 @@ impl Connection for EthClient {
         network.send_udp_packet(&feedback.serialize());
     }
 
-    fn recv_feedback(&mut self, network: &mut Network) -> FeedbackPacket {
+    fn recv_feedback(&mut self, network: &mut Network) -> Option<FeedbackPacket> {
         let result = network.get_udp_packet();
         match result {
             Ok(value) => if let Some(data) = value {
                 if data.len() == FeedbackPacket::len() {
-                    self.feedback = FeedbackPacket::deserialize(&data);
+                    // self.feedback = FeedbackPacket::deserialize(&data);
+                    return Some(FeedbackPacket::deserialize(&data));
                 }
             },
             Err(smoltcp::Error::Exhausted) => {}
@@ -214,7 +211,7 @@ impl Connection for EthClient {
                 hprintln!("error: {:?}", e);
             }
         }
-        self.feedback
+        None
     }
 
     fn is_other_connected(&mut self, network: &mut Network) -> bool {
