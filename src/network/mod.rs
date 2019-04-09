@@ -95,7 +95,7 @@ impl<'a> Network<'a> {
                 let result = socket.send_slice(data, endpoint); // TODO: Error handling
                 match result {
                     Ok(_) => {}
-                    Err(e) => {hprintln!("error {:?}", e);}
+                    Err(e) => {match hprintln!("error {:?}", e) {_ => {}}}
                 }
             }
         }
@@ -168,7 +168,6 @@ impl EthClient {
 impl Connection for EthClient {
     fn send_shoot(&mut self, network: &mut Network, shoot: ShootPacket) {
         network.send_udp_packet(&shoot.serialize());
-        // hprintln!("shoot called");
     }
 
     fn recv_shoot(&mut self, network: &mut Network) -> Option<ShootPacket> {
@@ -176,17 +175,16 @@ impl Connection for EthClient {
         match result {
             Ok(value) => if let Some(data) = value {
                 if data.len() == ShootPacket::len() {
-                    // self.shoot = ShootPacket::deserialize(&data);
                     return Some(ShootPacket::deserialize(&data));
                 }
                 else {
-                    hprintln!("wrong package length");
+                    match hprintln!("wrong package length") {_ => {}}
                 }
             },
             //Err(smoltcp::Error::Exhausted) => {}
             //Err(smoltcp::Error::Unrecognized) => {}
             Err(e) => {
-                hprintln!("error: {:?}", e);
+                match hprintln!("error: {:?}", e) {_ => {}}
             }
         }
         None
@@ -201,14 +199,13 @@ impl Connection for EthClient {
         match result {
             Ok(value) => if let Some(data) = value {
                 if data.len() == FeedbackPacket::len() {
-                    // self.feedback = FeedbackPacket::deserialize(&data);
                     return Some(FeedbackPacket::deserialize(&data));
                 }
             },
             Err(smoltcp::Error::Exhausted) => {}
             Err(smoltcp::Error::Unrecognized) => {}
             Err(e) => {
-                hprintln!("error: {:?}", e);
+                match hprintln!("error: {:?}", e) {_ => {}}
             }
         }
         None
@@ -229,7 +226,7 @@ impl Connection for EthClient {
                 }
             },
             Err(e) => {
-                hprintln!("errortest: {:?}", e);
+                match hprintln!("errortest: {:?}", e) {_ => {}}
             }
         }
         false
