@@ -34,7 +34,7 @@ use network::packets::ShootPacket;
 //use lcd::FramebufferL8;
 //use lcd::TextWriter;
 
-const IS_SERVER: bool = false;
+const IS_SERVER: bool = true;
 
 #[entry]
 fn main() -> ! {

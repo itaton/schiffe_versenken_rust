@@ -76,7 +76,7 @@ impl<'a> Network<'a> {
     }
 
     pub fn pull_all(&mut self) {
-        self.ethernet_interface.poll(&mut self.sockets, Instant::from_millis(system_clock::ms() as i64));
+        // self.ethernet_interface.poll(&mut self.sockets, Instant::from_millis(system_clock::ms() as i64));
         for mut socket in self.sockets.iter_mut() {
             Network::poll_udp_packet(&mut socket);
         }
@@ -131,8 +131,8 @@ pub fn init<'a>(
     let endpoint = IpEndpoint::new(IpAddress::Ipv4(ip_addr), PORT);
     hprintln!("IP: {:?}", ip_addr);
 
-    let udp_rx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 3], vec![0u8; 512]);
-    let udp_tx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 1], vec![0u8; 512]);
+    let udp_rx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 20], vec![0u8; 512]);
+    let udp_tx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 20], vec![0u8; 512]);
     let mut udp_socket = UdpSocket::new(udp_rx_buffer, udp_tx_buffer);
     udp_socket.bind(endpoint).unwrap();
     sockets.add(udp_socket);
