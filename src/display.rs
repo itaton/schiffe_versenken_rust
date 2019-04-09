@@ -190,7 +190,7 @@ impl Display {
         }
     }
 
-        pub fn print_text_on_display_layer2(&mut self, text: String) {
+    pub fn print_text_on_display_layer2(&mut self, text: String) {
         assert!(text.len() < 50); //TODO check max string length for the gui
         let split = text.split_whitespace();
         let mut y = 50;
