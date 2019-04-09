@@ -167,6 +167,7 @@ impl EthClient {
 
 impl Connection for EthClient {
     fn send_shoot(&mut self, network: &mut Network, shoot: ShootPacket) {
+        hprintln!("sent: {:?}", shoot);
         network.send_udp_packet(&shoot.serialize());
     }
 
@@ -175,7 +176,9 @@ impl Connection for EthClient {
         match result {
             Ok(value) => if let Some(data) = value {
                 if data.len() == ShootPacket::len() {
-                    return Some(ShootPacket::deserialize(&data));
+                    let shoot = ShootPacket::deserialize(&data);
+                    hprintln!("received: {:?}", shoot);
+                    return Some(shoot);
                 }
                 else {
                     match hprintln!("wrong package length") {_ => {}}
@@ -191,6 +194,7 @@ impl Connection for EthClient {
     }
 
     fn send_feedback(&mut self, network: &mut Network, feedback: FeedbackPacket) {
+        hprintln!("sent: {:?}", feedback);
         network.send_udp_packet(&feedback.serialize());
     }
 
@@ -199,7 +203,9 @@ impl Connection for EthClient {
         match result {
             Ok(value) => if let Some(data) = value {
                 if data.len() == FeedbackPacket::len() {
-                    return Some(FeedbackPacket::deserialize(&data));
+                    let feedback = FeedbackPacket::deserialize(&data);
+                    hprintln!("received: {:?}", feedback);
+                    return Some(feedback);
                 }
             },
             Err(smoltcp::Error::Exhausted) => {}
