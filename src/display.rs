@@ -247,7 +247,7 @@ impl Display {
     //fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
     //fn print_indicies(mut layer: &mut Layer<FramebufferArgb8888>) {
     fn print_indicies(&mut self) {
-        let text_writer = self.layer1.text_writer();
+        let text_writer = self.layer2.text_writer();
         self.write_in_field(1, 0, "1");
         self.write_in_field(2, 0, "2");
         self.write_in_field(3, 0, "3");
