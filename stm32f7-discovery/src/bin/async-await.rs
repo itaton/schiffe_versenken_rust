@@ -501,7 +501,7 @@ where
             &mut self.rcc,
             &mut self.syscfg,
             &mut self.ethernet_mac,
-            &mut self.ethernet_dma,
+            self.ethernet_dma,
             ETH_ADDR,
         )
         .map(|device| device.into_interface());

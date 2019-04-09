@@ -67,7 +67,7 @@ fn main() -> ! {
     let mut rng = peripherals.RNG;
     let mut sdmmc = peripherals.SDMMC1;
     let mut syscfg = peripherals.SYSCFG;
-    let mut ethernet_mac = peripherals.ETHERNET_MAC;
+    let ethernet_mac = peripherals.ETHERNET_MAC;
     let mut ethernet_dma = peripherals.ETHERNET_DMA;
 
     init::init_system_clock_216mhz(&mut rcc, &mut pwr, &mut flash);
@@ -143,7 +143,7 @@ fn main() -> ! {
         &mut rcc,
         &mut syscfg,
         &mut ethernet_mac,
-        &mut ethernet_dma,
+        ethernet_dma,
         ETH_ADDR,
     )
     .map(|device| {
