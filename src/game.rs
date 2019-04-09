@@ -156,13 +156,17 @@ impl Game {
             self.set_game_state(Gamestate::Won);
             return;
         } else if feedback_packet.hit {
-            self.display.write_in_field(block.x as usize, block.y as usize, "o");
+            self.display.write_in_field(block.x as usize, block.y as usize, "O");
             let sunk_size = feedback_packet.sunk;
             if feedback_packet.sunk != 0 {
+                self.display.clear_text_on_display();
                 self.display.print_text_on_display_layer2(format!("sunk ship of length {}", sunk_size).to_string());
+            } else {
+                self.display.clear_text_on_display();
+                self.display.print_text_on_display_layer2(format!("You hit the enemy").to_string());
             }
         } else {
-            self.display.write_in_field(block.x as usize, block.y as usize, "x");
+            self.display.write_in_field(block.x as usize, block.y as usize, "X");
         }
 
         self.set_game_state(Gamestate::WaitForEnemy);
@@ -195,6 +199,7 @@ impl Game {
     }
 
     fn select_shoot_location(&mut self) {
+        self.display.clear_text_on_display();
         self.display.print_text_on_display_layer2("select a fire location".to_string());
         let mut confirmed = false;
         let mut block_set = false;
