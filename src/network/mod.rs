@@ -167,7 +167,7 @@ impl EthClient {
 
 impl Connection for EthClient {
     fn send_shoot(&mut self, network: &mut Network, shoot: ShootPacket) {
-        hprintln!("sent: {:?}", shoot);
+        // hprintln!("sent: {:?}", shoot);
         network.send_udp_packet(&shoot.serialize());
     }
 
@@ -177,7 +177,7 @@ impl Connection for EthClient {
             Ok(value) => if let Some(data) = value {
                 if data.len() == ShootPacket::len() {
                     let shoot = ShootPacket::deserialize(&data);
-                    hprintln!("received: {:?}", shoot);
+                    // hprintln!("received: {:?}", shoot);
                     return Some(shoot);
                 }
                 else {
@@ -194,7 +194,7 @@ impl Connection for EthClient {
     }
 
     fn send_feedback(&mut self, network: &mut Network, feedback: FeedbackPacket) {
-        hprintln!("sent: {:?}", feedback);
+        //hprintln!("sent: {:?}", feedback);
         network.send_udp_packet(&feedback.serialize());
     }
 
@@ -204,7 +204,7 @@ impl Connection for EthClient {
             Ok(value) => if let Some(data) = value {
                 if data.len() == FeedbackPacket::len() {
                     let feedback = FeedbackPacket::deserialize(&data);
-                    hprintln!("received: {:?}", feedback);
+                    // hprintln!("received: {:?}", feedback);
                     return Some(feedback);
                 }
             },
