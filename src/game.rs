@@ -153,7 +153,7 @@ impl Game {
     }
 
     fn select_shoot_location(&mut self) {
-        self.display.print_text_on_display("select a fire location".to_string());
+        self.display.print_text_on_display_layer2("select a fire location".to_string());
         let mut confirmed = false;
         let mut block_set = false;
         let mut block = Block{x: 0, y: 0};
@@ -173,6 +173,7 @@ impl Game {
                     self.board.clear_x_es(&mut self.display); 
                     self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
                     block = ret_block;
+                    block_set = true;
                 }
             }
         }
