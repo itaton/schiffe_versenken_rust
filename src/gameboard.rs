@@ -238,7 +238,7 @@ impl Board {
     }
 
     //returns if hit and if sunk
-    pub fn shoot_at(&mut self, block: Block) -> (bool, bool) {
+    pub fn shoot_at(&mut self, block: Block) -> (bool, bool, u8) {
         //todo check index
         if !self.fields_shot[block.x as usize - 1][block.y as usize - 1]
             && self.placed_ships[block.x as usize - 1][block.y as usize - 1]
@@ -246,19 +246,19 @@ impl Board {
             //ship = getShip(x,y)
             match self.get_ship_at(block.x - 1, block.y - 1) {
                 None => {
-                    return (false, false);
+                    return (false, false, 0);
                 }
                 Some(mut ship) => {
                     ship.sunken_fields += 1; //TODO am I really working on the ship from the vector here or on a copy?
                     if ship.sunken_fields == ship.size {
-                        return (true, true);
+                        return (true, true, ship.size);
                     } else {
-                        return (true, false);
+                        return (true, false, 0);
                     }
                 }
             }
         }
-        (false, false)
+        (false, false, 0)
     }
 
     fn get_ship_at(&mut self, x: u8, y: u8) -> Option<&mut Ship> {

@@ -1,11 +1,13 @@
 use crate::alloc::string::ToString;
 use crate::gameboard;
+use crate::network;
 use crate::gameboard::{
     Block,
     Board,
 };
 
 use crate::network::{
+    Connection,
     packets,
     Network,
     EthClient,
@@ -16,10 +18,10 @@ use crate::display::{
 
 pub struct Game {
     game_state: Gamestate,
-    pub display: Display,
-    pub board: Board,
-    // network: Network<'a>,
-    pub ethernet_c: EthClient,
+    display: Display,
+    board: Board,
+    network: Network<'static>,
+    ethernet_c: EthClient,
 }
 
 // #[derive(Eq)]
@@ -27,26 +29,29 @@ enum Gamestate {
     YourTurn,
     WaitForEnemy,
     Won,
+    Lose,
     GameStart,
     SetupShips,
 }
 
 //start game, init field and wait for other player
-pub fn init_new_game(display: Display,is_server: bool) -> Game {
-    Game::new(display, is_server)    
+pub fn init_new_game(display: Display,net: network::Network<'static> ,is_server: bool) -> Game {
+    Game::new(display, net, is_server)    
 }
 
 
 
 
 impl Game {
-    fn new(display: Display, is_server: bool) -> Game {
+    fn new(display: Display, net: network::Network<'static>, is_server: bool) -> Game {
+        let mut nw: network::Network = net;
+        let mut eth_client = EthClient::new(is_server); 
         Game {
             game_state: Gamestate::GameStart,
             // board: Board::new(), //TODO: without params ? gameboard creates the start state ? 
             display,
             board: gameboard::gameboard_init(),
-            // network: network::init(rcc: &mut RCC, syscfg: &mut SYSCFG, ethernet_mac: &mut ETHERNET_MAC, ethernet_dma: &'a mut ETHERNET_DMA, is_server: bool),
+            network: nw,
             ethernet_c: EthClient::new(is_server),
         }
     }
@@ -57,6 +62,7 @@ impl Game {
                 Gamestate::YourTurn => self.select_shoot_location(),
                 Gamestate::WaitForEnemy => self.wait_and_check_enemy_shot(),
                 Gamestate::Won => self.show_win_screen(),
+                Gamestate::Lose => self.show_lose_screen();
                 Gamestate::SetupShips => self.setup_ships(),
                 Gamestate::GameStart => {
                     self.display.show_start_screen();
@@ -98,47 +104,81 @@ impl Game {
         }
     }
 
+    fn show_lose_screen(&mut self) {
+        self.display.show_lose_screen();
+    }
+
     fn show_win_screen(&mut self) {
         //Show win screen
         self.display.show_win_screen();
     }
 
+    fn wait_for_shoot(&mut self) -> network::packets::ShootPacket {
+        loop {
+            match self.ethernet_c.recv_shoot(&mut self.network) {
+                Some(shoot) => {
+                        return shoot;
+                }
+                None => {}
+            }
+        }
+    }
+
     //TODO: check if gameboard and network is implemented
     fn wait_and_check_enemy_shot(&mut self) {
-        // //recvn enemy shot packet and check hit 
-        // // let enemy_shot = self.ethernet_c.recv_shoot(self.ethernet_c, self.network);
-        // //now check hit
-        // let (hit, sunk) = self.board.shot_at(Block {x: enemy_shot.column, y: enemy_shot.line});
-        // let mut ship_sunk_size = 0;
-        // if sunk {
-        //     //get ship size 
-        //     // ship_sunk = 
-        // }
-        // //create feedback packet
-        // let win = self.board.check_win();
-        // let feedback = packets::FeedbackPacket::new(hit, ship_sunk_size, win);
-        // self.ethernet_c.send_feedback(self.network, feedback);
-        // self.set_game_state(Gamestate::YourTurn);
+        //recvn enemy shot packet and check hit 
+        let enemy_shoot = self.wait_for_shoot(); 
+
+        //now check hit
+        let (hit, sunk, ship_sunk_size) = self.board.shoot_at(Block {x: enemy_shoot.column, y: enemy_shoot.line});
+        //create feedback packet
+        let win = self.board.check_win();
+        let feedback = packets::FeedbackPacket::new(hit, ship_sunk_size, win);
+        self.ethernet_c.send_feedback(&mut self.network, feedback);
+        if win {
+            self.set_game_state(Gamestate::Lose);
+       } else {
+            self.set_game_state(Gamestate::YourTurn);
+       }
     }
 
     //send shoot packet and check hit
     fn fire(&mut self, block: Block) {
 
-        // let shoot_packet = packets::ShootPacket::new(block.y, block.x); //TODO set x,y public
-        // //use network file and send package
-        // self.ethernet_c.send_shoot(self.network, shoot_packet); 
-        // //wait for answer
+        let shoot_packet = packets::ShootPacket::new(block.y, block.x); //TODO set x,y public
+        //use network file and send package
+        self.ethernet_c.send_shoot(&mut self.network, shoot_packet);
+
+        //wait for answer
+        let feedback_packet = self.wait_for_feedback();
         // let feedback_packet = self.ethernet_c.recv_feedback(self.network);
-        // if feedback_packet.you_win = true {
-        //     self.set_game_state(Gamestate::Won);
-        // } else if feedback_packet.hit {
-        //     self.display.write_in_field_layer2(block.x, block.y, "o");
-        //     let sunk_size = feedback_packet.sunk;
-        // } else {
-        //     self.display.write_in_field_layer2(block.x, block.y, "x");
-        // }
-        // //clear all x on layer_1
+        if feedback_packet.you_win == true {
+            self.set_game_state(Gamestate::Won);
+            return;
+        } else if feedback_packet.hit {
+            self.display.write_in_field(block.x as usize, block.y as usize, "o");
+            let sunk_size = feedback_packet.sunk;
+            if feedback_packet.sunk != 0 {
+                self.display.print_text_on_display_layer2(format!("sunk ship of length {}", sunk_size).to_string());
+            }
+        } else {
+            self.display.write_in_field(block.x as usize, block.y as usize, "x");
+        }
+
+        self.set_game_state(Gamestate::WaitForEnemy);
+        //clear all x on layer_1
         // self.board.clear_x_es(&self.display);
+    }
+
+    fn wait_for_feedback(&mut self) ->  network::packets::FeedbackPacket {
+        loop {
+            match self.ethernet_c.recv_feedback(&mut self.network) {
+                Some(feedback) => {
+                        return feedback;
+                }
+                None => {}
+            }
+        }
     }
     
     fn setup_ships(&mut self) {
