@@ -1,3 +1,4 @@
+use crate::alloc::string::ToString;
 use crate::gameboard;
 use crate::gameboard::{
     Block,
@@ -152,6 +153,7 @@ impl Game {
     }
 
     fn select_shoot_location(&mut self) {
+        self.display.print_text_on_display("select a fire location".to_string());
         let mut confirmed = false;
         let mut block_set = false;
         let mut block = Block{x: 0, y: 0};
@@ -160,7 +162,7 @@ impl Game {
             let (x,y) = self.display.touch();
             match self.board.calculate_touch_block(x, y) {
                 None => {
-                    if (block_set && self.display.check_confirm_button_touched()) {
+                    if block_set && self.display.check_confirm_button_touched(x,y) {
                       //shot location set   
                       self.fire(block); //TODO: in fire -> update gameboard information
                       confirmed = true;
