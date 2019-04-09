@@ -20,7 +20,7 @@ pub struct Game {
     game_state: Gamestate,
     display: Display,
     board: Board,
-    network: Network<'static>,
+    network: Network,
     ethernet_c: EthClient,
 }
 
@@ -35,7 +35,7 @@ enum Gamestate {
 }
 
 //start game, init field and wait for other player
-pub fn init_new_game(display: Display,net: network::Network<'static> ,is_server: bool) -> Game {
+pub fn init_new_game(display: Display,net: network::Network, is_server: bool) -> Game {
     Game::new(display, net, is_server)    
 }
 
@@ -43,15 +43,14 @@ pub fn init_new_game(display: Display,net: network::Network<'static> ,is_server:
 
 
 impl Game {
-    fn new(display: Display, net: network::Network<'static>, is_server: bool) -> Game {
-        let mut nw: network::Network = net;
-        let mut eth_client = EthClient::new(is_server); 
+    fn new(display: Display, net: network::Network, is_server: bool) -> Game {
+        // let mut nw: network::Network = net;
         Game {
             game_state: Gamestate::GameStart,
             // board: Board::new(), //TODO: without params ? gameboard creates the start state ? 
             display,
             board: gameboard::gameboard_init(),
-            network: nw,
+            network: net,
             ethernet_c: EthClient::new(is_server),
         }
     }
@@ -62,7 +61,7 @@ impl Game {
                 Gamestate::YourTurn => self.select_shoot_location(),
                 Gamestate::WaitForEnemy => self.wait_and_check_enemy_shot(),
                 Gamestate::Won => self.show_win_screen(),
-                Gamestate::Lose => self.show_lose_screen();
+                Gamestate::Lose => self.show_lose_screen(),
                 Gamestate::SetupShips => self.setup_ships(),
                 Gamestate::GameStart => {
                     self.display.show_start_screen();
@@ -92,6 +91,9 @@ impl Game {
             }
             Gamestate::GameStart => {
                 self.game_state = Gamestate::GameStart;
+            }
+            Gamestate::Lose => {
+                self.game_state = Gamestate::Lose;
             }
         }
     }
