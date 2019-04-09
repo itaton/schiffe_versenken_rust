@@ -117,11 +117,8 @@ impl Game {
 
     fn wait_for_shoot(&mut self) -> network::packets::ShootPacket {
         loop {
-            match self.ethernet_c.recv_shoot(&mut self.network) {
-                Some(shoot) => {
-                        return shoot;
-                }
-                None => {}
+            if let Some(shoot) = self.ethernet_c.recv_shoot(&mut self.network) {
+                return shoot;
             }
         }
     }
@@ -187,6 +184,7 @@ impl Game {
         self.board.initial_setup(&mut self.display);
         //TODO: send ready packet and wait for other players ready packet
 
+        self.display.print_background();
         if self.ethernet_c.is_server {
             self.set_game_state(Gamestate::YourTurn);
         } else {

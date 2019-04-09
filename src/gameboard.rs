@@ -231,10 +231,10 @@ impl Board {
     pub fn check_win(&mut self) -> bool {
         for ship in self.ships.iter() {
             if ship.size != ship.sunken_fields {
-                return true;
+                return false;
             }
         }
-        false
+        true
     }
 
     //returns if hit and if sunk

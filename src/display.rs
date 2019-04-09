@@ -362,45 +362,45 @@ impl Display {
         //calculate_touch_block(touch_x, touch_y)
     }
 
-    pub fn render_bg(&mut self, x: u16, y: u16, color: u16) {
-        let addr: u32 = 0xC000_0000;
-        let pixel = (y as u32) * 480 + (x as u32);
-        let pixel_color = (addr + pixel * 2) as *mut u16;
-        unsafe { ptr::write_volatile(pixel_color, color) };
-    }
+    // pub fn render_bg(&mut self, x: u16, y: u16, color: u16) {
+    //     let addr: u32 = 0xC000_0000;
+    //     let pixel = (y as u32) * 480 + (x as u32);
+    //     let pixel_color = (addr + pixel * 2) as *mut u16;
+    //     unsafe { ptr::write_volatile(pixel_color, color) };
+    // }
 
-    pub fn draw_background(&mut self, x: u16, y: u16, size: (u16, u16), dump: &[u8]) {
-        let img_cnt = size.0 as usize * size.1 as usize;
-        for i in 0..img_cnt {
-            let idx = i * 4;
-            let dsp_y = y + (i / size.0 as usize) as u16;
-            let dsp_x = x + (i % size.0 as usize) as u16;
-            let c = self.from_rgb_with_alpha(dump[idx + 3],
-                                                  dump[idx],
-                                                  dump[idx + 1],
-                                                  dump[idx + 2]);
-            self.render_bg(dsp_x, dsp_y, c)
-        }
-    } 
+    // pub fn draw_background(&mut self, x: u16, y: u16, size: (u16, u16), dump: &[u8]) {
+    //     let img_cnt = size.0 as usize * size.1 as usize;
+    //     for i in 0..img_cnt {
+    //         let idx = i * 4;
+    //         let dsp_y = y + (i / size.0 as usize) as u16;
+    //         let dsp_x = x + (i % size.0 as usize) as u16;
+    //         let c = self.from_rgb_with_alpha(dump[idx + 3],
+    //                                               dump[idx],
+    //                                               dump[idx + 1],
+    //                                               dump[idx + 2]);
+    //         self.render_bg(dsp_x, dsp_y, c)
+    //     }
+    // } 
     
-    fn from_rgb_with_alpha(&mut self, a: u8, r: u8, g: u8, b: u8) -> u16 {
-        let r_f = (r / 8) as u16;
-        let g_f = (g / 8) as u16;
-        let b_f = (b / 8) as u16;
-        let c: u16 = if a >= 42 { 1 << 15 } else { 0 };
-        c | (r_f << 10) | (g_f << 5) | b_f
-    } 
+    // fn from_rgb_with_alpha(&mut self, a: u8, r: u8, g: u8, b: u8) -> u16 {
+    //     let r_f = (r / 8) as u16;
+    //     let g_f = (g / 8) as u16;
+    //     let b_f = (b / 8) as u16;
+    //     let c: u16 = if a >= 42 { 1 << 15 } else { 0 };
+    //     c | (r_f << 10) | (g_f << 5) | b_f
+    // } 
 
-    //TODO delete this and use the one in gameboard. Then get x and y from the Block returned
-    pub fn calculate_touch_block(&mut self, x: u16, y: u16) -> (u16,u16) {
-        if x<=272 && x>24 && y <= 272 && y > 24 {
-            let x_block = x/25;
-            let y_block = y/25;
-            (x_block,y_block)
-        } else {
-            (0,0)
-        }
-    }
+    // //TODO delete this and use the one in gameboard. Then get x and y from the Block returned
+    // pub fn calculate_touch_block(&mut self, x: u16, y: u16) -> (u16,u16) {
+    //     if x<=272 && x>24 && y <= 272 && y > 24 {
+    //         let x_block = x/25;
+    //         let y_block = y/25;
+    //         (x_block,y_block)
+    //     } else {
+    //         (0,0)
+    //     }
+    // }
 
     pub fn show_start_screen(&mut self) {
         self.print_bmp_at_location(STARTSCREEN, 0, 0);
