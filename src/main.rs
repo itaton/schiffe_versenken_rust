@@ -7,18 +7,15 @@
 extern crate alloc;
 
 use alloc_cortex_m::CortexMHeap;
-use core::fmt::Write;
 use core::alloc::Layout as AllocLayout;
 use core::panic::PanicInfo;
 use cortex_m_rt::{entry, exception};
 use cortex_m_semihosting::{hprintln};
 use stm32f7::stm32f7x6::{CorePeripherals, Peripherals};
 use stm32f7_discovery::{
-    ethernet,
     gpio::{GpioPort, OutputPin},
     init,
     system_clock::{self, Hz},
-    lcd::{self,Color,TextWriter,FramebufferArgb8888,Layer},
     touch,
 };
 mod display;
@@ -30,11 +27,7 @@ use network::EthClient;
 use network::Connection;
 use network::packets::ShootPacket;
 
-//use lcd::Framebuffer;
-//use lcd::FramebufferL8;
-//use lcd::TextWriter;
-
-const IS_SERVER: bool = true;
+const IS_SERVER: bool = false;
 
 #[entry]
 fn main() -> ! {
