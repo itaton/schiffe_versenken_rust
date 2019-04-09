@@ -88,21 +88,23 @@ impl Board {
         }
         //let ticks = system_clock::ticks();
         //while system_clock::ticks() - ticks <= 3 {}
-        match self.get_valid_ship(length, display) {
-            None => {
-                self.clear_x_es(display);
-                self.setup_field = [[false; 10]; 10];
-                self.setup_ship(length, display);
-            }
-            Some(ship) => {
-                self.clear_x_es(display);
-                self.setup_field = [[false; 10]; 10];
-                self.ships.push(ship);
-            }
+        self.clear_x_es(display);
+        if !self.get_valid_ship(length, display) {
+            // None => {
+            for ship in self.ships.iter() {
+                display
+                    .print_ship(ship.size as usize, ship.x_start_location as usize + 1, ship.y_start_location as usize + 1 as usize, ship.vertical);
+            }   
+            self.setup_field = [[false; 10]; 10];
+            self.setup_ship(length, display);
+        } else {
+            // Some(ship) => {
+            self.setup_field = [[false; 10]; 10];
         }
+        
     }
 
-    fn get_valid_ship(&mut self, len: u8, display: &mut Display) -> Option<Ship> {
+    fn get_valid_ship(&mut self, len: u8, display: &mut Display) -> bool {
         let mut x_start = 0;
         let mut y_start = 0;
 
@@ -117,7 +119,7 @@ impl Board {
         }
         if marked_fields != len {
             //wrong number of blocks set
-            return None;
+            return false;
         }
 
         //check if ship is in a line
@@ -139,7 +141,7 @@ impl Board {
                     } else {
                         if i != x_pos + 1 && j != y_pos + 1 {
                             // Next block is neither right nor below the previous
-                            return None;
+                            return false;
                         }
                         if !direction_known {
                             //find
@@ -155,13 +157,13 @@ impl Board {
                             if !vertical {
                                 if i != x_pos + 1 || j != y_pos {
                                     //Error, next block is at the wrong location
-                                    return None;
+                                    return false;
                                 }
                                 x_pos = i;
                             } else {
                                 if j != y_pos + 1 || i != x_pos {
                                     //Error, next block is at the wrong location
-                                    return None;
+                                    return false;
                                 }
                                 y_pos = j;
                             }
@@ -191,7 +193,7 @@ impl Board {
                             j - 1..=j + 1
                         } {
                             if self.placed_ships[k][l] {
-                                return None;
+                                return false;
                             }
                         }
                     }
@@ -207,11 +209,15 @@ impl Board {
                 }
             }
         }
-
-        display
-            .print_ship(len as usize, x_start + 1, y_start + 1, vertical);
-        let ship = Ship::new(len, x_start as u8, y_start as u8, vertical);
-        Some(ship)
+        
+        let current_ship = Ship::new(len, x_start as u8, y_start as u8, vertical);
+        self.ships.push(current_ship);
+        for ship in self.ships.iter() {
+            display
+                .print_ship(ship.size as usize, ship.x_start_location as usize + 1, ship.y_start_location as usize + 1 as usize, ship.vertical);
+        }
+        // Some(current_ship)
+        true
     }
 
     pub fn clear_x_es(&mut self, display: &mut Display) {
