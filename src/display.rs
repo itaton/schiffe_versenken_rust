@@ -1,4 +1,5 @@
 use alloc::string::String;
+use crate::alloc::string::ToString;
 use alloc::vec::Vec;
 use core::ptr;
 use core::fmt::Write;
@@ -11,8 +12,8 @@ use stm32f7_discovery::{
 };
 use stm32f7::stm32f7x6::I2C3;
 //pub static BACKGROUNDSMALL: &'static [u8] = include_bytes!("../water.bmp");
-pub static BACKGROUND: &'static [u8] = include_bytes!("../waterBig.bmp");
-pub static STARTSCREEN: &'static [u8] = include_bytes!("../l33tBackground.bmp");
+pub static BACKGROUND: &'static [u8] = include_bytes!("../WaterBig3.bmp");
+pub static STARTSCREEN: &'static [u8] = include_bytes!("../StartScreen.bmp");
 
 static BLUE: Color = Color {
     red: 0,
@@ -190,7 +191,7 @@ impl Display {
         }
     }
 
-        pub fn print_text_on_display_layer2(&mut self, text: String) {
+    pub fn print_text_on_display_layer2(&mut self, text: String) {
         assert!(text.len() < 50); //TODO check max string length for the gui
         let split = text.split_whitespace();
         let mut y = 50;
@@ -234,11 +235,12 @@ impl Display {
                 self.layer1.print_point_color_at(i, j, BLACK);
             }
         }
-        let mut text_writer = self.layer1.text_writer_at(300, 100);
-        text_writer.write_str("Please set up your");
-        let mut text_writer = self.layer1.text_writer_at(300, 120);
-        text_writer.write_fmt(format_args!("{} ship", ship_len));
-        let mut text_writer = self.layer1.text_writer_at(350, 220);
+        self.print_text_on_display_layer2(format_args!("Please set up your {} ship", ship_len).to_string());
+        // let mut text_writer = self.layer1.text_writer_at(300, 100);
+        // text_writer.write_str("Please set up your");
+        // let mut text_writer = self.layer1.text_writer_at(300, 120);
+        // text_writer.write_fmt(format_args!("{} ship", ship_len));
+        let mut text_writer = self.layer2.text_writer_at(350, 220);
         text_writer.write_str("Confirm");
     }
 
@@ -468,8 +470,8 @@ impl Display {
         for i in 0..height {
             bytenr = pixel_end + 1 - (pixel_rest + width * 3) * (i + 1);
             for j in 0..width {
-                if !(pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
-                    && pic[(bytenr) as usize] > 245) {
+                // if !(pic[(bytenr + 2) as usize] > 255 && pic[(bytenr + 1) as usize] > 255
+                    // && pic[(bytenr) as usize] > 255) {
                     self.layer1.print_point_color_at(
                         (loc_x + j) as usize,
                         (loc_y + i) as usize,
@@ -477,10 +479,11 @@ impl Display {
                             pic[(bytenr + 2) as usize],
                             pic[(bytenr + 1) as usize],
                             pic[(bytenr) as usize],
-                            pic[(bytenr) as usize]-50,
+                            // pic[(bytenr) as usize]-50,
+                            255,
                         ),
                     );
-                }
+                // }
                 bytenr += 3;
             }
         }
