@@ -94,22 +94,23 @@ fn main() -> ! {
     // turn led on
     pins.led.set(true);
 
-    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, &mut ethernet_dma, IS_SERVER);
+    let net = network::init(&mut rcc, &mut syscfg, &mut ethernet_mac, ethernet_dma, IS_SERVER);
     
     match net {
         Ok(value) => {
             let mut nw: network::Network = value;
             let mut eth_client = EthClient::new(IS_SERVER);
             // wait_for_connection(&mut eth_client, &mut nw);
+ 
+            //gameboard::gameboard_init(display);
+            let mut game = game::init_new_game(display , nw, IS_SERVER);
+            game.run_game();
             hprintln!("connected");
-            test_packet(&mut eth_client, &mut nw);
+            // test_packet(&mut eth_client, &mut nw);
         }
         Err(_e) => {hprintln!("failed to init network");}
     }
 
-    //gameboard::gameboard_init(display);
-    let mut game = game::init_new_game(display , IS_SERVER);
-    game.run_game();
 
     let mut last_led_toggle = system_clock::ticks();
     

@@ -15,6 +15,7 @@ use stm32f7::stm32f7x6::I2C3;
 //pub static BACKGROUNDSMALL: &'static [u8] = include_bytes!("../water.bmp");
 pub static BACKGROUND: &'static [u8] = include_bytes!("../WaterBig3.bmp");
 pub static STARTSCREEN: &'static [u8] = include_bytes!("../StartScreen.bmp");
+// pub static WIN_FONT: &'static [u8] = include_bytes!("../win_font.bmp");
 
 static BLUE: Color = Color {
     red: 0,
@@ -143,31 +144,31 @@ impl Display {
     /**
      * print a confirm button on the right side of the display
      */
-    pub fn print_confirm_button(&mut self) {
+    fn print_confirm_button(&mut self, color: Color) {
         for i in 299..301 {
             for j in 199..250 {
                 //todo change this to lookup color since layer 2 is lookup only
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         for i in 455..457 {
             for j in 199..250 {
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         for i in 299..457 {
             for j in 199..201 {
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         for i in 299..457 {
             for j in 249..251 {
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         for i in 299..457 {
             for j in 199..251 {
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         let mut text_writer = self.layer2.text_writer_at(350, 220);
@@ -245,7 +246,7 @@ impl Display {
         // text_writer.write_fmt(format_args!("{} ship", ship_len));
         // let mut text_writer = self.layer2.text_writer_at(350, 220);
         // text_writer.write_str("Confirm");
-        self.print_confirm_button();
+        self.print_confirm_button(BLACK);
     }
 
     //fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
@@ -290,6 +291,23 @@ impl Display {
         text_writer.write_str(letter);
     }
 
+    pub fn layer_2_clear(&mut self) {
+        self.layer2.clear();
+    }
+
+    pub fn clear_text_on_display(&mut self) {
+        let mut y = 50;
+        for i in 0..6 {
+            let mut text_writer = self.layer2.text_writer_at(350, y);
+            let result = text_writer.write_str("               ");
+            match result {
+                Ok(result) => result,
+                Err(error) => panic!("error while writing text on display: {}", error),
+            };
+            y += 20;
+        }    
+    }
+
     /**
      * draw ship on x, y coordination. The direction is vertical for true and horizontal for false.
      */
@@ -326,11 +344,25 @@ impl Display {
         }
     }
 
+    pub fn print_confirm_button_enabled(&mut self) {
+        self.print_confirm_button(BLACK);
+    }
+
+    pub fn print_confirm_button_disabled(&mut self) {
+        self.print_confirm_button(GREY);
+    }
+
     //TODO: without self.touch -> pass x, y paramters ?
     pub fn check_confirm_button_touched(&mut self, x: u16, y: u16) -> bool {
         // let (x,y) = self.touch();
 
-        (x,y).0 < 457 && (x,y).0 >= 299 && (x,y).1 < 251 && (x,y).1 >= 199
+        if (x,y).0 < 457 && (x,y).0 >= 299 && (x,y).1 < 251 && (x,y).1 >= 199 {
+            self.print_confirm_button(WHITE);
+            self.print_confirm_button(BLACK);
+            true
+        } else {
+            false
+        }
     }
 
 
@@ -361,45 +393,45 @@ impl Display {
         //calculate_touch_block(touch_x, touch_y)
     }
 
-    pub fn render_bg(&mut self, x: u16, y: u16, color: u16) {
-        let addr: u32 = 0xC000_0000;
-        let pixel = (y as u32) * 480 + (x as u32);
-        let pixel_color = (addr + pixel * 2) as *mut u16;
-        unsafe { ptr::write_volatile(pixel_color, color) };
-    }
+    // pub fn render_bg(&mut self, x: u16, y: u16, color: u16) {
+    //     let addr: u32 = 0xC000_0000;
+    //     let pixel = (y as u32) * 480 + (x as u32);
+    //     let pixel_color = (addr + pixel * 2) as *mut u16;
+    //     unsafe { ptr::write_volatile(pixel_color, color) };
+    // }
 
-    pub fn draw_background(&mut self, x: u16, y: u16, size: (u16, u16), dump: &[u8]) {
-        let img_cnt = size.0 as usize * size.1 as usize;
-        for i in 0..img_cnt {
-            let idx = i * 4;
-            let dsp_y = y + (i / size.0 as usize) as u16;
-            let dsp_x = x + (i % size.0 as usize) as u16;
-            let c = self.from_rgb_with_alpha(dump[idx + 3],
-                                                  dump[idx],
-                                                  dump[idx + 1],
-                                                  dump[idx + 2]);
-            self.render_bg(dsp_x, dsp_y, c)
-        }
-    } 
+    // pub fn draw_background(&mut self, x: u16, y: u16, size: (u16, u16), dump: &[u8]) {
+    //     let img_cnt = size.0 as usize * size.1 as usize;
+    //     for i in 0..img_cnt {
+    //         let idx = i * 4;
+    //         let dsp_y = y + (i / size.0 as usize) as u16;
+    //         let dsp_x = x + (i % size.0 as usize) as u16;
+    //         let c = self.from_rgb_with_alpha(dump[idx + 3],
+    //                                               dump[idx],
+    //                                               dump[idx + 1],
+    //                                               dump[idx + 2]);
+    //         self.render_bg(dsp_x, dsp_y, c)
+    //     }
+    // } 
     
-    fn from_rgb_with_alpha(&mut self, a: u8, r: u8, g: u8, b: u8) -> u16 {
-        let r_f = (r / 8) as u16;
-        let g_f = (g / 8) as u16;
-        let b_f = (b / 8) as u16;
-        let c: u16 = if a >= 42 { 1 << 15 } else { 0 };
-        c | (r_f << 10) | (g_f << 5) | b_f
-    } 
+    // fn from_rgb_with_alpha(&mut self, a: u8, r: u8, g: u8, b: u8) -> u16 {
+    //     let r_f = (r / 8) as u16;
+    //     let g_f = (g / 8) as u16;
+    //     let b_f = (b / 8) as u16;
+    //     let c: u16 = if a >= 42 { 1 << 15 } else { 0 };
+    //     c | (r_f << 10) | (g_f << 5) | b_f
+    // } 
 
-    //TODO delete this and use the one in gameboard. Then get x and y from the Block returned
-    pub fn calculate_touch_block(&mut self, x: u16, y: u16) -> (u16,u16) {
-        if x<=272 && x>24 && y <= 272 && y > 24 {
-            let x_block = x/25;
-            let y_block = y/25;
-            (x_block,y_block)
-        } else {
-            (0,0)
-        }
-    }
+    // //TODO delete this and use the one in gameboard. Then get x and y from the Block returned
+    // pub fn calculate_touch_block(&mut self, x: u16, y: u16) -> (u16,u16) {
+    //     if x<=272 && x>24 && y <= 272 && y > 24 {
+    //         let x_block = x/25;
+    //         let y_block = y/25;
+    //         (x_block,y_block)
+    //     } else {
+    //         (0,0)
+    //     }
+    // }
 
     pub fn show_start_screen(&mut self) {
         self.print_bmp_at_location(STARTSCREEN, 0, 0);
@@ -408,9 +440,14 @@ impl Display {
     pub fn draw_button_at(&mut self) {
 
     }
+    
+    pub fn show_lose_screen(&mut self) {
+        self.show_start_screen();
+    }
 
     pub fn show_win_screen(&mut self) {
-
+        self.show_start_screen();
+        // self.print_bmp_at_location(WIN_FONT, 0, 0);
     }
 
     // pub fn draw_background_with_bitmap(&mut self) {
