@@ -144,31 +144,31 @@ impl Display {
     /**
      * print a confirm button on the right side of the display
      */
-    pub fn print_confirm_button(&mut self) {
+    fn print_confirm_button(&mut self, color: Color) {
         for i in 299..301 {
             for j in 199..250 {
                 //todo change this to lookup color since layer 2 is lookup only
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         for i in 455..457 {
             for j in 199..250 {
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         for i in 299..457 {
             for j in 199..201 {
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         for i in 299..457 {
             for j in 249..251 {
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         for i in 299..457 {
             for j in 199..251 {
-                self.layer1.print_point_color_at(i, j, BLACK);
+                self.layer1.print_point_color_at(i, j, color);
             }
         }
         let mut text_writer = self.layer2.text_writer_at(350, 220);
@@ -246,7 +246,7 @@ impl Display {
         // text_writer.write_fmt(format_args!("{} ship", ship_len));
         // let mut text_writer = self.layer2.text_writer_at(350, 220);
         // text_writer.write_str("Confirm");
-        self.print_confirm_button();
+        self.print_confirm_button(BLACK);
     }
 
     //fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
@@ -344,11 +344,25 @@ impl Display {
         }
     }
 
+    pub fn print_confirm_button_enabled(&mut self) {
+        self.print_confirm_button(BLACK);
+    }
+
+    pub fn print_confirm_button_disabled(&mut self) {
+        self.print_confirm_button(GREY);
+    }
+
     //TODO: without self.touch -> pass x, y paramters ?
     pub fn check_confirm_button_touched(&mut self, x: u16, y: u16) -> bool {
         // let (x,y) = self.touch();
 
-        (x,y).0 < 457 && (x,y).0 >= 299 && (x,y).1 < 251 && (x,y).1 >= 199
+        if (x,y).0 < 457 && (x,y).0 >= 299 && (x,y).1 < 251 && (x,y).1 >= 199 {
+            self.print_confirm_button(WHITE);
+            self.print_confirm_button(BLACK);
+            true
+        } else {
+            false
+        }
     }
 
 

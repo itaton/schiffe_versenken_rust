@@ -125,6 +125,9 @@ impl Game {
 
     //TODO: check if gameboard and network is implemented
     fn wait_and_check_enemy_shot(&mut self) {
+        self.display.print_confirm_button_disabled();
+        self.display.clear_text_on_display();
+        self.display.print_text_on_display_layer2("wait for the enemy".to_string());
         //recvn enemy shot packet and check hit 
         let enemy_shoot = self.wait_for_shoot(); 
 
@@ -191,6 +194,7 @@ impl Game {
 
         self.display.layer_2_clear();
         self.display.print_background();
+        self.display.print_confirm_button_enabled();
         if self.ethernet_c.is_server {
             self.set_game_state(Gamestate::YourTurn);
         } else {
@@ -199,6 +203,7 @@ impl Game {
     }
 
     fn select_shoot_location(&mut self) {
+        self.display.print_confirm_button_enabled();
         self.display.clear_text_on_display();
         self.display.print_text_on_display_layer2("select a fire location".to_string());
         let mut confirmed = false;
