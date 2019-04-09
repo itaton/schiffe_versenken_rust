@@ -1,3 +1,4 @@
+use cortex_m_semihosting::hprintln;
 use alloc::string::String;
 use crate::alloc::string::ToString;
 use alloc::vec::Vec;
@@ -106,7 +107,7 @@ pub fn init_display(mut lcd: &mut Lcd, mut touchscreen: I2C<I2C3>) -> Display {
     lcd.set_background_color(WATER_BLUE);
 
     //print_indicies(&mut layer_1);
-    display.print_indicies();
+    // display.print_indicies();
     //print_ship(display.layer2, 4, 5, 5, true);
     // print_ship(layer_2, 2, 4, 5, true);
     // printShip(layer_2, 6, 6, 1, false);
@@ -117,6 +118,7 @@ impl Display {
     pub fn print_background(&mut self) {
         
         self.print_bmp_at_location(BACKGROUND, 0, 0);
+        // hprintln!("Address for image BACKGROUND: {}" , (&BACKGROUND[0] as *const u8) as u32);
         let xarr = [
             24, 25, 49, 50, 74, 75, 99, 100, 124, 125, 149, 150, 174, 175, 199, 200, 224, 225, 249,
             250, 274, 275,
@@ -127,12 +129,12 @@ impl Display {
         ];
         for c in xarr.iter() {
             for i in 0..272 {
-                self.layer1.print_point_color_at(*c, i, BLACK);
+                self.layer2.print_point_color_at(*c, i, BLACK);
             }
         }
         for c in yarr.iter() {
             for i in 0..275 {
-                self.layer1.print_point_color_at(i, *c, BLACK);
+                self.layer2.print_point_color_at(i, *c, BLACK);
             }
         }
         self.print_indicies();
@@ -206,42 +208,44 @@ impl Display {
         }
     }
 
+    //TODO refactor method -> not neccesary 
     pub fn setup_ship(&mut self, ship_len: u8) {
-        let arr = [
-            24, 25, 49, 50, 74, 75, 99, 100, 124, 125, 149, 150, 174, 175, 199, 200, 224, 225, 249,
-            250, 274, 275,
-        ];
-        //let arr2 = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250];
-        let arr = [299, 300, 380, 381];
-        let arr2 = [199, 200, 249, 250];
-        for i in 299..301 {
-            for j in 199..250 {
-                //todo change this to lookup color since layer 2 is lookup only
-                self.layer1.print_point_color_at(i, j, BLACK);
-            }
-        }
-        for i in 455..457 {
-            for j in 199..250 {
-                self.layer1.print_point_color_at(i, j, BLACK);
-            }
-        }
-        for i in 299..457 {
-            for j in 199..201 {
-                self.layer1.print_point_color_at(i, j, BLACK);
-            }
-        }
-        for i in 299..457 {
-            for j in 249..251 {
-                self.layer1.print_point_color_at(i, j, BLACK);
-            }
-        }
+        // let arr = [
+        //     24, 25, 49, 50, 74, 75, 99, 100, 124, 125, 149, 150, 174, 175, 199, 200, 224, 225, 249,
+        //     250, 274, 275,
+        // ];
+        // //let arr2 = [24,25,49,50,74,75,99,100,124,125,149,150,174,175,199,200,224,225,249,250];
+        // let arr = [299, 300, 380, 381];
+        // let arr2 = [199, 200, 249, 250];
+        // for i in 299..301 {
+        //     for j in 199..250 {
+        //         //todo change this to lookup color since layer 2 is lookup only
+        //         self.layer1.print_point_color_at(i, j, BLACK);
+        //     }
+        // }
+        // for i in 455..457 {
+        //     for j in 199..250 {
+        //         self.layer1.print_point_color_at(i, j, BLACK);
+        //     }
+        // }
+        // for i in 299..457 {
+        //     for j in 199..201 {
+        //         self.layer1.print_point_color_at(i, j, BLACK);
+        //     }
+        // }
+        // for i in 299..457 {
+        //     for j in 249..251 {
+        //         self.layer1.print_point_color_at(i, j, BLACK);
+        //     }
+        // }
         self.print_text_on_display_layer2(format_args!("Please set up your {} ship", ship_len).to_string());
         // let mut text_writer = self.layer1.text_writer_at(300, 100);
         // text_writer.write_str("Please set up your");
         // let mut text_writer = self.layer1.text_writer_at(300, 120);
         // text_writer.write_fmt(format_args!("{} ship", ship_len));
-        let mut text_writer = self.layer2.text_writer_at(350, 220);
-        text_writer.write_str("Confirm");
+        // let mut text_writer = self.layer2.text_writer_at(350, 220);
+        // text_writer.write_str("Confirm");
+        self.print_confirm_button();
     }
 
     //fn print_indicies(mut text_writer: &mut TextWriter<FramebufferArgb8888>) {
@@ -272,21 +276,6 @@ impl Display {
 
     //pub fn write_in_field(x: usize, y: usize, mut text_writer: &mut TextWriter<FramebufferArgb8888>, letter: &str) {
     pub fn write_in_field(&mut self, x: usize, y: usize, letter: &str) {
-        let x_pos = 9 + 25 * x;
-        let y_pos = 9 + 25 * y;
-        if x == 0 {
-            let x_pos = 9;
-        };
-        if y == 0 {
-            let y_pos = 9;
-        };
-        //text_writer.x_pos = x_pos;
-        //text_writer.y_pos = y_pos;
-        let mut text_writer = self.layer1.text_writer_at(x_pos, y_pos);
-        text_writer.write_str(letter);
-    }
-
-    pub fn write_in_field_layer2(&mut self, x: usize, y: usize, letter: &str) {
         let x_pos = 9 + 25 * x;
         let y_pos = 9 + 25 * y;
         if x == 0 {
