@@ -311,9 +311,6 @@ impl Board {
         let mut x_start = x;
         let mut y_start = y;
 
-        if x == 0  && y == 0{
-
-        }
         //if !self.enemy_ships_hit[x as usize - 1][y as usize] && !self.enemy_ships_hit[x as usize][y as usize - 1]{
         if !self.get_enemy_helper(x as i8 - 1, y as i8) && !self.get_enemy_helper(x as i8, y as i8 - 1){
             //we already found the start position of the ship
@@ -328,15 +325,49 @@ impl Board {
             if self.get_enemy_helper(x as i8,y as i8 + 1) {
                 //ship horizontal
                 for k in 2..6 {
-                    if !self.enemy_ships_hit[x as usize][y as usize + k] {
+                    if !self.get_enemy_helper(x as i8,y as i8 + k) {
                         return (x, y, true, k as u8);
-                        
                     }
                 }
             }
         }
-        else if self.enemy_ships_hit[x as usize - 1][y as usize] {
-            //ho
+        else if self.get_enemy_helper(x as i8 - 1, y as i8) {
+            //horizontal
+            let mut before: u8 = 0;
+            let mut after: u8 = 0;
+            for k in 2..6 {
+                if !self.get_enemy_helper(x as i8 - k, y as i8) {
+                    before = k as u8;
+                    x_start = x - k as u8 + 1;
+                    break;
+                }
+            }
+            for k in 1..6 {
+                if !self.get_enemy_helper(x as i8 + k, y as i8) {
+                    after = k as u8;
+                    break;
+                }
+            }
+            return(x_start, y, false, before+after-1);
+        }
+        else if self.get_enemy_helper(x as i8, y as i8 - 1) {
+            //vertical
+            let mut before: u8 = 0;
+            let mut after: u8 = 0;
+            for k in 2..6 {
+                if !self.get_enemy_helper(x as i8, y as i8 - k) {
+                    before = k as u8;
+                    y_start = y - k as u8 + 1;
+                    break;
+                }
+            }
+            for k in 1..6 {
+                if !self.get_enemy_helper(x as i8, y as i8 + k) {
+                    after = k as u8;
+                    break;
+                }
+            }
+            return(x, y_start, false, before+after-1);
         }
 
 
