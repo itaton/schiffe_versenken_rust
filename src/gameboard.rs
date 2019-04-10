@@ -86,8 +86,8 @@ impl Board {
             for ship in self.ships.iter() {
                 display.print_ship(
                     ship.size as usize,
-                    ship.x_start_location as usize + 1,
-                    ship.y_start_location as usize + 1 as usize,
+                    ship.x_start_location as usize,
+                    ship.y_start_location as usize,
                     ship.vertical,
                 );
             }
@@ -198,8 +198,8 @@ impl Board {
         for ship in self.ships.iter() {
             display.print_ship(
                 ship.size as usize,
-                ship.x_start_location as usize + 1,
-                ship.y_start_location as usize + 1 as usize,
+                ship.x_start_location as usize,
+                ship.y_start_location as usize,
                 ship.vertical,
             );
         }
