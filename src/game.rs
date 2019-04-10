@@ -73,6 +73,7 @@ impl Game {
     }
 
     fn set_game_state(&mut self, state: Gamestate) {
+        self.display.update_status_text(self.board.get_own_ships_of_len(), self.board.get_enemy_ships_of_len());
         match state {
             Gamestate::YourTurn => {
                 // assert!(self.game_state == Gamestate::WaitForEnemy);
@@ -169,6 +170,8 @@ impl Game {
             if feedback_packet.sunk != 0 {
                 self.display.clear_text_on_display();
                 self.display.print_text_on_display_layer2(format!("sunk ship of length {}", sunk_size).to_string());
+                let (x, y, dir, size) = self.board.get_enemy_ship_start_dir_len(block.x, block.y);
+                self.display.print_ship(size as usize, x as usize, y as usize, dir);
             } else {
                 self.display.clear_text_on_display();
                 self.display.print_text_on_display_layer2("You hit the enemy".to_string().to_string());

@@ -9,6 +9,7 @@ pub struct Board {
     setup_field: [[bool; 10]; 10], //temporary setup field, cleared after successful ship setup
     placed_ships: [[bool; 10]; 10], //holds all placed ships for adjacency checks
     enemy_ships_hit: [[bool; 10]; 10],
+    remaining_enemy_ships: [u8; 4],
 }
 
 #[derive(Copy, Clone)]
@@ -30,6 +31,7 @@ impl Board {
             setup_field,
             placed_ships,
             enemy_ships_hit: [[false; 10]; 10],
+            remaining_enemy_ships: (1,1,2,1),
         }
     }
 
@@ -318,6 +320,7 @@ impl Board {
                 //ship horizontal
                 for k in 2..6 {
                     if !self.get_enemy_helper(x as i8 + k,y as i8) {
+                        self.remaining_enemy_ships[k as usize - 2] -= 1;
                         return (x, y, false, k as u8);
                     }
                 }
@@ -326,6 +329,7 @@ impl Board {
                 //ship horizontal
                 for k in 2..6 {
                     if !self.get_enemy_helper(x as i8,y as i8 + k) {
+                        self.remaining_enemy_ships[k as usize - 2] -= 1;
                         return (x, y, true, k as u8);
                     }
                 }
@@ -348,6 +352,7 @@ impl Board {
                     break;
                 }
             }
+            self.remaining_enemy_ships[before as usize + after as usize - 3] -= 1;
             return(x_start, y, false, before+after-1);
         }
         else if self.get_enemy_helper(x as i8, y as i8 - 1) {
@@ -367,6 +372,7 @@ impl Board {
                     break;
                 }
             }
+            self.remaining_enemy_ships[before as usize + after as usize - 3] -= 1;
             return(x, y_start, false, before+after-1);
         }
 
@@ -388,15 +394,29 @@ impl Board {
      */
     pub fn get_own_ships_of_len(&mut self) -> (u8, u8, u8, u8){
         //stub
-        (0,0,0,0)
+        let mut five = 0;
+        let mut four = 0;
+        let mut three = 0;
+        let mut two = 0;
+        for ship in self.ships.iter() {
+            if ship.sunken_fields != ship.size {
+                match ship.size {
+                    5 => five += 1,
+                    4 => four += 1,
+                    3 => three += 1,
+                    2 => two += 1,
+                    _ => {}
+                }
+            }
+        }
+        (five, four, three, two)
     }
     
     /**
      * get remaining enemy ships of all lengths
      */
     pub fn get_enemy_ships_of_len(&mut self) -> (u8, u8, u8, u8){
-        //stub
-        (0,0,0,0)
+        (self.remaining_enemy_ships[3], self.remaining_enemy_ships[2], self.remaining_enemy_ships[1], self.remaining_enemy_ships[0])
     }
 
     /**
