@@ -300,8 +300,14 @@ impl Board {
     
     /**
      * only call this method once the ship is sunk. Returns the start location, the lenth and whether ship is vertical
+     * expects the x, y coordinates of the last shot which sunk the ship
      */
-    pub fn get_enemy_ship_start_dir_len(&mut self) -> (u8, u8, bool, u8) {
+    pub fn get_enemy_ship_start_dir_len(&mut self, x: u8, y: u8) -> (u8, u8, bool, u8) {
+        for i in 0..10 {
+            for j in 0..10 {
+
+            }
+        }
         //stub
         (0,0,false,0)
     }
