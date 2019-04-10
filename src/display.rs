@@ -204,7 +204,7 @@ impl Display {
 
     //TODO refactor method -> not neccesary 
     pub fn setup_ship(&mut self, ship_len: u8) {
-        self.print_text_on_display_layer2(format_args!("Please set up your {} ship", ship_len).to_string());
+        self.print_text_on_display_layer2(format_args!("Set up your {} ship", ship_len).to_string());
         self.print_confirm_button(BLACK);
     }
 
