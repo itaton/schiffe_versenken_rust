@@ -94,7 +94,22 @@ impl Display {
         self.print_indicies();
         self.print_status_information();
     }
-    
+
+    pub fn update_status_text(&mut self, own_ships: (u8, u8, u8, u8), enemy_ships: (u8, u8, u8, u8)) {
+        let x_you = 350;
+        let x_enemy = 451;
+        let y = 55;
+        self.write_text_on_location(x_you, y, format!("{}", own_ships.0).to_string());
+        self.write_text_on_location(x_you, y+15, format!("{}", own_ships.1).to_string());
+        self.write_text_on_location(x_you, y+30, format!("{}", own_ships.2).to_string());
+        self.write_text_on_location(x_you, y+45, format!("{}", own_ships.3).to_string());
+        
+        self.write_text_on_location(x_enemy, y, format!("{}", enemy_ships.0).to_string());
+        self.write_text_on_location(x_enemy, y+15, format!("{}", enemy_ships.1).to_string());
+        self.write_text_on_location(x_enemy, y+30, format!("{}", enemy_ships.2).to_string());
+        self.write_text_on_location(x_enemy, y+45, format!("{}", enemy_ships.3).to_string());
+    }
+
     fn write_text_on_location(&mut self, x: usize, y: usize, text: String) {
         let mut text_writer = self.layer2.text_writer_at(x, y);
         let result = text_writer.write_str(&text);
@@ -127,10 +142,6 @@ impl Display {
         self.write_text_on_location(x, y+15, "size 4:".to_string());
         self.write_text_on_location(x, y+30, "size 3:".to_string());
         self.write_text_on_location(x, y+45, "size 2:".to_string());
-    }
-
-    pub fn update_status() {
-
     }
 
     /**
@@ -171,14 +182,13 @@ impl Display {
         };
     }
 
-    pub fn update_status_text(&mut self) {
-
-    }
+    
 
     pub fn print_text_on_display_layer2(&mut self, text: String) {
         self.print_status_information(); //TODO remove
         self.print_background(); //TODO remove
         self.print_confirm_button_enabled(); //TODO remove
+        self.update_status_text((0,0,0,0), (0,0,0,0)); //TODO remove
 
         assert!(text.len() < 50); //TODO check max string length for the gui
         // let split = text.split_whitespace();
@@ -247,6 +257,7 @@ impl Display {
         self.layer2.clear();
     }
 
+    //TODO: set new start point
     pub fn clear_text_on_display(&mut self) {
         let mut y = 50;
         for _ in 0..6 {
