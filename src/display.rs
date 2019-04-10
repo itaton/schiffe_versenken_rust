@@ -13,9 +13,11 @@ use stm32f7_discovery::{
 };
 use stm32f7::stm32f7x6::I2C3;
 //pub static BACKGROUNDSMALL: &'static [u8] = include_bytes!("../water.bmp");
-pub static BACKGROUND: &'static [u8] = include_bytes!("../WaterBig3.bmp");
+pub static BACKGROUND: &'static [u8] = include_bytes!("../WaterBig3Small.bmp");
 pub static STARTSCREEN: &'static [u8] = include_bytes!("../StartScreen.bmp");
-// pub static WIN_FONT: &'static [u8] = include_bytes!("../win_font.bmp");
+// pub static WIN_SCREEN: &'static [u8] = include_bytes!("../win2.bmp");
+pub static WIN_FONT: &'static [u8] = include_bytes!("../win_font_small_without_alpha.bmp");
+pub static LOSE_FONT: &'static [u8] = include_bytes!("../loser_font_small.bmp");
 
 static BLUE: Color = Color {
     red: 0,
@@ -119,6 +121,9 @@ impl Display {
     pub fn print_background(&mut self) {
         
         self.print_bmp_at_location(BACKGROUND, 0, 0);
+        self.print_bmp_at_location(BACKGROUND, 240, 0);
+        self.print_bmp_at_location(BACKGROUND, 0, 136);
+        self.print_bmp_at_location(BACKGROUND, 240, 136);
         // hprintln!("Address for image BACKGROUND: {}" , (&BACKGROUND[0] as *const u8) as u32);
         let xarr = [
             24, 25, 49, 50, 74, 75, 99, 100, 124, 125, 149, 150, 174, 175, 199, 200, 224, 225, 249,
@@ -442,11 +447,17 @@ impl Display {
     }
     
     pub fn show_lose_screen(&mut self) {
+        self.layer1.clear();
+        self.layer2.clear();
         self.show_start_screen();
+        self.print_bmp_at_location_black_white(LOSE_FONT, 0, 45); 
     }
 
     pub fn show_win_screen(&mut self) {
+        self.layer1.clear();
+        self.layer2.clear();
         self.show_start_screen();
+        self.print_bmp_at_location_black_white(WIN_FONT, 0, 45); 
         // self.print_bmp_at_location(WIN_FONT, 0, 0);
     }
 
@@ -480,6 +491,39 @@ impl Display {
     //     }
     //     Bmp{width: w, height: h , color: image_colors,}
     // }   
+
+
+    pub fn print_bmp_at_location_black_white(&mut self, pic: &[u8], x: u32, y: u32) {
+        let pixels_start = u32::from(pic[10]);
+        let width = u32::from(pic[18]) + (u32::from(pic[19]) * 256_u32);
+        let height = u32::from(pic[22]) + (u32::from(pic[23]) * 256_u32);
+        let pixel_rest = width % 4;
+
+        let loc_x = x;
+        let loc_y = y;
+        let mut bytenr: u32 = pixels_start;
+        let pixel_end: u32 = pic.len() as u32 - 1;
+        // println!("{},{}",pixel_rest,pixel_end );
+
+        for i in 0..height {
+            bytenr = pixel_end + 1 - (pixel_rest + width * 3) * (i + 1);
+            for j in 0..width {
+                if pic[(bytenr + 2) as usize] == 0 && pic[(bytenr + 1) as usize] == 0  && pic[(bytenr) as usize] == 0  {
+                    self.layer1.print_point_color_at(
+                        (loc_x + j) as usize,
+                        (loc_y + i) as usize,
+                        Color::rgba(
+                            0,
+                            0,
+                            0,
+                            255,
+                        ),
+                    );
+                }
+                bytenr += 3;
+            }
+        }
+    }
 
     pub fn print_bmp_at_location(&mut self, pic: &[u8], x: u32, y: u32) {
         let pixels_start = u32::from(pic[10]);
