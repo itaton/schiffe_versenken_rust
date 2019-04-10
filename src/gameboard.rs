@@ -418,7 +418,7 @@ impl Board {
      * get remaining enemy ships of all lengths
      */
     pub fn get_enemy_ships_of_len(&mut self) -> (u8, u8, u8, u8){
-        (self.remaining_enemy_ships[3], self.remaining_enemy_ships[2], self.remaining_enemy_ships[1], self.remaining_enemy_ships[0])
+        (self.remaining_enemy_ships[0], self.remaining_enemy_ships[1], self.remaining_enemy_ships[2], self.remaining_enemy_ships[3])
     }
 
     /**
