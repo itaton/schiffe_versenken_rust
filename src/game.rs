@@ -159,7 +159,7 @@ impl Game {
             return;
         } else if feedback_packet.hit {
             self.display.write_in_field(block.x as usize, block.y as usize, "X");
-            self.board.enemy_ships_hit[block.x as usize][block.y as usize] = true;
+            self.board.enemy_ships_hit[(block.x - 1) as usize][(block.y-1) as usize] = true;
             let sunk_size = feedback_packet.sunk;
             if feedback_packet.sunk != 0 {
                 self.display.clear_text_on_display();
@@ -216,7 +216,7 @@ impl Game {
                 None => {
                     if block_set && self.display.check_confirm_button_touched(x,y) {
                       //shot location set   
-                      self.board.enemy_fields_shot[block.x as usize][block.y as usize] = true;
+                      self.board.enemy_fields_shot[(block.x - 1) as usize][(block.y -1 ) as usize] = true;
                       self.fire(block); //TODO: in fire -> update gameboard information
                       confirmed = true;
                     }
