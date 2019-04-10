@@ -279,8 +279,8 @@ impl Display {
         vertical: bool,
     ) {
         let block_size = 25;
-        let x_start_pixel = ship_start_xblock * block_size + 3;
-        let y_start_pixel = ship_start_yblock * block_size + 2;
+        let x_start_pixel = (ship_start_xblock+1) * block_size + 3;
+        let y_start_pixel = (ship_start_yblock+1) * block_size + 2;
         if vertical {
             let x_end_pixel = x_start_pixel + block_size - 5;
             let mut y_end_pixel = y_start_pixel + (block_size * ship_size) - 5;
