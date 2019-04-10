@@ -24,7 +24,6 @@ pub struct Game {
     ethernet_c: EthClient,
 }
 
-// #[derive(Eq)]
 enum Gamestate {
     YourTurn,
     WaitForEnemy,
@@ -39,15 +38,10 @@ pub fn init_new_game(display: Display,net: network::Network, is_server: bool) ->
     Game::new(display, net, is_server)    
 }
 
-
-
-
 impl Game {
     fn new(display: Display, net: network::Network, is_server: bool) -> Game {
-        // let mut nw: network::Network = net;
         Game {
             game_state: Gamestate::GameStart,
-            // board: Board::new(), //TODO: without params ? gameboard creates the start state ? 
             display,
             board: gameboard::gameboard_init(),
             network: net,
@@ -129,7 +123,6 @@ impl Game {
         }
     }
 
-    //TODO: check if gameboard and network is implemented
     fn wait_and_check_enemy_shot(&mut self) {
         self.display.print_confirm_button_disabled();
         self.display.clear_text_on_display();
@@ -171,6 +164,7 @@ impl Game {
                 self.display.clear_text_on_display();
                 self.display.print_text_on_display_layer2(format!("sunk ship of length {}", sunk_size).to_string());
                 let (x, y, dir, size) = self.board.get_enemy_ship_start_dir_len(block.x, block.y);
+                assert!(size != 0);
                 self.display.print_ship(size as usize, x as usize, y as usize, dir);
             } else {
                 self.display.clear_text_on_display();
@@ -221,6 +215,7 @@ impl Game {
                 None => {
                     if block_set && self.display.check_confirm_button_touched(x,y) {
                       //shot location set   
+                      self.board.enemy_fields_shot[block.x as usize][block.y as usize] = true;
                       self.fire(block); //TODO: in fire -> update gameboard information
                       confirmed = true;
                     }
@@ -228,11 +223,13 @@ impl Game {
                 Some(ret_block) => {
                     //delete old block and set new
                     //TODO: dont remove x, if block is one of the fire locations
-                    self.display.write_in_field(block.x as usize, block.y as usize, " ");
+                    if !self.board.enemy_fields_shot[block.x as usize][block.y as usize] {
+                        self.display.write_in_field(block.x as usize, block.y as usize, " ");
+                        self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
+                        block = ret_block;
+                        block_set = true;
+                    }
                     // self.board.clear_x_es(&mut self.display); 
-                    self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
-                    block = ret_block;
-                    block_set = true;
                 }
             }
         }
