@@ -83,7 +83,7 @@ impl Network {
     fn push_udp_packet(socket: &mut Socket, endpoint: IpEndpoint, data: &[u8]) {
         if let Socket::Udp(ref mut socket) = socket {
             if socket.can_send() {
-                let result = socket.send_slice(data, endpoint); // TODO: Error handling
+                let result = socket.send_slice(data, endpoint);
                 match result {
                     Ok(_) => {}
                     Err(e) => {match hprintln!("error {:?}", e) {_ => {}}}
