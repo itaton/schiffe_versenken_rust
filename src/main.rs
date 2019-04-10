@@ -23,9 +23,6 @@ mod ships;
 mod game;
 mod gameboard;
 mod network;
-use network::EthClient;
-use network::Connection;
-use network::packets::ShootPacket;
 
 const IS_SERVER: bool = false;
 
@@ -43,12 +40,9 @@ fn main() -> ! {
     init::enable_gpio_ports(&mut rcc);
     let mut fmc = peripherals.FMC;
     let mut ltdc = peripherals.LTDC;
-    let mut sai_2 = peripherals.SAI2;
-    let mut rng = peripherals.RNG;
-    let mut sdmmc = peripherals.SDMMC1;
     let mut syscfg = peripherals.SYSCFG;
     let mut ethernet_mac = peripherals.ETHERNET_MAC;
-    let mut ethernet_dma = peripherals.ETHERNET_DMA;
+    let ethernet_dma = peripherals.ETHERNET_DMA;
 
     let gpio_a = GpioPort::new(peripherals.GPIOA);
     let gpio_b = GpioPort::new(peripherals.GPIOB);
@@ -84,12 +78,10 @@ fn main() -> ! {
     while system_clock::ticks() - ticks <= 10 {}
     touch::check_family_id(&mut touchscreen).unwrap();
 
-    let mut display = display::init_display(&mut lcd, touchscreen);
+    let display = display::init_display(&mut lcd, touchscreen);
 
     // Initialize the allocator BEFORE you use it
     unsafe { ALLOCATOR.init(cortex_m_rt::heap_start() as usize, 50_000) }
-
-    let mut layer_1 = lcd.layer_1().unwrap();
 
     // turn led on
     pins.led.set(true);
@@ -98,17 +90,12 @@ fn main() -> ! {
     
     match net {
         Ok(value) => {
-            let mut nw: network::Network = value;
-            let mut eth_client = EthClient::new(IS_SERVER);
-            // wait_for_connection(&mut eth_client, &mut nw);
- 
-            //gameboard::gameboard_init(display);
+            let nw: network::Network = value;
             let mut game = game::init_new_game(display , nw, IS_SERVER);
             game.run_game();
-            hprintln!("connected");
-            // test_packet(&mut eth_client, &mut nw);
+            match hprintln!("connected") {_ => {}}
         }
-        Err(_e) => {hprintln!("failed to init network");}
+        Err(_e) => {match hprintln!("failed to init network") {_ => {}}}
     }
 
 
@@ -131,44 +118,6 @@ static ALLOCATOR: CortexMHeap = CortexMHeap::empty();
 #[exception]
 fn SysTick() {
     system_clock::tick();
-}
-
-fn test_packet(eth_client: &mut network::EthClient, net: &mut network::Network) {
-    /*if IS_SERVER {
-        let shoot = ShootPacket::new(5, 5);
-        for i in 0..10 {
-            eth_client.send_shoot(net, shoot);
-            hprintln!("send shoot");
-        }
-    }
-    else {
-        loop {
-            let shoot = eth_client.recv_shoot(net);
-            hprintln!("received shoot at {}, {}", shoot.line, shoot.column);
-        }
-    }*/
-
-    let shoot = ShootPacket::new(5, 5);
-    loop {
-        net.pull_all();
-        eth_client.send_shoot(net, shoot);
-        let recv_shoot = eth_client.recv_shoot(net);
-        match recv_shoot {
-            None => {}
-            Some(some) => {hprintln!("recv_shoot: {:?}", some);}
-        }
-        let ticks = system_clock::ticks();
-        while system_clock::ticks() - ticks <= 10 {}
-    }
-    
-}
-
-fn wait_for_connection(eth_client: &mut network::EthClient, net: &mut network::Network) {
-    while !eth_client.is_other_connected(net) {
-        eth_client.send_whoami(net);
-        let ticks = system_clock::ticks();
-        while system_clock::ticks() - ticks <= 5 {}
-    }
 }
 
 // define what happens in an Out Of Memory (OOM) condition

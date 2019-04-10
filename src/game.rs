@@ -140,7 +140,7 @@ impl Game {
         let win = self.board.check_win();
         let feedback = packets::FeedbackPacket::new(hit, ship_sunk_size, win);
         self.ethernet_c.send_feedback(&mut self.network, feedback);
-        self.network.pull_all();
+        self.network.poll_all();
         if win {
             self.set_game_state(Gamestate::Lose);
        } else {

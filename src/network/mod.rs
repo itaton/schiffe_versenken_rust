@@ -36,24 +36,13 @@ impl Network {
             Instant::from_millis(system_clock::ms() as i64),
         ) {
             Err(smoltcp::Error::Exhausted) => {
-                // Exhausted may mean full -> we need to read more
-                // hprintln!("exhausted");
                 let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
-                return Network::poll_udp_packet(&mut socket);
-                /*for mut socket in self.sockets.iter_mut() {
-                    return Network::poll_udp_packet(&mut socket);
-                }*/
-                // Err(smoltcp::Error::Illegal)
+                Network::poll_udp_packet(&mut socket)
             },
             Err(e) => Err(e),
             Ok(socket_changed) => if socket_changed {
-                // hprintln!("ok");
                 let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
-                return Network::poll_udp_packet(&mut socket);
-                /*for mut socket in self.sockets.iter_mut() {
-                    return Network::poll_udp_packet(&mut socket);
-                }*/
-                // Ok(None)
+                Network::poll_udp_packet(&mut socket)
             } else {
                 Ok(None)
             },
@@ -77,10 +66,10 @@ impl Network {
         }
     }
 
-    pub fn pull_all(&mut self) {
-        self.ethernet_interface.poll(&mut self.sockets, Instant::from_millis(system_clock::ms() as i64));
+    pub fn poll_all(&mut self) {
+        match self.ethernet_interface.poll(&mut self.sockets, Instant::from_millis(system_clock::ms() as i64)) {_ => {}}
         for mut socket in self.sockets.iter_mut() {
-            Network::poll_udp_packet(&mut socket);
+            match Network::poll_udp_packet(&mut socket) {_ => {}}
         }
     }
 
@@ -94,7 +83,7 @@ impl Network {
     fn push_udp_packet(socket: &mut Socket, endpoint: IpEndpoint, data: &[u8]) {
         if let Socket::Udp(ref mut socket) = socket {
             if socket.can_send() {
-                let result = socket.send_slice(data, endpoint); // TODO: Error handling
+                let result = socket.send_slice(data, endpoint);
                 match result {
                     Ok(_) => {}
                     Err(e) => {match hprintln!("error {:?}", e) {_ => {}}}
@@ -169,7 +158,6 @@ impl EthClient {
 
 impl Connection for EthClient {
     fn send_shoot(&mut self, network: &mut Network, shoot: ShootPacket) {
-        // hprintln!("sent: {:?}", shoot);
         network.send_udp_packet(&shoot.serialize());
     }
 
@@ -179,15 +167,12 @@ impl Connection for EthClient {
             Ok(value) => if let Some(data) = value {
                 if data.len() == ShootPacket::len() {
                     let shoot = ShootPacket::deserialize(&data);
-                    // hprintln!("received: {:?}", shoot);
                     return Some(shoot);
                 }
                 else {
                     match hprintln!("wrong package length") {_ => {}}
                 }
             },
-            //Err(smoltcp::Error::Exhausted) => {}
-            //Err(smoltcp::Error::Unrecognized) => {}
             Err(e) => {
                 match hprintln!("error: {:?}", e) {_ => {}}
             }
@@ -196,10 +181,6 @@ impl Connection for EthClient {
     }
 
     fn send_feedback(&mut self, network: &mut Network, feedback: FeedbackPacket) {
-        //hprintln!("sent: {:?}", feedback);
-        /*if feedback.sunk != 0 {
-            hprintln!("{:?}", feedback);
-        }*/
         network.send_udp_packet(&feedback.serialize());
     }
 
@@ -209,10 +190,6 @@ impl Connection for EthClient {
             Ok(value) => if let Some(data) = value {
                 if data.len() == FeedbackPacket::len() {
                     let feedback = FeedbackPacket::deserialize(&data);
-                    // hprintln!("received: {:?}", feedback);
-                    /*if feedback.sunk != 0 {
-                        hprintln!("{:?}", feedback);
-                    }*/
                     return Some(feedback);
                 }
             },
