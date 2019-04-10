@@ -187,10 +187,6 @@ impl Display {
     
 
     pub fn print_text_on_display_layer2(&mut self, text: String) {
-        self.print_status_information(); //TODO remove
-        self.print_background(); //TODO remove
-        self.print_confirm_button_enabled(); //TODO remove
-        self.update_status_text((0,0,0,0), (0,0,0,0)); //TODO remove
 
         assert!(text.len() < 50); //TODO check max string length for the gui
         // let split = text.split_whitespace();
