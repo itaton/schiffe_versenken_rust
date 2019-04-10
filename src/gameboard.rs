@@ -303,13 +303,69 @@ impl Board {
      * expects the x, y coordinates of the last shot which sunk the ship
      */
     pub fn get_enemy_ship_start_dir_len(&mut self, x: u8, y: u8) -> (u8, u8, bool, u8) {
-        for i in 0..10 {
-            for j in 0..10 {
+        if !self.enemy_ships_hit[x as usize][y as usize] {
+            //no enemy ship at that location
+            //pls re-read the documentation of this method.
+            return (0,0,false,0);
+        }
+        let mut x_start = x;
+        let mut y_start = y;
 
+        if x == 0  && y == 0{
+
+        }
+        //if !self.enemy_ships_hit[x as usize - 1][y as usize] && !self.enemy_ships_hit[x as usize][y as usize - 1]{
+        if !self.get_enemy_helper(x as i8 - 1, y as i8) && !self.get_enemy_helper(x as i8, y as i8 - 1){
+            //we already found the start position of the ship
+            if self.get_enemy_helper(x as i8 + 1,y as i8) {
+                //ship horizontal
+                for k in 2..6 {
+                    if !self.get_enemy_helper(x as i8 + k,y as i8) {
+                        return (x, y, false, k as u8);
+                    }
+                }
+            }
+            if self.get_enemy_helper(x as i8,y as i8 + 1) {
+                //ship horizontal
+                for k in 2..6 {
+                    if !self.enemy_ships_hit[x as usize][y as usize + k] {
+                        return (x, y, true, k as u8);
+                        
+                    }
+                }
             }
         }
+        else if self.enemy_ships_hit[x as usize - 1][y as usize] {
+            //ho
+        }
+
+
+
         //stub
         (0,0,false,0)
+    }
+
+    fn get_enemy_helper(&mut self, x: i8, y: i8) -> bool {
+        if x < 0 || x > 9 || y < 0 || y > 9 {
+            return false;
+        }
+        self.enemy_ships_hit[x as usize][y as usize]
+    }
+
+    /**
+     * get remaining own ships of all lengths
+     */
+    pub fn get_own_ships_of_len(&mut self) -> (u8, u8, u8, u8){
+        //stub
+        (0,0,0,0)
+    }
+    
+    /**
+     * get remaining enemy ships of all lengths
+     */
+    pub fn get_enemy_ships_of_len(&mut self) -> (u8, u8, u8, u8){
+        //stub
+        (0,0,0,0)
     }
 
     /**
