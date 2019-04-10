@@ -133,21 +133,6 @@ impl Display {
         };
     }
 
-    pub fn print_text_on_display(&mut self, text: String) {
-        assert!(text.len() < 50); //TODO check max string length for the gui
-        let split = text.split_whitespace();
-        let mut y = 50;
-        for word in split {
-            let mut text_writer = self.layer1.text_writer_at(350, y);
-            let result = text_writer.write_str(word);
-            match result {
-                Ok(result) => result,
-                Err(error) => panic!("error while writing text on display: {}", error),
-            };
-            y += 20;
-        }
-    }
-
     pub fn print_text_on_display_layer2(&mut self, text: String) {
         assert!(text.len() < 50); //TODO check max string length for the gui
         let split = text.split_whitespace();
