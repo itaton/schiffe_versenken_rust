@@ -56,6 +56,8 @@ impl Game {
     }
 
     pub fn run_game(&mut self) {
+
+        self.display.show_start_screen();
         loop {
             match self.game_state {
                 Gamestate::YourTurn => self.select_shoot_location(),
@@ -64,7 +66,6 @@ impl Game {
                 Gamestate::Lose => self.show_lose_screen(),
                 Gamestate::SetupShips => self.setup_ships(),
                 Gamestate::GameStart => {
-                    self.display.show_start_screen();
                     self.wait_for_start_screen_interaction();
                 },
             } 
@@ -108,11 +109,13 @@ impl Game {
 
     fn show_lose_screen(&mut self) {
         self.display.show_lose_screen();
+        self.set_game_state(Gamestate::GameStart);
     }
 
     fn show_win_screen(&mut self) {
         //Show win screen
         self.display.show_win_screen();
+        self.set_game_state(Gamestate::GameStart);
     }
 
     fn wait_for_shoot(&mut self) -> network::packets::ShootPacket {
@@ -137,7 +140,7 @@ impl Game {
         let win = self.board.check_win();
         let feedback = packets::FeedbackPacket::new(hit, ship_sunk_size, win);
         self.ethernet_c.send_feedback(&mut self.network, feedback);
-        self.network.pull_all();
+        self.network.poll_all();
         if win {
             self.set_game_state(Gamestate::Lose);
        } else {
@@ -155,7 +158,7 @@ impl Game {
         //wait for answer
         let feedback_packet = self.wait_for_feedback();
         // let feedback_packet = self.ethernet_c.recv_feedback(self.network);
-        if feedback_packet.you_win == true {
+        if feedback_packet.you_win {
             self.set_game_state(Gamestate::Won);
             return;
         } else if feedback_packet.hit {
@@ -166,7 +169,7 @@ impl Game {
                 self.display.print_text_on_display_layer2(format!("sunk ship of length {}", sunk_size).to_string());
             } else {
                 self.display.clear_text_on_display();
-                self.display.print_text_on_display_layer2(format!("You hit the enemy").to_string());
+                self.display.print_text_on_display_layer2("You hit the enemy".to_string().to_string());
             }
         } else {
             self.display.write_in_field(block.x as usize, block.y as usize, "O");
@@ -179,12 +182,9 @@ impl Game {
 
     fn wait_for_feedback(&mut self) ->  network::packets::FeedbackPacket {
         loop {
-            match self.ethernet_c.recv_feedback(&mut self.network) {
-                Some(feedback) => {
-                        return feedback;
-                }
-                None => {}
-            }
+            if let Some(feedback) = self.ethernet_c.recv_feedback(&mut self.network) {
+        return feedback;
+}
         }
     }
     
@@ -222,6 +222,7 @@ impl Game {
                 }
                 Some(ret_block) => {
                     //delete old block and set new
+                    //TODO: dont remove x, if block is one of the fire locations
                     self.display.write_in_field(block.x as usize, block.y as usize, " ");
                     // self.board.clear_x_es(&mut self.display); 
                     self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");

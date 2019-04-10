@@ -3,14 +3,8 @@ pub struct Ship {
     pub size: u8,
     pub x_start_location: u8,
     pub y_start_location: u8,
-    //direction: Direction,
     pub vertical: bool,
     pub sunken_fields: u8,
-}
-//enum for direction ?
-enum Direction {
-    vertical,
-    horizontal
 }
 
 impl Ship {
@@ -22,9 +16,5 @@ impl Ship {
             vertical,
             sunken_fields: 0,
         }
-    }
-
-    pub fn sunk(&mut self) -> bool {
-        return false;
     }
 }
