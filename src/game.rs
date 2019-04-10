@@ -159,6 +159,7 @@ impl Game {
             return;
         } else if feedback_packet.hit {
             self.display.write_in_field(block.x as usize, block.y as usize, "X");
+            self.board.enemy_ships_hit[block.x as usize][block.y as usize] = true;
             let sunk_size = feedback_packet.sunk;
             if feedback_packet.sunk != 0 {
                 self.display.clear_text_on_display();

@@ -8,7 +8,7 @@ pub struct Board {
     fields_shot: [[bool; 10]; 10],
     setup_field: [[bool; 10]; 10], //temporary setup field, cleared after successful ship setup
     placed_ships: [[bool; 10]; 10], //holds all placed ships for adjacency checks
-    enemy_ships_hit: [[bool; 10]; 10],
+    pub enemy_ships_hit: [[bool; 10]; 10],
     remaining_enemy_ships: [u8; 4],
     pub enemy_fields_shot: [[bool; 10]; 10],
 }
@@ -32,7 +32,7 @@ impl Board {
             setup_field,
             placed_ships,
             enemy_ships_hit: [[false; 10]; 10],
-            remaining_enemy_ships: [1,1,2,1],
+            remaining_enemy_ships: [1,2,1,1],
             enemy_fields_shot: [[false; 10]; 10],
         }
     }
@@ -315,6 +315,7 @@ impl Board {
         let mut x_start = x;
         let mut y_start = y;
 
+
         //if !self.enemy_ships_hit[x as usize - 1][y as usize] && !self.enemy_ships_hit[x as usize][y as usize - 1]{
         if !self.get_enemy_helper(x as i8 - 1, y as i8) && !self.get_enemy_helper(x as i8, y as i8 - 1){
             //we already found the start position of the ship
@@ -359,6 +360,7 @@ impl Board {
         }
         else if self.get_enemy_helper(x as i8, y as i8 - 1) {
             //vertical
+            cortex_m_semihosting::hprintln!("vertical mid");
             let mut before: u8 = 0;
             let mut after: u8 = 0;
             for k in 2..6 {
@@ -374,6 +376,9 @@ impl Board {
                     break;
                 }
             }
+            
+            cortex_m_semihosting::hprintln!("{}", before);
+            cortex_m_semihosting::hprintln!("{}", after);
             self.remaining_enemy_ships[before as usize + after as usize - 3] -= 1;
             return(x, y_start, false, before+after-1);
         }
@@ -411,7 +416,7 @@ impl Board {
                 }
             }
         }
-        (five, four, three, two)
+        (two, three, four, five)
     }
     
     /**
