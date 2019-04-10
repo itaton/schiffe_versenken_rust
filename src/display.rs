@@ -6,7 +6,6 @@ use stm32f7_discovery::{
     i2c::I2C,
     touch,
     system_clock::{self},
-
 };
 use stm32f7::stm32f7x6::I2C3;
 pub static BACKGROUND: &'static [u8] = include_bytes!("../WaterBig3Small.bmp");
@@ -93,8 +92,45 @@ impl Display {
             }
         }
         self.print_indicies();
+        self.print_status_information();
     }
     
+    fn write_text_on_location(&mut self, x: usize, y: usize, text: String) {
+        let mut text_writer = self.layer2.text_writer_at(x, y);
+        let result = text_writer.write_str(&text);
+        match result {
+            Ok(result) => result,
+            Err(error) => panic!("error while writing text on display: {}", error),
+        };
+    }
+    
+    fn print_status_information(&mut self) {
+        for i in 0..136 {
+            self.layer2.print_point_color_at(378, i, BLACK);
+        }
+        for i in 275..480 {
+            self.layer2.print_point_color_at(i, 136, BLACK);
+        }
+        let y = 40;
+        let mut x = 290;
+        self.write_text_on_location(x+20, 10, "You".to_string());
+        self.write_text_on_location(x, y, "size 5:".to_string());
+        self.write_text_on_location(x, y+15, "size 4:".to_string());
+        self.write_text_on_location(x, y+30, "size 3:".to_string());
+        self.write_text_on_location(x, y+45, "size 2:".to_string());
+
+        x += 101;
+        self.write_text_on_location(x+20, 10, "Enemy".to_string());
+        self.write_text_on_location(x, y, "size 5:".to_string());
+        self.write_text_on_location(x, y+15, "size 4:".to_string());
+        self.write_text_on_location(x, y+30, "size 3:".to_string());
+        self.write_text_on_location(x, y+45, "size 2:".to_string());
+    }
+
+    pub fn update_status() {
+        
+    }
+
     /**
      * print a confirm button on the right side of the display
      */
@@ -133,19 +169,27 @@ impl Display {
         };
     }
 
+    pub fn update_status_text(&mut self) {
+
+    }
+
     pub fn print_text_on_display_layer2(&mut self, text: String) {
+        self.print_status_information(); //TODO remove
+        self.print_background(); //TODO remove
+        self.print_confirm_button_enabled(); //TODO remove
+
         assert!(text.len() < 50); //TODO check max string length for the gui
-        let split = text.split_whitespace();
-        let mut y = 50;
-        for word in split {
-            let mut text_writer = self.layer2.text_writer_at(350, y);
-            let result = text_writer.write_str(word);
+        // let split = text.split_whitespace();
+        let mut y = 160;
+        // for word in split {
+            let mut text_writer = self.layer2.text_writer_at(300, y);
+            let result = text_writer.write_str(&text.to_string());
             match result {
                 Ok(result) => result,
                 Err(error) => panic!("error while writing text on display: {}", error),
             };
-            y += 20;
-        }
+            // y += 20;
+        // }
     }
 
     //TODO refactor method -> not neccesary 
@@ -312,7 +356,7 @@ impl Display {
         // self.print_bmp_at_location(WIN_FONT, 0, 0);
     }
 
-    pub fn print_bmp_at_location_black_white(&mut self, pic: &[u8], x: u32, y: u32) {
+    fn print_bmp_at_location_black_white(&mut self, pic: &[u8], x: u32, y: u32) {
         // let pixels_start = u32::from(pic[10]);
         let width = u32::from(pic[18]) + (u32::from(pic[19]) * 256_u32);
         let height = u32::from(pic[22]) + (u32::from(pic[23]) * 256_u32);
@@ -342,7 +386,7 @@ impl Display {
         }
     }
 
-    pub fn print_bmp_at_location(&mut self, pic: &[u8], x: u32, y: u32) {
+    fn print_bmp_at_location(&mut self, pic: &[u8], x: u32, y: u32) {
         // let pixels_start = u32::from(pic[10]);
         let width = u32::from(pic[18]) + (u32::from(pic[19]) * 256_u32);
         let height = u32::from(pic[22]) + (u32::from(pic[23]) * 256_u32);
