@@ -224,7 +224,7 @@ impl Game {
                 Some(ret_block) => {
                     cortex_m_semihosting::hprintln!("touched block : x:{}, y:{} ", ret_block.x, ret_block.y );
                     //delete old block and set new
-                    if !self.board.enemy_fields_shot[(block.x) as usize][(block.y) as usize] {
+                    if !self.board.enemy_fields_shot[(block.x-1) as usize][(block.y-1) as usize] {
                         self.display.write_in_field(block.x as usize, block.y as usize, " ");
                         self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
                         block = ret_block;
