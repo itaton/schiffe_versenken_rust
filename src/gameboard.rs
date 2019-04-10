@@ -1,17 +1,13 @@
 use crate::display::Display;
 use crate::ships::Ship;
 use alloc::vec::Vec;
-use stm32f7_discovery::system_clock::{self, Hz};
+// use stm32f7_discovery::system_clock::{self, Hz};
 
 pub struct Board {
-    //game_field:[[Block; 10];10],
-    //ships:[Ship; 5],
     ships: Vec<Ship>,
     fields_shot: [[bool; 10]; 10],
-    //display: Display,
-    setup_field: [[bool; 10]; 10],
-    //TODO: maybe do this more beautiful?
-    placed_ships: [[bool; 10]; 10],
+    setup_field: [[bool; 10]; 10], //temporary setup field, cleared after successful ship setup
+    placed_ships: [[bool; 10]; 10], //holds all placed ships for adjacency checks
 }
 
 #[derive(Copy, Clone)]
@@ -24,20 +20,20 @@ impl Board {
     pub fn new(
         ships: Vec<Ship>,
         fields_shot: [[bool; 10]; 10],
-        //display: Display,
         setup_field: [[bool; 10]; 10],
         placed_ships: [[bool; 10]; 10],
     ) -> Board {
         Board {
-            //game_field,
             ships,
             fields_shot,
-            //display,
             setup_field,
             placed_ships,
         }
     }
 
+    /**
+     * return the block at position `x`, `y` on the display
+     */
     pub fn calculate_touch_block(&mut self, x: u16, y: u16) -> Option<Block> {
         if x <= 272 && x > 24 && y <= 272 && y > 24 {
             let x_block = x / 25;
@@ -53,22 +49,17 @@ impl Board {
         }
     }
 
+    /**
+     * get the user input for setting up the ships, i.e. the x'es where the ship is supposed to be set up
+     */
     pub fn setup_ship(&mut self, length: u8, display: &mut Display) {
-        //self.display.setup_ship(length);
-        display.setup_ship(length);
+        display.setup_ship(length); //This is basically double - maybe remove in the initBoard function
         let mut confirmed = false;
-        //let ticks = system_clock::ticks();
-        //while system_clock::ticks() - ticks <= 5 {}
         while !confirmed {
-        // display.check_confirm_button_touched() {
-
-            //touch loop
-            // let ticks = system_clock::ticks();
-            // while system_clock::ticks() - ticks <= 5 {}
             let (x, y) = display.touch();
             match self.calculate_touch_block(x, y) {
                 None => {
-                    if display.check_confirm_button_touched(x,y) {
+                    if display.check_confirm_button_touched(x, y) {
                         confirmed = true;
                     }
                 }
@@ -76,53 +67,43 @@ impl Board {
                     let (x, y) = (block.x - 1, block.y - 1);
                     if !self.setup_field[x as usize][y as usize] {
                         self.setup_field[x as usize][y as usize] = true;
-                        display
-                            .write_in_field(block.x as usize, block.y as usize, "x");
+                        display.write_in_field(block.x as usize, block.y as usize, "x");
                     } else {
                         self.setup_field[x as usize][y as usize] = false;
-                        display
-                            .write_in_field(block.x as usize, block.y as usize, " ");
+                        display.write_in_field(block.x as usize, block.y as usize, " ");
                     }
                 }
             }
         }
-        //let ticks = system_clock::ticks();
-        //while system_clock::ticks() - ticks <= 3 {}
         self.clear_x_es(display);
         if !self.get_valid_ship(length, display) {
-            // None => {
             for ship in self.ships.iter() {
-                display
-                    .print_ship(ship.size as usize, ship.x_start_location as usize + 1, ship.y_start_location as usize + 1 as usize, ship.vertical);
-            }   
+                display.print_ship(
+                    ship.size as usize,
+                    ship.x_start_location as usize + 1,
+                    ship.y_start_location as usize + 1 as usize,
+                    ship.vertical,
+                );
+            }
             self.setup_field = [[false; 10]; 10];
             self.setup_ship(length, display);
         } else {
-            // Some(ship) => {
             self.setup_field = [[false; 10]; 10];
         }
-        
     }
 
+    /**
+     * check whether the given user input is a valid ship
+     */
     fn get_valid_ship(&mut self, len: u8, display: &mut Display) -> bool {
-        let mut x_start = 0;
-        let mut y_start = 0;
 
-        //check if length is correct
-        let mut marked_fields = 0;
-        for i in 0..10 {
-            for j in 0..10 {
-                if self.setup_field[i][j] {
-                    marked_fields += 1;
-                }
-            }
-        }
-        if marked_fields != len {
-            //wrong number of blocks set
+        if !self.ship_length_correct(len) {
             return false;
         }
 
         //check if ship is in a line
+        let mut x_start = 0;
+        let mut y_start = 0;
         let mut x_pos = 0;
         let mut y_pos = 0;
         let mut found = false;
@@ -143,8 +124,7 @@ impl Board {
                             // Next block is neither right nor below the previous
                             return false;
                         }
-                        if !direction_known {
-                            //find
+                        if !direction_known { //find ship
                             if i == x_pos + 1 {
                                 vertical = false;
                             } else {
@@ -153,20 +133,18 @@ impl Board {
                             direction_known = true;
                             x_pos = i;
                             y_pos = j;
-                        } else {
-                            if !vertical {
-                                if i != x_pos + 1 || j != y_pos {
-                                    //Error, next block is at the wrong location
-                                    return false;
-                                }
-                                x_pos = i;
-                            } else {
-                                if j != y_pos + 1 || i != x_pos {
-                                    //Error, next block is at the wrong location
-                                    return false;
-                                }
-                                y_pos = j;
+                        } else if !vertical {
+                            if i != x_pos + 1 || j != y_pos {
+                                //Error, next block is at the wrong location
+                                return false;
                             }
+                            x_pos = i;
+                        } else { //vertical
+                            if j != y_pos + 1 || i != x_pos {
+                                //Error, next block is at the wrong location
+                                return false;
+                            }
+                            y_pos = j;
                         }
                     }
                 }
@@ -177,7 +155,6 @@ impl Board {
         for i in 0..10 {
             for j in 0..10 {
                 if self.setup_field[i][j] {
-                    // i love R
                     for k in if i == 0 {
                         0..=1
                     } else if i == 9 {
@@ -201,7 +178,7 @@ impl Board {
             }
         }
 
-        //save ship - TODO maybe do this nicer via Ship or sth. Quick and dirty solution
+        //save ship
         for i in 0..10 {
             for j in 0..10 {
                 if self.setup_field[i][j] {
@@ -209,14 +186,37 @@ impl Board {
                 }
             }
         }
-        
+
         let current_ship = Ship::new(len, x_start as u8, y_start as u8, vertical);
         self.ships.push(current_ship);
         for ship in self.ships.iter() {
-            display
-                .print_ship(ship.size as usize, ship.x_start_location as usize + 1, ship.y_start_location as usize + 1 as usize, ship.vertical);
+            display.print_ship(
+                ship.size as usize,
+                ship.x_start_location as usize + 1,
+                ship.y_start_location as usize + 1 as usize,
+                ship.vertical,
+            );
         }
         // Some(current_ship)
+        true
+    }
+
+    /**
+     * check if there are `len` x'es given by the user
+     */
+    fn ship_length_correct(&mut self, len: u8) -> bool {
+        let mut marked_fields = 0;
+        for i in 0..10 {
+            for j in 0..10 {
+                if self.setup_field[i][j] {
+                    marked_fields += 1;
+                }
+            }
+        }
+        if marked_fields != len {
+            //wrong number of blocks set
+            return false;
+        }
         true
     }
 
@@ -237,19 +237,19 @@ impl Board {
         true
     }
 
-    //returns if hit and if sunk
+    /**
+     * shoot at a location, return if hit and if sunk. If sunk also returns the sunken ship's length.
+     */
     pub fn shoot_at(&mut self, block: Block) -> (bool, bool, u8) {
-        //todo check index
         if !self.fields_shot[block.x as usize - 1][block.y as usize - 1]
             && self.placed_ships[block.x as usize - 1][block.y as usize - 1]
         {
-            //ship = getShip(x,y)
             match self.get_ship_at(block.x - 1, block.y - 1) {
                 None => {
                     return (false, false, 0);
                 }
                 Some(mut ship) => {
-                    ship.sunken_fields += 1; //TODO am I really working on the ship from the vector here or on a copy?
+                    ship.sunken_fields += 1;
                     //cortex_m_semihosting::hprintln!("{}", ship.size);
                     //cortex_m_semihosting::hprintln!("{}", ship.sunken_fields);
                     if ship.sunken_fields == ship.size {
@@ -263,6 +263,9 @@ impl Board {
         (false, false, 0)
     }
 
+    /**
+     * return Some(ship) if there is a ship at the given position, None otherwise
+     */
     fn get_ship_at(&mut self, x: u8, y: u8) -> Option<&mut Ship> {
         for ship in self.ships.iter_mut() {
             if ship.vertical {
@@ -288,49 +291,31 @@ impl Board {
         None
     }
 
+    /**
+     * Get the 5 ships from the user
+     */
     pub fn initial_setup(&mut self, display: &mut Display) {
-        display.setup_ship(5); //only display right side here
+        display.setup_ship(5);
         self.setup_ship(5, display);
-        //let ship: [Block; 5] = input_x();
-        //get_valid_ship(5);
-        //ships.push(ship);
         display.setup_ship(4);
         self.setup_ship(4, display);
-        //let ship: [Block; 4] = input_x();
-        //get_valid_ship(ship, ships);
-        //ships.push(ship);
         display.setup_ship(3);
         self.setup_ship(3, display);
-        //let ship: [Block; 3] = input_x();
-        //get_valid_ship(ship, ships);
-        //ships.push(ship);
         display.setup_ship(3);
         self.setup_ship(3, display);
-        //let ship: [Block; 3] = input_x();
-        //get_valid_ship(ship, ships);
-        //ships.push(ship);
         display.setup_ship(2);
         self.setup_ship(2, display);
-        //let ship: [Block; 2] = input_x();
-        //get_valid_ship(ship, ships);
-        //ships.push(ship);
     }
 }
 
+/**
+ * Initializes the gameboard with an empty field and no ships
+ */
 pub fn gameboard_init() -> Board {
-    //let mut ships : [Ship; 5] = [];
-    let mut ships = Vec::new();
-
+    let ships = Vec::new();
     let fields_shot = [[false; 10]; 10];
     let setup_field = [[false; 10]; 10];
     let placed_ships = [[false; 10]; 10];
 
-    //Board::new(game_field, ships, fields_shot, display, setup_field)
-    // let mut board = Board::new(ships, fields_shot, display, setup_field, placed_ships);
-    let mut board = Board::new(ships, fields_shot, setup_field, placed_ships);
-
-    // board.initial_setup(display);
-    board
-
-    //let game_field = //TODO initialize with the blocks
+    Board::new(ships, fields_shot, setup_field, placed_ships)
 }
