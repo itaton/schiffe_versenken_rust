@@ -1,0 +1,18 @@
+\frametitle{Format String Vulnerabilities}
+    \begin{lstlisting}
+    #include<stdio.h>
+
+    #define SIZE 20
+
+    int main(int argc, char* argv[]) {  	
+        char buf[SIZE];
+        fgets(buf, SIZE, stdin);
+        printf(buf);
+        return 0;
+    }
+    \end{lstlisting}
+    \begin{itemize}
+        \item<2-3> \%x: liest 32bit Wert vom Stack
+            %TODO explain w/ Stack frame image - parameter are placed on stack
+        \item<3> \%n: Anzahl der bisher geschriebenen Zeichen wird an Adresse geschrieben (\code{int*})
+    \end{itemize}
