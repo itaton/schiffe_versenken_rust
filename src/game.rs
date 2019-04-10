@@ -164,7 +164,7 @@ impl Game {
             if feedback_packet.sunk != 0 {
                 self.display.clear_text_on_display();
                 self.display.print_text_on_display_layer2(format!("sunk ship of length {}", sunk_size).to_string());
-                let (x, y, dir, size) = self.board.get_enemy_ship_start_dir_len(block.x, block.y);
+                let (x, y, dir, size) = self.board.get_enemy_ship_start_dir_len(block.x-1, block.y-1);
                 assert!(size != 0);
                 self.display.print_ship(size as usize, x as usize, y as usize, dir);
             } else {
@@ -224,7 +224,7 @@ impl Game {
                 Some(ret_block) => {
                     //delete old block and set new
                     //TODO: dont remove x, if block is one of the fire locations
-                    if !self.board.enemy_fields_shot[block.x as usize][block.y as usize] {
+                    if !self.board.enemy_fields_shot[(block.x-1) as usize][(block.y-1) as usize] {
                         self.display.write_in_field(block.x as usize, block.y as usize, " ");
                         self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
                         block = ret_block;
