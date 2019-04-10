@@ -1,4 +1,5 @@
 use crate::alloc::string::ToString;
+use crate::cortex_m_semihosting::hprintln!;
 use crate::gameboard;
 use crate::network;
 use crate::gameboard::{
@@ -222,9 +223,9 @@ impl Game {
                     }
                 }
                 Some(ret_block) => {
+                    hprintln("touched block : x:{}, y:{} ", ret_block.x, ret_block.y );
                     //delete old block and set new
-                    //TODO: dont remove x, if block is one of the fire locations
-                    if !self.board.enemy_fields_shot[(block.x-1) as usize][(block.y-1) as usize] {
+                    if !self.board.enemy_fields_shot[(block.x) as usize][(block.y) as usize] {
                         self.display.write_in_field(block.x as usize, block.y as usize, " ");
                         self.display.write_in_field(ret_block.x as usize, ret_block.y as usize, "x");
                         block = ret_block;
