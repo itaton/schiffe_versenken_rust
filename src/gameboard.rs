@@ -329,7 +329,7 @@ impl Board {
                 }
             }
             if self.get_enemy_helper(x as i8,y as i8 + 1) {
-                //ship horizontal
+                //ship vertical
                 for k in 2..6 {
                     if !self.get_enemy_helper(x as i8,y as i8 + k) {
                         self.remaining_enemy_ships[k as usize - 2] -= 1;
@@ -380,7 +380,7 @@ impl Board {
             cortex_m_semihosting::hprintln!("{}", before);
             cortex_m_semihosting::hprintln!("{}", after);
             self.remaining_enemy_ships[before as usize + after as usize - 3] -= 1;
-            return(x, y_start, false, before+after-1);
+            return(x, y_start, true, before+after-1);
         }
 
 
