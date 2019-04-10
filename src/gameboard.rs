@@ -32,7 +32,7 @@ impl Board {
             setup_field,
             placed_ships,
             enemy_ships_hit: [[false; 10]; 10],
-            remaining_enemy_ships: [1,1,2,1],
+            remaining_enemy_ships: [1,2,1,1],
             enemy_fields_shot: [[false; 10]; 10],
         }
     }
@@ -416,7 +416,7 @@ impl Board {
                 }
             }
         }
-        (five, four, three, two)
+        (two, three, four, five)
     }
     
     /**
