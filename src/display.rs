@@ -132,18 +132,18 @@ impl Display {
         let x_you = 290;
         self.write_text_on_location(x_you+20, 10, "Your".to_string());
         self.write_text_on_location(x_you+15, 20, "Ships".to_string());
-        self.write_text_on_location(x_you, y, "size 5:".to_string());
-        self.write_text_on_location(x_you, y+15, "size 4:".to_string());
-        self.write_text_on_location(x_you, y+30, "size 3:".to_string());
-        self.write_text_on_location(x_you, y+45, "size 2:".to_string());
+        self.write_text_on_location(x_you, y, "size 2:".to_string());
+        self.write_text_on_location(x_you, y+15, "size 3:".to_string());
+        self.write_text_on_location(x_you, y+30, "size 4:".to_string());
+        self.write_text_on_location(x_you, y+45, "size 5:".to_string());
 
         let x_enemy = x_you + 101;
         self.write_text_on_location(x_enemy+20, 10, "Enemy".to_string());
         self.write_text_on_location(x_enemy+20, 20, "Ships".to_string());
-        self.write_text_on_location(x_enemy, y, "size 5:".to_string());
-        self.write_text_on_location(x_enemy, y+15, "size 4:".to_string());
-        self.write_text_on_location(x_enemy, y+30, "size 3:".to_string());
-        self.write_text_on_location(x_enemy, y+45, "size 2:".to_string());
+        self.write_text_on_location(x_enemy, y, "size 2:".to_string());
+        self.write_text_on_location(x_enemy, y+15, "size 3:".to_string());
+        self.write_text_on_location(x_enemy, y+30, "size 4:".to_string());
+        self.write_text_on_location(x_enemy, y+45, "size 5:".to_string());
     }
 
     /**
