@@ -38,20 +38,22 @@ impl Network {
             Err(smoltcp::Error::Exhausted) => {
                 // Exhausted may mean full -> we need to read more
                 // hprintln!("exhausted");
-                // let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
-                for mut socket in self.sockets.iter_mut() {
+                let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
+                return Network::poll_udp_packet(&mut socket);
+                /*for mut socket in self.sockets.iter_mut() {
                     return Network::poll_udp_packet(&mut socket);
-                }
-                Err(smoltcp::Error::Illegal)
+                }*/
+                // Err(smoltcp::Error::Illegal)
             },
             Err(e) => Err(e),
             Ok(socket_changed) => if socket_changed {
                 // hprintln!("ok");
-                // let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
-                for mut socket in self.sockets.iter_mut() {
+                let mut socket = &mut self.sockets.iter_mut().nth(0).unwrap();
+                return Network::poll_udp_packet(&mut socket);
+                /*for mut socket in self.sockets.iter_mut() {
                     return Network::poll_udp_packet(&mut socket);
-                }
-                Ok(None)
+                }*/
+                // Ok(None)
             } else {
                 Ok(None)
             },
