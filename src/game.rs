@@ -208,7 +208,7 @@ impl Game {
         self.display.print_text_on_display_layer2("select a fire location".to_string());
         let mut confirmed = false;
         let mut block_set = false;
-        let mut block = Block{x: 0, y: 0};
+        let mut block = Block{x: 1, y: 1};
         //create methods in display to handle touch
         while !confirmed {
             let (x,y) = self.display.touch();
