@@ -135,7 +135,7 @@ impl Game {
         let enemy_shoot = self.wait_for_shoot(); 
 
         //now check hit
-        let (hit, sunk, ship_sunk_size) = self.board.shoot_at(Block {x: enemy_shoot.column, y: enemy_shoot.line});
+        let (hit, ship_sunk_size) = self.board.shoot_at(Block {x: enemy_shoot.column, y: enemy_shoot.line});
         //create feedback packet
         let win = self.board.check_win();
         let feedback = packets::FeedbackPacket::new(hit, ship_sunk_size, win);

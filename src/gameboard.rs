@@ -238,29 +238,27 @@ impl Board {
     }
 
     /**
-     * shoot at a location, return if hit and if sunk. If sunk also returns the sunken ship's length.
+     * shoot at a location, return if hit.  If sunk returns the sunken ship's length. If not sunk, return 0 instead.
      */
-    pub fn shoot_at(&mut self, block: Block) -> (bool, bool, u8) {
+    pub fn shoot_at(&mut self, block: Block) -> (bool, u8) {
         if !self.fields_shot[block.x as usize - 1][block.y as usize - 1]
             && self.placed_ships[block.x as usize - 1][block.y as usize - 1]
         {
             match self.get_ship_at(block.x - 1, block.y - 1) {
                 None => {
-                    return (false, false, 0);
+                    return (false, 0);
                 }
                 Some(mut ship) => {
                     ship.sunken_fields += 1;
-                    //cortex_m_semihosting::hprintln!("{}", ship.size);
-                    //cortex_m_semihosting::hprintln!("{}", ship.sunken_fields);
                     if ship.sunken_fields == ship.size {
-                        return (true, true, ship.size);
+                        return (true, ship.size);
                     } else {
-                        return (true, false, 0);
+                        return (true, 0);
                     }
                 }
             }
         }
-        (false, false, 0)
+        (false, 0)
     }
 
     /**
