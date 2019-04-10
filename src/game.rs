@@ -110,12 +110,14 @@ impl Game {
     fn show_lose_screen(&mut self) {
         self.display.show_lose_screen();
         self.set_game_state(Gamestate::GameStart);
+        self.board = gameboard::gameboard_init();
     }
 
     fn show_win_screen(&mut self) {
         //Show win screen
         self.display.show_win_screen();
         self.set_game_state(Gamestate::GameStart);
+        self.board = gameboard::gameboard_init();
     }
 
     fn wait_for_shoot(&mut self) -> network::packets::ShootPacket {

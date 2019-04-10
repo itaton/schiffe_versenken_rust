@@ -8,6 +8,7 @@ pub struct Board {
     fields_shot: [[bool; 10]; 10],
     setup_field: [[bool; 10]; 10], //temporary setup field, cleared after successful ship setup
     placed_ships: [[bool; 10]; 10], //holds all placed ships for adjacency checks
+    enemy_ships_hit: [[bool; 10]; 10],
 }
 
 #[derive(Copy, Clone)]
@@ -28,6 +29,7 @@ impl Board {
             fields_shot,
             setup_field,
             placed_ships,
+            enemy_ships_hit: [[false; 10]; 10],
         }
     }
 
@@ -287,6 +289,27 @@ impl Board {
             }
         }
         None
+    }
+
+    /**
+     * call this when we hit an enemy
+     */
+    pub fn save_hit_enemy(&mut self, x: u8, y: u8) {
+        self.enemy_ships_hit[x as usize][y as usize] = true;
+    }
+    
+    /**
+     * only call this method once the ship is sunk. Returns the start location, the lenth and whether ship is vertical
+     * expects the x, y coordinates of the last shot which sunk the ship
+     */
+    pub fn get_enemy_ship_start_dir_len(&mut self, x: u8, y: u8) -> (u8, u8, bool, u8) {
+        for i in 0..10 {
+            for j in 0..10 {
+
+            }
+        }
+        //stub
+        (0,0,false,0)
     }
 
     /**
