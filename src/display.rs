@@ -23,7 +23,7 @@ static GREY: Color = Color {
     red: 127,
     green: 127,
     blue: 127,
-    alpha: 127,
+    alpha: 100,
 };
 static WHITE: Color = Color {
     red: 255,
@@ -111,9 +111,10 @@ impl Display {
         for i in 275..480 {
             self.layer2.print_point_color_at(i, 136, BLACK);
         }
-        let y = 40;
+        let y = 55;
         let mut x = 290;
-        self.write_text_on_location(x+20, 10, "You".to_string());
+        self.write_text_on_location(x+20, 10, "Your".to_string());
+        self.write_text_on_location(x+15, 20, "Ships".to_string());
         self.write_text_on_location(x, y, "size 5:".to_string());
         self.write_text_on_location(x, y+15, "size 4:".to_string());
         self.write_text_on_location(x, y+30, "size 3:".to_string());
@@ -121,6 +122,7 @@ impl Display {
 
         x += 101;
         self.write_text_on_location(x+20, 10, "Enemy".to_string());
+        self.write_text_on_location(x+20, 20, "Ships".to_string());
         self.write_text_on_location(x, y, "size 5:".to_string());
         self.write_text_on_location(x, y+15, "size 4:".to_string());
         self.write_text_on_location(x, y+30, "size 3:".to_string());
@@ -128,7 +130,7 @@ impl Display {
     }
 
     pub fn update_status() {
-        
+
     }
 
     /**
