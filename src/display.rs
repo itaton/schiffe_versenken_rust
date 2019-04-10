@@ -259,7 +259,7 @@ impl Display {
         let mut y = 160;
         for _ in 0..3 {
             let mut text_writer = self.layer2.text_writer_at(350, y);
-            let result = text_writer.write_str("               ");
+            let result = text_writer.write_str("                ");
             match result {
                 Ok(result) => result,
                 Err(error) => panic!("error while writing text on display: {}", error),
