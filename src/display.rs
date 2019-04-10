@@ -8,10 +8,12 @@ use stm32f7_discovery::{
     system_clock::{self},
 };
 use stm32f7::stm32f7x6::I2C3;
-pub static BACKGROUND: &'static [u8] = include_bytes!("../WaterBig3Small.bmp");
-pub static STARTSCREEN: &'static [u8] = include_bytes!("../StartScreen.bmp");
-pub static WIN_FONT: &'static [u8] = include_bytes!("../win_font_small_without_alpha.bmp");
-pub static LOSE_FONT: &'static [u8] = include_bytes!("../loser_font_small.bmp");
+static BACKGROUND: &'static [u8] = include_bytes!("../WaterBig3Small.bmp");
+static STARTSCREEN: &'static [u8] = include_bytes!("../StartScreen.bmp");
+static WIN_FONT: &'static [u8] = include_bytes!("../win_font_small_without_alpha.bmp");
+static LOSE_FONT: &'static [u8] = include_bytes!("../loser_font_small.bmp");
+
+
 
 static BLACK: Color = Color {
     red: 0,
@@ -127,21 +129,21 @@ impl Display {
             self.layer2.print_point_color_at(i, 136, BLACK);
         }
         let y = 55;
-        let mut x = 290;
-        self.write_text_on_location(x+20, 10, "Your".to_string());
-        self.write_text_on_location(x+15, 20, "Ships".to_string());
-        self.write_text_on_location(x, y, "size 5:".to_string());
-        self.write_text_on_location(x, y+15, "size 4:".to_string());
-        self.write_text_on_location(x, y+30, "size 3:".to_string());
-        self.write_text_on_location(x, y+45, "size 2:".to_string());
+        let x_you = 290;
+        self.write_text_on_location(x_you+20, 10, "Your".to_string());
+        self.write_text_on_location(x_you+15, 20, "Ships".to_string());
+        self.write_text_on_location(x_you, y, "size 5:".to_string());
+        self.write_text_on_location(x_you, y+15, "size 4:".to_string());
+        self.write_text_on_location(x_you, y+30, "size 3:".to_string());
+        self.write_text_on_location(x_you, y+45, "size 2:".to_string());
 
-        x += 101;
-        self.write_text_on_location(x+20, 10, "Enemy".to_string());
-        self.write_text_on_location(x+20, 20, "Ships".to_string());
-        self.write_text_on_location(x, y, "size 5:".to_string());
-        self.write_text_on_location(x, y+15, "size 4:".to_string());
-        self.write_text_on_location(x, y+30, "size 3:".to_string());
-        self.write_text_on_location(x, y+45, "size 2:".to_string());
+        let x_enemy = x_you + 101;
+        self.write_text_on_location(x_enemy+20, 10, "Enemy".to_string());
+        self.write_text_on_location(x_enemy+20, 20, "Ships".to_string());
+        self.write_text_on_location(x_enemy, y, "size 5:".to_string());
+        self.write_text_on_location(x_enemy, y+15, "size 4:".to_string());
+        self.write_text_on_location(x_enemy, y+30, "size 3:".to_string());
+        self.write_text_on_location(x_enemy, y+45, "size 2:".to_string());
     }
 
     /**
@@ -257,10 +259,9 @@ impl Display {
         self.layer2.clear();
     }
 
-    //TODO: set new start point
     pub fn clear_text_on_display(&mut self) {
-        let mut y = 50;
-        for _ in 0..6 {
+        let mut y = 160;
+        for _ in 0..3 {
             let mut text_writer = self.layer2.text_writer_at(350, y);
             let result = text_writer.write_str("               ");
             match result {
@@ -315,7 +316,6 @@ impl Display {
         self.print_confirm_button(GREY);
     }
 
-    //TODO: without self.touch -> pass x, y paramters ?
     pub fn check_confirm_button_touched(&mut self, x: u16, y: u16) -> bool {
         if (x,y).0 < 457 && (x,y).0 >= 299 && (x,y).1 < 251 && (x,y).1 >= 199 {
             self.print_confirm_button(WHITE);
