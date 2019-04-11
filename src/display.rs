@@ -190,7 +190,7 @@ impl Display {
 
         assert!(text.len() < 50); //TODO check max string length for the gui
         // let split = text.split_whitespace();
-        let mut y = 160;
+        let y = 160;
         // for word in split {
             let mut text_writer = self.layer2.text_writer_at(300, y);
             let result = text_writer.write_str(&text.to_string());
@@ -243,8 +243,6 @@ impl Display {
         if y == 0 {
             y_pos = 9;
         }
-        //text_writer.x_pos = x_pos;
-        //text_writer.y_pos = y_pos;
         let mut text_writer = self.layer2.text_writer_at(x_pos, y_pos);
         if let Ok(value) = text_writer.write_str(letter) {
             value
@@ -329,8 +327,6 @@ impl Display {
         let curr_ticks = system_clock::ticks();
         if curr_ticks - self.last_touch >= 8 {
             for touch in &touch::touches(&mut self.touchscreen).unwrap() {
-                //cortex_m::asm::bkpt();
-                //let (x,y) = calculate_touch_block(touch.x, touch.y);
                 touch_x = touch.x;
                 touch_y = touch.y;
                 self.last_touch = curr_ticks;
@@ -340,10 +336,6 @@ impl Display {
         else {
             (0,0)
         }
-        // let ticks = system_clock::ticks();
-        // while system_clock::ticks()-ticks <= 3 {
-        // }
-        //calculate_touch_block(touch_x, touch_y)
     }
 
     pub fn show_start_screen(&mut self) {
@@ -362,17 +354,14 @@ impl Display {
         self.layer2.clear();
         self.show_start_screen();
         self.print_bmp_at_location_black_white(WIN_FONT, 0, 45); 
-        // self.print_bmp_at_location(WIN_FONT, 0, 0);
     }
 
     fn print_bmp_at_location_black_white(&mut self, pic: &[u8], x: u32, y: u32) {
-        // let pixels_start = u32::from(pic[10]);
         let width = u32::from(pic[18]) + (u32::from(pic[19]) * 256_u32);
         let height = u32::from(pic[22]) + (u32::from(pic[23]) * 256_u32);
         let pixel_rest = width % 4;
         let loc_x = x;
         let loc_y = y;
-        // let mut bytenr: u32 = pixels_start;
         let pixel_end: u32 = pic.len() as u32 - 1;
 
         for i in 0..height {
@@ -396,13 +385,11 @@ impl Display {
     }
 
     fn print_bmp_at_location(&mut self, pic: &[u8], x: u32, y: u32) {
-        // let pixels_start = u32::from(pic[10]);
         let width = u32::from(pic[18]) + (u32::from(pic[19]) * 256_u32);
         let height = u32::from(pic[22]) + (u32::from(pic[23]) * 256_u32);
         let pixel_rest = width % 4;
         let loc_x = x;
         let loc_y = y;
-        // let mut bytenr: u32 = pixels_start;
         let pixel_end: u32 = pic.len() as u32 - 1;
 
         for i in 0..height {

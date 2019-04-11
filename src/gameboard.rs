@@ -1,7 +1,6 @@
 use crate::display::Display;
 use crate::ships::Ship;
 use alloc::vec::Vec;
-// use stm32f7_discovery::system_clock::{self, Hz};
 
 pub struct Board {
     ships: Vec<Ship>,
@@ -294,13 +293,6 @@ impl Board {
         }
         None
     }
-
-    /**
-     * call this when we hit an enemy
-     */
-    pub fn save_hit_enemy(&mut self, x: u8, y: u8) {
-        self.enemy_ships_hit[x as usize][y as usize] = true;
-    }
     
     /**
      * only call this method once the ship is sunk. Returns the start location, the lenth and whether ship is vertical
@@ -360,7 +352,6 @@ impl Board {
         }
         else if self.get_enemy_helper(x as i8, y as i8 - 1) {
             //vertical
-            cortex_m_semihosting::hprintln!("vertical mid");
             let mut before: u8 = 0;
             let mut after: u8 = 0;
             for k in 2..6 {
@@ -377,8 +368,6 @@ impl Board {
                 }
             }
             
-            cortex_m_semihosting::hprintln!("{}", before);
-            cortex_m_semihosting::hprintln!("{}", after);
             self.remaining_enemy_ships[before as usize + after as usize - 3] -= 1;
             return(x, y_start, true, before+after-1);
         }
